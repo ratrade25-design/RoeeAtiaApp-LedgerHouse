@@ -250,7 +250,7 @@
   };
 
   let STATE = loadLocal() || JSON.parse(JSON.stringify(DEFAULT_DATA));
-  let GAS_URL = localStorage.getItem('lh_gas_url') || '';
+  let GAS_URL = localStorage.getItem('lh_gas_url') || 'https://script.google.com/macros/s/AKfycbwMDQpxmLCiXM62_imOz6p63DwQvT6A7kyJ_59qps8SwrELidbQ4KZQDicUDn1qZlzd/exec';
 
   function loadLocal(){ try{return JSON.parse(localStorage.getItem('lh_state'))}catch(e){return null} }
   function saveLocal(){ localStorage.setItem('lh_state', JSON.stringify(STATE)); }

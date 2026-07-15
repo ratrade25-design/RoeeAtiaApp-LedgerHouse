@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#080B10">
+<title>LedgerHouse</title>
+<style>
+  :root {
+    --bg-deep: #080B10;
+    --bg-base: #0D1117;
+    --bg-card: #141A23;
+    --bg-raised: #1B2331;
+    --bg-hover: #212B3A;
+    --border: #1E2736;
+    --border-hover: #2A3548;
+    --text-1: #E2E8F0;
+    --text-2: #8B97A8;
+    --text-3: #4E5B6E;
+    --emerald: #34D399;
+    --emerald-soft: #064E3B;
+    --emerald-glow: rgba(52,211,153,.12);
+    --amber: #F6C042;
+    --amber-soft: #713F12;
+    --amber-glow: rgba(246,192,66,.10);
+    --indigo: #818CF8;
+    --indigo-soft: #2E1065;
+    --indigo-glow: rgba(129,140,248,.10);
+    --red: #F87171;
+    --red-soft: #7F1D1D;
+    --red-glow: rgba(248,113,113,.10);
+    --cyan: #22D3EE;
+    --radius: 10px;
+    --radius-lg: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:var(--bg-deep);color:var(--text-1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  body{background:var(--bg-deep);min-height:100vh;min-height:100dvh;overflow-x:hidden}
+  .app{max-width:1320px;margin:0 auto;padding:28px 24px 80px}
+
+  /* Brand */
+  .brand{display:flex;align-items:center;gap:14px;margin-bottom:28px;flex-wrap:wrap}
+  .brand-icon{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--emerald-soft),var(--bg-raised));border:1px solid var(--emerald);display:flex;align-items:center;justify-content:center;color:var(--emerald);font-weight:700;font-size:16px;letter-spacing:-.5px}
+  .brand h1{font-size:22px;font-weight:700;letter-spacing:-.6px;color:var(--text-1)}
+  .brand h1 span{color:var(--emerald)}
+  .brand-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .sync-badge{font-size:11px;padding:4px 10px;border-radius:6px;background:var(--bg-raised);border:1px solid var(--border);color:var(--text-3);display:flex;align-items:center;gap:6px;cursor:default}
+  .sync-badge .pulse{width:6px;height:6px;border-radius:50%;background:var(--text-3)}
+  .sync-badge.ok .pulse{background:var(--emerald);box-shadow:0 0 6px var(--emerald)}
+  .sync-badge.ok{color:var(--emerald);border-color:var(--emerald-soft)}
+  .sync-badge.err{color:var(--red);border-color:var(--red-soft)}
+
+  /* Settings modal */
+  .settings-btn{width:34px;height:34px;border-radius:8px;background:var(--bg-raised);border:1px solid var(--border);color:var(--text-3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
+  .settings-btn:hover{border-color:var(--border-hover);color:var(--text-2)}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:480px;position:relative}
+  .modal h2{font-size:18px;font-weight:700;margin-bottom:20px;color:var(--text-1)}
+  .modal label{display:block;font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+  .modal input[type="text"]{width:100%;padding:10px 14px;background:var(--bg-raised);border:1px solid var(--border);border-radius:8px;color:var(--text-1);font-size:14px;outline:none;transition:border .2s}
+  .modal input:focus{border-color:var(--indigo)}
+  .modal .btn-row{display:flex;gap:10px;margin-top:20px}
+  .modal .btn{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .2s}
+  .btn-primary{background:var(--emerald-soft);border-color:var(--emerald)!important;color:var(--emerald)}
+  .btn-primary:hover{background:var(--emerald);color:var(--bg-deep)}
+  .btn-ghost{background:transparent;border-color:var(--border)!important;color:var(--text-2)}
+  .btn-ghost:hover{border-color:var(--border-hover)!important}
+  .modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text-3);cursor:pointer;font-size:18px}
+
+  /* Metric strip */
+  .metric-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+  .metric-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 22px;position:relative;overflow:hidden;transition:border-color .2s}
+  .metric-card:hover{border-color:var(--border-hover)}
+  .metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+  .metric-card.mc-emerald::before{background:linear-gradient(90deg,var(--emerald),transparent)}
+  .metric-card.mc-amber::before{background:linear-gradient(90deg,var(--amber),transparent)}
+  .metric-card.mc-indigo::before{background:linear-gradient(90deg,var(--indigo),transparent)}
+  .metric-card.mc-cyan::before{background:linear-gradient(90deg,var(--cyan),transparent)}
+  .metric-label{font-size:11.5px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+  .metric-value{font-size:28px;font-weight:700;letter-spacing:-1px;line-height:1.1}
+  .metric-value.green{color:var(--emerald)}.metric-value.amber-c{color:var(--amber)}.metric-value.indigo-c{color:var(--indigo)}.metric-value.cyan-c{color:var(--cyan)}
+  .metric-sub{font-size:12px;color:var(--text-2);margin-top:6px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+  .tag{font-size:10.5px;padding:2px 7px;border-radius:6px;font-weight:600}
+  .tag-green{background:var(--emerald-glow);color:var(--emerald)}
+  .tag-red{background:var(--red-glow);color:var(--red)}
+  .sparkline-wrap{position:absolute;bottom:14px;right:16px;width:90px;height:36px}
+  .sparkline-wrap svg{width:100%;height:100%}
+
+  /* Dashboard grid */
+  .dashboard{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .panel{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;position:relative;transition:border-color .2s}
+  .panel:hover{border-color:var(--border-hover)}
+  .panel-full{grid-column:1/-1}
+  .panel-title{font-size:13px;color:var(--text-2);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+  .panel-title .dot{width:7px;height:7px;border-radius:50%}
+  .dot-emerald{background:var(--emerald)}.dot-indigo{background:var(--indigo)}.dot-amber{background:var(--amber)}.dot-cyan{background:var(--cyan)}
+
+  /* Dual Ring */
+  .ring-container{display:flex;align-items:center;gap:40px}
+  .ring-svg-wrap{position:relative;width:280px;height:280px;flex-shrink:0}
+  .ring-svg-wrap svg{width:100%;height:100%}
+  .ring-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none}
+  .ring-center-val{font-size:26px;font-weight:700;letter-spacing:-1px;color:var(--text-1)}
+  .ring-center-label{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px}
+  .ring-legend{flex:1;min-width:0}
+  .legend-item{display:flex;align-items:center;gap:12px;padding:10px 8px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;border-radius:6px}
+  .legend-item:last-child{border-bottom:none}
+  .legend-item:hover,.legend-item.active{background:var(--bg-hover)}
+  .legend-swatch{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+  .legend-name{flex:1;font-size:13.5px;color:var(--text-2);min-width:0}
+  .legend-name .he{font-size:11px;color:var(--text-3);margin-left:6px}
+  .legend-vals{text-align:right;flex-shrink:0}
+  .legend-cur{font-size:14px;font-weight:600;color:var(--text-1)}
+  .legend-delta{font-size:11px;font-weight:600}
+  .legend-delta.pos{color:var(--red)}.legend-delta.neg{color:var(--emerald)}
+  .ring-tooltip{position:absolute;background:var(--bg-raised);border:1px solid var(--border-hover);border-radius:8px;padding:12px 16px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:10;white-space:nowrap;font-size:12.5px;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+  .ring-tooltip.visible{opacity:1}
+  .tt-cat{font-weight:600;color:var(--text-1);margin-bottom:6px}
+  .tt-row{display:flex;justify-content:space-between;gap:20px;color:var(--text-2);line-height:1.7}
+  .tt-row span:last-child{font-weight:600;color:var(--text-1)}
+  .tt-delta{margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font-weight:700}
+
+  /* Runway */
+  .runway-display{display:flex;align-items:flex-end;gap:20px}
+  .runway-months{font-size:56px;font-weight:800;letter-spacing:-3px;line-height:1}
+  .runway-months .unit{font-size:18px;font-weight:500;color:var(--text-2);letter-spacing:0}
+  .runway-detail{flex:1}
+  .runway-detail p{font-size:13px;color:var(--text-2);line-height:1.65;margin-bottom:14px}
+  .runway-bar-track{height:8px;background:var(--bg-raised);border-radius:4px;overflow:hidden;margin-bottom:8px}
+  .runway-bar-fill{height:100%;border-radius:4px;transition:width 1s ease-out}
+  .runway-bar-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text-3)}
+  .stat-row{margin-top:8px;padding:14px 16px;background:var(--bg-raised);border-radius:8px;display:flex;justify-content:space-between;font-size:12.5px}
+  .stat-row .lbl{color:var(--text-3)}.stat-row .val{color:var(--text-1);font-weight:600}
+
+  /* Cash flow bars */
+  .cf-chart{display:flex;align-items:flex-end;gap:16px;height:180px;padding-top:10px}
+  .cf-month{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .cf-bars{display:flex;gap:4px;align-items:flex-end;height:140px}
+  .cf-bar{width:24px;border-radius:4px 4px 0 0;transition:height .8s ease-out;position:relative}
+  .cf-bar.income{background:var(--emerald);opacity:.85}
+  .cf-bar.expense{background:var(--red);opacity:.7}
+  .cf-bar:hover{opacity:1}
+  .cf-bar-label{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:600;white-space:nowrap;opacity:0;transition:opacity .2s;pointer-events:none}
+  .cf-bar:hover .cf-bar-label{opacity:1}
+  .cf-month-label{font-size:11px;color:var(--text-3);letter-spacing:.5px}
+
+  /* PDF ingestion */
+  .drop-zone{border:2px dashed var(--border);border-radius:var(--radius-lg);padding:48px 32px;text-align:center;transition:all .3s;cursor:pointer;position:relative}
+  .drop-zone.drag-over{border-color:var(--indigo);background:var(--indigo-glow)}
+  .drop-zone.processing{border-color:var(--amber);border-style:solid}
+  .drop-zone-icon{width:48px;height:48px;margin:0 auto 16px;border-radius:12px;background:var(--bg-raised);border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+  .drop-zone-icon svg{color:var(--text-3)}
+  .drop-zone h3{font-size:15px;font-weight:600;color:var(--text-1);margin-bottom:4px}
+  .drop-zone p{font-size:12.5px;color:var(--text-3)}
+  .process-steps{text-align:left;padding:20px 0}
+  .process-step{display:flex;align-items:center;gap:12px;padding:8px 0;font-size:13px;color:var(--text-3);transition:color .3s}
+  .process-step.active{color:var(--amber)}.process-step.done{color:var(--emerald)}
+  .step-indicator{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s}
+  .process-step.active .step-indicator{border-color:var(--amber)}
+  .process-step.done .step-indicator{border-color:var(--emerald);background:var(--emerald-soft)}
+  .step-spinner{width:12px;height:12px;border:2px solid transparent;border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .flash-rows{margin:12px 0;height:100px;overflow:hidden;position:relative;border-radius:6px;background:var(--bg-deep)}
+  .flash-row{display:flex;justify-content:space-between;padding:4px 12px;font-size:11.5px;font-family:'Consolas','SF Mono',monospace;color:var(--emerald);opacity:0;animation:flashIn .15s forwards}
+  @keyframes flashIn{from{opacity:0;transform:translateY(4px)}to{opacity:.7;transform:translateY(0)}}
+  .review-table{width:100%;border-collapse:collapse;margin-top:16px}
+  .review-table th{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.8px;text-align:left;padding:8px 12px;border-bottom:1px solid var(--border)}
+  .review-table td{padding:10px 12px;font-size:13px;color:var(--text-2);border-bottom:1px solid var(--border)}
+  .review-table tr:last-child td{border-bottom:none}
+  .review-table .amount{font-weight:600;color:var(--text-1);text-align:right}
+  .review-table select{background:var(--bg-raised);border:1px solid var(--border);color:var(--text-1);padding:4px 8px;border-radius:6px;font-size:12px;cursor:pointer}
+  .review-table select:focus{outline:none;border-color:var(--indigo)}
+  .btn-commit{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:10px 24px;background:var(--emerald-soft);border:1px solid var(--emerald);color:var(--emerald);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+  .btn-commit:hover{background:var(--emerald);color:var(--bg-deep)}
+
+  /* Ring labels mobile */
+  .ring-labels{display:flex;gap:16px;margin-top:16px;font-size:11px;color:var(--text-3)}
+  .ring-labels span{display:flex;align-items:center;gap:6px}
+
+  /* Mobile */
+  @media(max-width:900px){
+    .metric-strip{grid-template-columns:repeat(2,1fr)}
+    .dashboard{grid-template-columns:1fr}
+    .ring-container{flex-direction:column}
+    .ring-svg-wrap{width:240px;height:240px;margin:0 auto}
+    .runway-display{flex-direction:column;align-items:flex-start}
+    .runway-months{font-size:44px}
+    .cf-bar{width:18px}
+  }
+  @media(max-width:540px){
+    .metric-strip{grid-template-columns:1fr}
+    .app{padding:16px 12px 60px}
+    .ring-svg-wrap{width:200px;height:200px}
+    .brand h1{font-size:18px}
+    .metric-value{font-size:24px}
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <button class="modal-close" id="modalClose">&times;</button>
+    <h2>Settings</h2>
+    <label>Google Apps Script URL</label>
+    <input type="text" id="gasUrl" placeholder="https://script.google.com/macros/s/...../exec">
+    <p style="font-size:11px;color:var(--text-3);margin-top:8px;line-height:1.5">
+      Paste the Web App URL from your deployed Google Apps Script.<br>
+      Data syncs automatically to your Google Sheet.
+    </p>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="saveSettings">Save &amp; Sync</button>
+      <button class="btn btn-ghost" id="cancelSettings">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ═══════════════════════════════════════════
+  // DATA & STATE
+  // ═══════════════════════════════════════════
+  const CATS = [
+    {key:'food',name:'Food & Groceries',he:'מזון',color:'#34D399'},
+    {key:'housing',name:'Housing & Utilities',he:'דיור',color:'#818CF8'},
+    {key:'invest',name:'Investments & Wealth',he:'השקעות',color:'#F6C042'},
+    {key:'savings',name:'Savings',he:'חיסכון',color:'#22D3EE'},
+    {key:'car',name:'Car & Transport',he:'רכב',color:'#FB923C'},
+    {key:'telecom',name:'Telecom & Internet',he:'תקשורת ואינטרנט',color:'#A78BFA'},
+  ];
+
+  const DEFAULT_DATA = {
+    months: {
+      'May 2026':{income:21500,expenses:{food:3200,housing:6500,invest:4000,savings:3500,car:2100,telecom:450}},
+      'Jun 2026':{income:22000,expenses:{food:2800,housing:6800,invest:4500,savings:3200,car:1900,telecom:420}},
+      'Jul 2026':{income:22800,expenses:{food:2950,housing:6700,invest:5000,savings:3800,car:2300,telecom:380}},
+    },
+    netWorth:[
+      {month:'Feb',value:245000},{month:'Mar',value:252000},{month:'Apr',value:248000},
+      {month:'May',value:258000},{month:'Jun',value:265000},{month:'Jul',value:273000},
+    ],
+    liquidSavings: 95000,
+    transactions: [],
+  };
+
+  let STATE = loadLocal() || JSON.parse(JSON.stringify(DEFAULT_DATA));
+  let GAS_URL = localStorage.getItem('lh_gas_url') || '';
+
+  function loadLocal(){ try{return JSON.parse(localStorage.getItem('lh_state'))}catch(e){return null} }
+  function saveLocal(){ localStorage.setItem('lh_state', JSON.stringify(STATE)); }
+
+  // ── Google Sheets Sync ──
+  async function syncToCloud(){
+    if(!GAS_URL) return false;
+    try{
+      const r = await fetch(GAS_URL+'?action=save',{method:'POST',body:JSON.stringify(STATE),headers:{'Content-Type':'text/plain'}});
+      const d = await r.json();
+      setSyncStatus('ok','Synced ' + new Date().toLocaleTimeString());
+      return true;
+    }catch(e){
+      setSyncStatus('err','Sync failed');
+      return false;
+    }
+  }
+
+  async function loadFromCloud(){
+    if(!GAS_URL) return false;
+    try{
+      const r = await fetch(GAS_URL+'?action=get');
+      const d = await r.json();
+      if(d && d.months){
+        STATE = d;
+        saveLocal();
+        render();
+        setSyncStatus('ok','Loaded from cloud');
+        return true;
+      }
+    }catch(e){
+      setSyncStatus('err','Load failed');
+    }
+    return false;
+  }
+
+  function setSyncStatus(status, text){
+    const badge = document.getElementById('syncBadge');
+    if(!badge) return;
+    badge.className = 'sync-badge ' + status;
+    badge.querySelector('.sync-text').textContent = text;
+  }
+
+  // ── Helpers ──
+  const fmt = n => '₪' + n.toLocaleString('en-IL');
+  const fmtK = n => n >= 1000 ? '₪' + (n/1000).toFixed(0) + 'K' : fmt(n);
+  function totalExp(d){ return Object.values(d.expenses).reduce((a,b)=>a+b,0); }
+
+  function sparkSVG(data, color, w, h){
+    w=w||90; h=h||36;
+    const vals=data.map(d=>d.value), mn=Math.min(...vals), mx=Math.max(...vals), range=mx-mn||1;
+    const pts=vals.map((v,i)=>{
+      const x=(i/(vals.length-1))*w, y=h-4-((v-mn)/range)*(h-8);
+      return x+','+y;
+    });
+    const gid='sg'+Math.random().toString(36).slice(2,6);
+    return '<svg viewBox="0 0 '+w+' '+h+'" xmlns="http://www.w3.org/2000/svg">'+
+      '<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1">'+
+      '<stop offset="0%" stop-color="'+color+'" stop-opacity=".3"/>'+
+      '<stop offset="100%" stop-color="'+color+'" stop-opacity="0"/>'+
+      '</linearGradient></defs>'+
+      '<polygon points="0,'+h+' '+pts.join(' ')+' '+w+','+h+'" fill="url(#'+gid+')"/>'+
+      '<polyline points="'+pts.join(' ')+'" fill="none" stroke="'+color+'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'+
+      '<circle cx="'+pts[pts.length-1].split(',')[0]+'" cy="'+pts[pts.length-1].split(',')[1]+'" r="2.5" fill="'+color+'"/></svg>';
+  }
+
+  function ringArcs(data, r, w, cx, cy, prefix){
+    const total=Object.values(data).reduce((a,b)=>a+b,0);
+    let angle=-90, paths='';
+    CATS.forEach(cat=>{
+      const val=data[cat.key], pct=val/total, sweep=pct*360, gap=2;
+      const sA=angle+gap/2, eA=angle+sweep-gap/2;
+      if(sweep>gap){
+        const sr=sA*Math.PI/180, er=eA*Math.PI/180;
+        const x1=cx+r*Math.cos(sr), y1=cy+r*Math.sin(sr);
+        const x2=cx+r*Math.cos(er), y2=cy+r*Math.sin(er);
+        const large=sweep-gap>180?1:0;
+        paths+='<path d="M '+x1+' '+y1+' A '+r+' '+r+' 0 '+large+' 1 '+x2+' '+y2+'" '+
+          'fill="none" stroke="'+cat.color+'" stroke-width="'+w+'" stroke-linecap="round" '+
+          'data-cat="'+cat.key+'" data-ring="'+prefix+'" style="opacity:.85;transition:opacity .2s,stroke-width .2s;cursor:pointer"/>';
+      }
+      angle+=sweep;
+    });
+    return paths;
+  }
+
+  // ═══════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════
+  function render(){
+    const mKeys=Object.keys(STATE.months);
+    const curMonth=mKeys[mKeys.length-1], prevMonth=mKeys[mKeys.length-2];
+    const cur=STATE.months[curMonth], prev=STATE.months[prevMonth];
+    const curTot=totalExp(cur), prevTot=totalExp(prev);
+    const cfr=((cur.income/curTot)*100).toFixed(1);
+    const nwCur=STATE.netWorth[STATE.netWorth.length-1].value;
+    const nwPrev=STATE.netWorth[STATE.netWorth.length-2].value;
+    const nwDelta=((nwCur-nwPrev)/nwPrev*100).toFixed(1);
+    const avgExp=Math.round(mKeys.reduce((a,k)=>a+totalExp(STATE.months[k]),0)/mKeys.length);
+    const runway=(STATE.liquidSavings/avgExp).toFixed(1);
+    const cfIncome=mKeys.map(m=>STATE.months[m].income);
+    const cfExp=mKeys.map(m=>totalExp(STATE.months[m]));
+    const barMax=Math.max(...cfIncome,...cfExp);
+
+    const app=document.getElementById('app');
+    app.innerHTML=`
+    <div class="brand">
+      <div class="brand-icon">LH</div>
+      <h1>Ledger<span>House</span></h1>
+      <div class="brand-right">
+        <div class="sync-badge" id="syncBadge">
+          <span class="pulse"></span>
+          <span class="sync-text">${GAS_URL?'Ready':'No sync configured'}</span>
+        </div>
+        <button class="settings-btn" id="openSettings" title="Settings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="metric-strip">
+      <div class="metric-card mc-emerald">
+        <div class="metric-label">Cash Flow Ratio</div>
+        <div class="metric-value green">${cfr}%</div>
+        <div class="metric-sub">Income / Expenses &times; 100 <span class="tag ${+cfr>=100?'tag-green':'tag-red'}">${+cfr>=100?'Healthy':'Warning'}</span></div>
+      </div>
+      <div class="metric-card mc-indigo">
+        <div class="metric-label">Net Worth</div>
+        <div class="metric-value indigo-c">${fmt(nwCur)}</div>
+        <div class="metric-sub"><span class="tag ${+nwDelta>=0?'tag-green':'tag-red'}">${+nwDelta>=0?'+':''}${nwDelta}%</span> vs last month</div>
+        <div class="sparkline-wrap">${sparkSVG(STATE.netWorth,'#818CF8')}</div>
+      </div>
+      <div class="metric-card mc-amber">
+        <div class="metric-label">Monthly Expenses</div>
+        <div class="metric-value amber-c">${fmt(curTot)}</div>
+        <div class="metric-sub"><span class="tag ${curTot>prevTot?'tag-red':'tag-green'}">${curTot>prevTot?'+':''}${((curTot-prevTot)/prevTot*100).toFixed(1)}%</span> vs ${prevMonth}</div>
+      </div>
+      <div class="metric-card mc-cyan">
+        <div class="metric-label">Monthly Income</div>
+        <div class="metric-value cyan-c">${fmt(cur.income)}</div>
+        <div class="metric-sub">Net surplus: <strong style="color:var(--emerald)">${fmt(cur.income-curTot)}</strong></div>
+      </div>
+    </div>
+
+    <div class="dashboard">
+      <div class="panel">
+        <div class="panel-title"><span class="dot dot-indigo"></span>Spending Comparison — Dual Ring</div>
+        <div class="ring-container">
+          <div class="ring-svg-wrap">
+            <svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg" id="ringChart">
+              <circle cx="140" cy="140" r="120" fill="none" stroke="rgba(30,39,54,.5)" stroke-width="22"/>
+              <circle cx="140" cy="140" r="88" fill="none" stroke="rgba(30,39,54,.5)" stroke-width="26"/>
+              ${ringArcs(prev.expenses,120,22,140,140,'prev')}
+              ${ringArcs(cur.expenses,88,26,140,140,'cur')}
+            </svg>
+            <div class="ring-center">
+              <div class="ring-center-val">${fmt(curTot)}</div>
+              <div class="ring-center-label">${curMonth}</div>
+            </div>
+            <div class="ring-tooltip" id="ringTooltip"></div>
+          </div>
+          <div class="ring-legend" id="ringLegend">
+            ${CATS.map(cat=>{
+              const c=cur.expenses[cat.key], p=prev.expenses[cat.key];
+              const d=((c-p)/p*100).toFixed(1), up=+d>0;
+              return '<div class="legend-item" data-cat="'+cat.key+'">'+
+                '<div class="legend-swatch" style="background:'+cat.color+'"></div>'+
+                '<div class="legend-name">'+cat.name+'<span class="he" dir="rtl">'+cat.he+'</span></div>'+
+                '<div class="legend-vals"><div class="legend-cur">'+fmt(c)+'</div>'+
+                '<div class="legend-delta '+(up?'pos':'neg')+'">'+(up?'+':'')+d+'%</div></div></div>';
+            }).join('')}
+          </div>
+        </div>
+        <div class="ring-labels">
+          <span><span style="width:12px;height:3px;background:var(--text-3);border-radius:2px;opacity:.5;display:inline-block"></span>Outer: ${prevMonth}</span>
+          <span><span style="width:12px;height:5px;background:var(--text-2);border-radius:2px;display:inline-block"></span>Inner: ${curMonth}</span>
+        </div>
+      </div>
+
+      <div class="panel" style="display:flex;flex-direction:column;justify-content:space-between">
+        <div>
+          <div class="panel-title"><span class="dot dot-amber"></span>Financial Runway</div>
+          <div class="runway-display">
+            <div class="runway-months" style="color:${+runway>6?'var(--emerald)':+runway>3?'var(--amber)':'var(--red)'}">
+              ${runway}<span class="unit"> months</span>
+            </div>
+            <div class="runway-detail">
+              <p>If all income stopped today, your household can sustain current spending for <strong style="color:var(--text-1)">${runway} months</strong> on liquid reserves alone.</p>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:24px">
+          <div class="runway-bar-track"><div class="runway-bar-fill" id="runwayBar" style="width:0;background:linear-gradient(90deg,${+runway>6?'var(--emerald)':'var(--amber)'},transparent)"></div></div>
+          <div class="runway-bar-labels"><span>0 mo</span><span style="color:var(--amber)">3 mo</span><span style="color:var(--emerald)">6 mo</span><span>12 mo</span></div>
+          <div class="stat-row" style="margin-top:16px"><span class="lbl">Liquid Savings</span><span class="val">${fmt(STATE.liquidSavings)}</span></div>
+          <div class="stat-row"><span class="lbl">Avg Monthly Burn</span><span class="val">${fmt(avgExp)}</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title"><span class="dot dot-emerald"></span>Cash Flow — 3 Month Trend</div>
+        <div class="cf-chart" id="cfChart">
+          ${mKeys.map((m,i)=>'<div class="cf-month"><div class="cf-bars">'+
+            '<div class="cf-bar income" data-val="'+cfIncome[i]+'" style="height:0"><span class="cf-bar-label" style="color:var(--emerald)">'+fmtK(cfIncome[i])+'</span></div>'+
+            '<div class="cf-bar expense" data-val="'+cfExp[i]+'" style="height:0"><span class="cf-bar-label" style="color:var(--red)">'+fmtK(cfExp[i])+'</span></div>'+
+            '</div><div class="cf-month-label">'+m.split(' ')[0]+'</div></div>').join('')}
+        </div>
+        <div class="ring-labels" style="margin-top:14px">
+          <span><span style="width:10px;height:10px;border-radius:2px;background:var(--emerald);opacity:.85;display:inline-block"></span>Income</span>
+          <span><span style="width:10px;height:10px;border-radius:2px;background:var(--red);opacity:.7;display:inline-block"></span>Expenses</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title"><span class="dot dot-cyan"></span>Credit Statement Ingestion</div>
+        <div id="ingestZone">
+          <div class="drop-zone" id="dropZone">
+            <div class="drop-zone-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                <polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>
+              </svg>
+            </div>
+            <h3>Drop Isracard / Max PDF here</h3>
+            <p>Or tap to simulate a statement import</p>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+    // Animations
+    requestAnimationFrame(()=>{
+      setTimeout(()=>{
+        const rb=document.getElementById('runwayBar');
+        if(rb) rb.style.width=Math.min((+runway/12)*100,100)+'%';
+      },300);
+      setTimeout(()=>{
+        document.querySelectorAll('.cf-bar').forEach(b=>{
+          b.style.height=Math.max((+b.dataset.val/barMax)*140,8)+'px';
+        });
+      },400);
+    });
+
+    bindRingInteractions(cur, prev, curMonth, prevMonth);
+    bindIngestion();
+    bindSettings();
+  }
+
+  // ═══════════════════════════════════════════
+  // RING INTERACTIONS
+  // ═══════════════════════════════════════════
+  function bindRingInteractions(cur, prev, curMonth, prevMonth){
+    const chart=document.getElementById('ringChart');
+    const tooltip=document.getElementById('ringTooltip');
+    const legends=document.querySelectorAll('.legend-item');
+    if(!chart) return;
+
+    function highlight(catKey){
+      chart.querySelectorAll('path').forEach(p=>{
+        p.style.opacity=p.dataset.cat===catKey?'1':'.25';
+        p.style.strokeWidth=p.dataset.cat===catKey?(p.dataset.ring==='cur'?'30':'26'):(p.dataset.ring==='cur'?'26':'22');
+      });
+      legends.forEach(li=>li.classList.toggle('active',li.dataset.cat===catKey));
+    }
+    function reset(){
+      chart.querySelectorAll('path').forEach(p=>{p.style.opacity='.85';p.style.strokeWidth=p.dataset.ring==='cur'?'26':'22';});
+      legends.forEach(li=>li.classList.remove('active'));
+      tooltip.classList.remove('visible');
+    }
+    function showTT(catKey,x,y){
+      const cat=CATS.find(c=>c.key===catKey);
+      const c=cur.expenses[catKey], p=prev.expenses[catKey];
+      const d=((c-p)/p*100).toFixed(1), up=+d>0;
+      tooltip.innerHTML='<div class="tt-cat" style="color:'+cat.color+'">'+cat.name+'</div>'+
+        '<div class="tt-row"><span>'+curMonth+':</span><span>'+fmt(c)+'</span></div>'+
+        '<div class="tt-row"><span>'+prevMonth+':</span><span>'+fmt(p)+'</span></div>'+
+        '<div class="tt-delta" style="color:'+(up?'var(--red)':'var(--emerald)')+'">'+(up?'▲':'▼')+' '+(up?'+':'')+d+'% vs last month</div>';
+      const wrap=chart.closest('.ring-svg-wrap'), rect=wrap.getBoundingClientRect();
+      tooltip.style.left=(x-rect.left+16)+'px'; tooltip.style.top=(y-rect.top-30)+'px';
+      tooltip.classList.add('visible');
+    }
+
+    chart.addEventListener('mousemove',e=>{
+      const p=e.target.closest('path[data-cat]');
+      if(p){highlight(p.dataset.cat);showTT(p.dataset.cat,e.clientX,e.clientY);}
+    });
+    chart.addEventListener('mouseleave',reset);
+    legends.forEach(li=>{
+      li.addEventListener('mouseenter',()=>{highlight(li.dataset.cat);tooltip.style.left='60px';tooltip.style.top='60px';
+        const cat=CATS.find(c=>c.key===li.dataset.cat),c=cur.expenses[li.dataset.cat],p=prev.expenses[li.dataset.cat];
+        const d=((c-p)/p*100).toFixed(1),up=+d>0;
+        tooltip.innerHTML='<div class="tt-cat" style="color:'+cat.color+'">'+cat.name+'</div>'+
+          '<div class="tt-row"><span>'+curMonth+':</span><span>'+fmt(c)+'</span></div>'+
+          '<div class="tt-row"><span>'+prevMonth+':</span><span>'+fmt(p)+'</span></div>'+
+          '<div class="tt-delta" style="color:'+(up?'var(--red)':'var(--emerald)')+'">'+(up?'▲':'▼')+' '+(up?'+':'')+d+'% vs last month</div>';
+        tooltip.classList.add('visible');
+      });
+      li.addEventListener('mouseleave',reset);
+    });
+  }
+
+  // ═══════════════════════════════════════════
+  // PDF INGESTION
+  // ═══════════════════════════════════════════
+  const MOCK_TX=[
+    {date:'2026-07-02',merchant:'שופרסל דיל',amount:387,cat:'food'},
+    {date:'2026-07-03',merchant:'פז תדלוק',amount:280,cat:'car'},
+    {date:'2026-07-05',merchant:'HOT Telecom',amount:129,cat:'telecom'},
+    {date:'2026-07-06',merchant:'רמי לוי',amount:245,cat:'food'},
+    {date:'2026-07-08',merchant:'עיריית תל אביב - ארנונה',amount:1850,cat:'housing'},
+    {date:'2026-07-10',merchant:'IKEA Online',amount:560,cat:'housing'},
+    {date:'2026-07-11',merchant:'חשמל - חברת חשמל',amount:420,cat:'housing'},
+    {date:'2026-07-12',merchant:'IBI Investment House',amount:2000,cat:'invest'},
+    {date:'2026-07-13',merchant:'פארטנר סלולר',amount:79,cat:'telecom'},
+    {date:'2026-07-14',merchant:'AM:PM',amount:62,cat:'food'},
+  ];
+  const STREAM=[
+    '02/07  שופרסל דיל בע"מ          ₪387.00','03/07  פז חברת נפט בע"מ          ₪280.00',
+    '05/07  HOT TELECOM LTD            ₪129.00','06/07  רמי לוי שיווק השקמה        ₪245.20',
+    '08/07  עיריית תל אביב             ₪1,850.00','10/07  IKEA ISRAEL LTD            ₪560.00',
+    '11/07  חברת החשמל לישראל          ₪420.00','12/07  IBI INVESTMENT HOUSE       ₪2,000.00',
+    '13/07  PARTNER COMMUNICATIONS     ₪79.00','14/07  AM:PM CONVENIENCE          ₪62.00',
+    '02/07  GOOGLE *YOUTUBE PREMIUM    ₪29.90','04/07  WAZE CARPOOL               ₪45.00',
+    '07/07  מגה בעיר                    ₪198.50','09/07  סונול תדלוק                ₪310.00',
+    '11/07  YES TV                      ₪149.00',
+  ];
+
+  let ingestionRunning=false;
+
+  function bindIngestion(){
+    const dz=document.getElementById('dropZone');
+    if(!dz) return;
+    dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over');});
+    dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));
+    dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-over');startIngestion();});
+    dz.addEventListener('click',startIngestion);
+  }
+
+  function startIngestion(){
+    if(ingestionRunning) return;
+    ingestionRunning=true;
+    const zone=document.getElementById('ingestZone');
+    zone.innerHTML='<div class="drop-zone processing"><div class="process-steps" id="ps">'+
+      '<div class="process-step" id="s1"><div class="step-indicator"></div><span>Scanning Document Structure...</span></div>'+
+      '<div class="process-step" id="s2"><div class="step-indicator"></div><span>Extracting Transaction Ledger...</span></div>'+
+      '<div class="flash-rows" id="fr" style="display:none"></div>'+
+      '<div class="process-step" id="s3"><div class="step-indicator"></div><span>Categorizing Transactions via NLP/Rules...</span></div>'+
+      '</div></div>';
+
+    const s1=document.getElementById('s1'),s2=document.getElementById('s2'),s3=document.getElementById('s3'),fr=document.getElementById('fr');
+    s1.classList.add('active');s1.querySelector('.step-indicator').innerHTML='<div class="step-spinner"></div>';
+
+    setTimeout(()=>{
+      s1.classList.remove('active');s1.classList.add('done');s1.querySelector('.step-indicator').innerHTML='<span style="color:var(--emerald)">✓</span>';
+      s2.classList.add('active');s2.querySelector('.step-indicator').innerHTML='<div class="step-spinner"></div>';
+      fr.style.display='block';
+      let ri=0;
+      const iv=setInterval(()=>{
+        if(ri>=STREAM.length){clearInterval(iv);return;}
+        const row=document.createElement('div');row.className='flash-row';row.textContent=STREAM[ri];
+        fr.appendChild(row);if(fr.children.length>6)fr.removeChild(fr.firstChild);ri++;
+      },120);
+      setTimeout(()=>{
+        clearInterval(iv);
+        s2.classList.remove('active');s2.classList.add('done');s2.querySelector('.step-indicator').innerHTML='<span style="color:var(--emerald)">✓</span>';
+        fr.style.display='none';
+        s3.classList.add('active');s3.querySelector('.step-indicator').innerHTML='<div class="step-spinner"></div>';
+        setTimeout(()=>{
+          s3.classList.remove('active');s3.classList.add('done');s3.querySelector('.step-indicator').innerHTML='<span style="color:var(--emerald)">✓</span>';
+          setTimeout(showReview,400);
+        },1200);
+      },2000);
+    },1400);
+  }
+
+  function showReview(){
+    const zone=document.getElementById('ingestZone');
+    const opts=CATS.map(c=>'<option value="'+c.key+'">'+c.name+'</option>').join('');
+    const total=MOCK_TX.reduce((a,t)=>a+t.amount,0);
+    zone.innerHTML='<div style="font-size:13px;color:var(--emerald);margin-bottom:12px;display:flex;align-items:center;gap:8px">'+
+      '<span style="width:8px;height:8px;border-radius:50%;background:var(--emerald)"></span>'+
+      '10 transactions extracted — review before committing</div>'+
+      '<div style="overflow-x:auto"><table class="review-table"><thead><tr>'+
+      '<th>Date</th><th>Merchant</th><th>Category</th><th style="text-align:right">Amount</th></tr></thead><tbody>'+
+      MOCK_TX.map(t=>'<tr><td>'+t.date+'</td><td dir="auto" style="color:var(--text-1)">'+t.merchant+'</td>'+
+        '<td><select>'+opts.replace('value="'+t.cat+'"','value="'+t.cat+'" selected')+'</select></td>'+
+        '<td class="amount">'+fmt(t.amount)+'</td></tr>').join('')+
+      '</tbody></table></div>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;flex-wrap:wrap;gap:10px">'+
+      '<button class="btn-commit" id="btnCommit">'+
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>'+
+      'Commit to Ledger</button>'+
+      '<span style="font-size:12px;color:var(--text-3)">Total: <strong style="color:var(--text-1)">'+fmt(total)+'</strong></span></div>';
+
+    document.getElementById('btnCommit').addEventListener('click',function(){
+      STATE.transactions = STATE.transactions.concat(MOCK_TX);
+      saveLocal();
+      syncToCloud();
+      this.style.background='var(--emerald)';this.style.color='var(--bg-deep)';
+      this.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Committed & Synced';
+      this.style.pointerEvents='none';
+      setTimeout(()=>{ingestionRunning=false;},1000);
+    });
+  }
+
+  // ═══════════════════════════════════════════
+  // SETTINGS
+  // ═══════════════════════════════════════════
+  function bindSettings(){
+    const openBtn=document.getElementById('openSettings');
+    const modal=document.getElementById('settingsModal');
+    const urlInput=document.getElementById('gasUrl');
+    if(!openBtn) return;
+
+    openBtn.addEventListener('click',()=>{
+      urlInput.value=GAS_URL;
+      modal.classList.add('open');
+    });
+    document.getElementById('modalClose').addEventListener('click',()=>modal.classList.remove('open'));
+    document.getElementById('cancelSettings').addEventListener('click',()=>modal.classList.remove('open'));
+    modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open');});
+
+    document.getElementById('saveSettings').addEventListener('click',async()=>{
+      GAS_URL=urlInput.value.trim();
+      localStorage.setItem('lh_gas_url',GAS_URL);
+      modal.classList.remove('open');
+      if(GAS_URL){
+        setSyncStatus('','Syncing...');
+        const loaded=await loadFromCloud();
+        if(!loaded){
+          await syncToCloud();
+        }
+      }
+    });
+  }
+
+  // ── Init ──
+  render();
+  if(GAS_URL) loadFromCloud();
+
+})();
+</script>
+</body>
+</html>

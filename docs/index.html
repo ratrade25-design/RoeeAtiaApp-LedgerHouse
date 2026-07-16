@@ -766,16 +766,13 @@ function drawZoneCanvases(){
 }
 function observeZones(){
   const root=document.getElementById('mainScroll');
-  const obs=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')})
-  },{root,threshold:0,rootMargin:'0px 0px 100px 0px'});
-  document.querySelectorAll('.zone').forEach((z,i)=>{
-    if(i===0)setTimeout(()=>z.classList.add('visible'),100);
-    else obs.observe(z)});
-  root.addEventListener('scroll',function onScroll(){
-    const zones=document.querySelectorAll('.zone:not(.visible)');
-    zones.forEach(z=>{const r=z.getBoundingClientRect();if(r.top<window.innerHeight+50)z.classList.add('visible')});
-    if(!zones.length)root.removeEventListener('scroll',onScroll)},{passive:true});
+  function revealCheck(){
+    document.querySelectorAll('.zone:not(.visible)').forEach(z=>{
+      const r=z.getBoundingClientRect();if(r.top<window.innerHeight+100)z.classList.add('visible')});
+  }
+  setTimeout(()=>{document.querySelectorAll('.zone').forEach((z,i)=>{
+    if(i===0)z.classList.add('visible')});revealCheck()},150);
+  root.addEventListener('scroll',revealCheck,{passive:true});
 }
 function sizeCanvas(id){const c=document.getElementById(id);if(!c)return null;const p=c.parentElement;c.width=p.offsetWidth;c.height=p.offsetHeight;return c}
 function drawGrid(id){

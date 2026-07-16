@@ -763,10 +763,13 @@ function drawZoneCanvases(){
   observeZones();
 }
 function observeZones(){
+  const root=document.getElementById('mainScroll');
   const obs=new IntersectionObserver(entries=>{
     entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')})
-  },{root:document.getElementById('mainScroll'),threshold:.15});
-  document.querySelectorAll('.zone').forEach(z=>obs.observe(z));
+  },{root,threshold:.1});
+  document.querySelectorAll('.zone').forEach((z,i)=>{
+    if(i===0)setTimeout(()=>z.classList.add('visible'),100);
+    else obs.observe(z)});
 }
 function sizeCanvas(id){const c=document.getElementById(id);if(!c)return null;const p=c.parentElement;c.width=p.offsetWidth;c.height=p.offsetHeight;return c}
 function drawGrid(id){

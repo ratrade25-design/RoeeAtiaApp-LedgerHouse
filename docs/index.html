@@ -1,704 +1,796 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="ltr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#080B10">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#070A0F">
 <title>LedgerHouse</title>
 <style>
-  :root {
-    --bg-deep: #080B10;
-    --bg-base: #0D1117;
-    --bg-card: rgba(20,26,35,.85);
-    --bg-raised: #1B2331;
-    --bg-hover: #212B3A;
-    --border: rgba(30,39,54,.8);
-    --border-hover: #2A3548;
-    --text-1: #E2E8F0;
-    --text-2: #8B97A8;
-    --text-3: #4E5B6E;
-    --emerald: #34D399;
-    --emerald-soft: #064E3B;
-    --emerald-glow: rgba(52,211,153,.12);
-    --amber: #F6C042;
-    --amber-soft: #713F12;
-    --amber-glow: rgba(246,192,66,.10);
-    --indigo: #818CF8;
-    --indigo-soft: #2E1065;
-    --indigo-glow: rgba(129,140,248,.10);
-    --red: #F87171;
-    --red-soft: #7F1D1D;
-    --red-glow: rgba(248,113,113,.10);
-    --cyan: #22D3EE;
-    --radius: 10px;
-    --radius-lg: 14px;
-    font-variant-numeric: tabular-nums;
-  }
-  *{margin:0;padding:0;box-sizing:border-box}
-  html{background:var(--bg-deep);color:var(--text-1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
-  body{background:var(--bg-deep);min-height:100vh;overflow-x:hidden}
+:root{
+  --bg-0:#070A0F;--bg-1:#0C1017;--bg-2:#121820;--bg-3:#1A2232;--bg-4:#232D3F;
+  --border:#1E2736;--border-h:#2A3548;
+  --t1:#E6ECF4;--t2:#8B97A8;--t3:#4E5B6E;
+  --green:#34D399;--green-d:#064E3B;--green-g:rgba(52,211,153,.12);
+  --amber:#F6C042;--amber-d:#713F12;--amber-g:rgba(246,192,66,.10);
+  --indigo:#818CF8;--indigo-d:#2E1065;--indigo-g:rgba(129,140,248,.10);
+  --red:#F87171;--red-d:#7F1D1D;--red-g:rgba(248,113,113,.10);
+  --cyan:#22D3EE;
+  --r:10px;--r2:14px;
+  font-variant-numeric:tabular-nums;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:var(--bg-0);color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow:hidden}
 
-  /* ═══ ZONE SYSTEM ═══ */
-  .zone{position:relative;padding:40px 0;overflow:hidden}
-  .zone-inner{max-width:1320px;margin:0 auto;padding:0 24px;position:relative;z-index:2}
-  .zone-bg{position:absolute;inset:0;z-index:0;opacity:.35;pointer-events:none}
+/* ── PIN ── */
+#pinScreen{position:fixed;inset:0;z-index:500;background:var(--bg-0);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
+.pin-logo{font-size:48px;font-weight:800;letter-spacing:-2px;color:var(--green)}
+.pin-sub{font-size:13px;color:var(--t3);margin-top:-12px}
+.pin-dots{display:flex;gap:14px;margin:12px 0}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border-h);transition:all .2s}
+.pin-dot.filled{background:var(--green);border-color:var(--green);box-shadow:0 0 12px rgba(52,211,153,.4)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,72px);gap:10px}
+.pin-key{height:56px;border-radius:12px;background:var(--bg-2);border:1px solid var(--border);color:var(--t1);font-size:20px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.pin-key:hover{background:var(--bg-3);border-color:var(--border-h)}
+.pin-key:active{transform:scale(.95)}
+.pin-key.del{font-size:14px;color:var(--t3)}
+.pin-key.empty{visibility:hidden;pointer-events:none}
+.pin-msg{font-size:12px;height:18px;color:var(--red);text-align:center}
+.pin-skip{margin-top:8px;font-size:12px;color:var(--t3);background:none;border:none;cursor:pointer;text-decoration:underline}
+.pin-skip:hover{color:var(--t2)}
+@keyframes pinShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.pin-shake{animation:pinShake .4s ease-in-out}
 
-  /* Zone 1: Overview — dark financial grid */
-  .zone-overview{background:linear-gradient(180deg,#080B10 0%,#0A0F18 50%,#0D1420 100%)}
-  .zone-overview .zone-bg{background:
-    repeating-linear-gradient(90deg,rgba(129,140,248,.04) 0px,rgba(129,140,248,.04) 1px,transparent 1px,transparent 80px),
-    repeating-linear-gradient(0deg,rgba(129,140,248,.04) 0px,rgba(129,140,248,.04) 1px,transparent 1px,transparent 60px);
-    opacity:.6}
-  .zone-overview::after{content:'';position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(180deg,transparent,#081210);z-index:1}
+/* ── SHELL ── */
+#app{display:none;height:100vh;overflow:hidden}
+.shell{display:flex;height:100%}
 
-  /* Zone 2: Income — stock market / money */
-  .zone-income{background:linear-gradient(180deg,#081210 0%,#0A1A14 30%,#0C1E18 60%,#0A1610 100%)}
-  .zone-income::before{content:'';position:absolute;inset:0;z-index:0;opacity:.12;
-    background:radial-gradient(ellipse 600px 400px at 20% 50%,rgba(52,211,153,.15),transparent),
-    radial-gradient(ellipse 500px 300px at 80% 30%,rgba(34,211,238,.1),transparent)}
-  .zone-income::after{content:'';position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(180deg,transparent,#14100A);z-index:1}
+/* ── SIDEBAR ── */
+.sidebar{width:64px;background:var(--bg-1);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:4px;flex-shrink:0;z-index:10}
+.sb-logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--green-d),var(--bg-3));border:1px solid rgba(52,211,153,.3);display:flex;align-items:center;justify-content:center;color:var(--green);font-weight:800;font-size:13px;margin-bottom:20px;box-shadow:0 0 20px rgba(52,211,153,.15)}
+.sb-item{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--t3);cursor:pointer;transition:all .2s;position:relative}
+.sb-item:hover{background:var(--bg-2);color:var(--t2)}
+.sb-item.active{background:rgba(52,211,153,.08);color:var(--green)}
+.sb-item.active::before{content:'';position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 3px 3px 0;background:var(--green)}
+.sb-item svg{width:20px;height:20px}
+.sb-bottom{margin-top:auto;display:flex;flex-direction:column;gap:4px;align-items:center}
 
-  /* Zone 3: Expenses — warm receipt/spending */
-  .zone-expenses{background:linear-gradient(180deg,#14100A 0%,#1A1410 30%,#1C1610 60%,#12100C 100%);padding-bottom:80px}
-  .zone-expenses::before{content:'';position:absolute;inset:0;z-index:0;opacity:.1;
-    background:radial-gradient(ellipse 500px 400px at 70% 40%,rgba(246,192,66,.15),transparent),
-    radial-gradient(ellipse 400px 300px at 30% 70%,rgba(248,113,113,.1),transparent)}
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;overflow-x:hidden;position:relative;scroll-behavior:smooth}
 
-  /* Zone titles */
-  .zone-header{display:flex;align-items:center;gap:14px;margin-bottom:32px}
-  .zone-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;backdrop-filter:blur(8px)}
-  .zone-title{font-size:13px;text-transform:uppercase;letter-spacing:2px;font-weight:600}
-  .zone-subtitle{font-size:11px;color:var(--text-3);letter-spacing:.5px;margin-top:2px}
+/* ── VIEWS ── */
+.view{display:none;min-height:100%}.view.active{display:block}
 
-  /* Brand */
-  .brand{display:flex;align-items:center;gap:14px;margin-bottom:32px;flex-wrap:wrap;padding-top:8px}
-  .brand-icon{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--emerald-soft),var(--bg-raised));border:1px solid var(--emerald);display:flex;align-items:center;justify-content:center;color:var(--emerald);font-weight:700;font-size:17px;letter-spacing:-.5px;box-shadow:0 0 25px rgba(52,211,153,.2);animation:iconGlow 3s ease-in-out infinite}
-  @keyframes iconGlow{0%,100%{box-shadow:0 0 20px rgba(52,211,153,.15)}50%{box-shadow:0 0 35px rgba(52,211,153,.3)}}
-  .brand h1{font-size:24px;font-weight:700;letter-spacing:-.6px;color:var(--text-1)}
-  .brand h1 span{color:var(--emerald)}
-  .brand-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-  .live-clock{font-size:12px;color:var(--text-3);font-family:'SF Mono','Consolas',monospace;display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:8px;background:rgba(20,26,35,.7);border:1px solid var(--border);backdrop-filter:blur(8px)}
-  .live-dot{width:6px;height:6px;border-radius:50%;background:var(--emerald);animation:livePulse 2s ease-in-out infinite}
-  @keyframes livePulse{0%,100%{opacity:1;box-shadow:0 0 4px var(--emerald)}50%{opacity:.4;box-shadow:0 0 10px var(--emerald)}}
-  .sync-badge{font-size:11px;padding:4px 10px;border-radius:6px;background:rgba(20,26,35,.7);border:1px solid var(--border);color:var(--text-3);display:flex;align-items:center;gap:6px;backdrop-filter:blur(8px)}
-  .sync-badge .pulse{width:6px;height:6px;border-radius:50%;background:var(--text-3)}
-  .sync-badge.ok .pulse{background:var(--emerald);box-shadow:0 0 6px var(--emerald)}
-  .sync-badge.ok{color:var(--emerald);border-color:var(--emerald-soft)}
-  .sync-badge.err{color:var(--red);border-color:var(--red-soft)}
-  .action-btn{width:36px;height:36px;border-radius:10px;background:rgba(20,26,35,.7);border:1px solid var(--border);color:var(--text-3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;backdrop-filter:blur(8px)}
-  .action-btn:hover{border-color:var(--border-hover);color:var(--text-2);background:var(--bg-hover)}
-  .add-btn{background:rgba(6,78,59,.5);border-color:rgba(52,211,153,.3);color:var(--emerald)}
-  .add-btn:hover{background:var(--emerald);color:var(--bg-deep);border-color:var(--emerald)}
+/* ── HEADER BAR ── */
+.topbar{padding:18px 28px 0;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.topbar h2{font-size:20px;font-weight:700;letter-spacing:-.4px}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.live-clock{font-size:11px;color:var(--t3);font-family:'SF Mono',Consolas,monospace;display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;background:var(--bg-2);border:1px solid var(--border)}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 4px var(--green)}50%{opacity:.4;box-shadow:0 0 10px var(--green)}}
+.sync-badge{font-size:11px;padding:3px 8px;border-radius:6px;background:var(--bg-2);border:1px solid var(--border);color:var(--t3);display:flex;align-items:center;gap:5px}
+.sync-badge.ok{color:var(--green);border-color:var(--green-d)}
+.sync-badge.err{color:var(--red);border-color:var(--red-d)}
 
-  /* Cards */
-  .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px 24px;position:relative;overflow:hidden;transition:border-color .3s,box-shadow .3s,transform .2s;backdrop-filter:blur(12px)}
-  .card:hover{border-color:var(--border-hover);box-shadow:0 8px 30px rgba(0,0,0,.3);transform:translateY(-2px)}
+/* ── ZONE BACKGROUNDS ── */
+.zone{position:relative;padding:36px 0;overflow:hidden}
+.zone-inner{max-width:1280px;margin:0 auto;padding:0 28px;position:relative;z-index:2}
+.zone-canvas{position:absolute;inset:0;z-index:0;pointer-events:none}
+.zone-overview{background:linear-gradient(180deg,#070A0F,#0A0F18,#0C1420)}
+.zone-overview::after{content:'';position:absolute;bottom:0;left:0;right:0;height:100px;background:linear-gradient(transparent,#081210);z-index:1}
+.zone-income{background:linear-gradient(180deg,#081210,#0A1A14,#0C1E18,#0A1610)}
+.zone-income::after{content:'';position:absolute;bottom:0;left:0;right:0;height:100px;background:linear-gradient(transparent,#14100A);z-index:1}
+.zone-expenses{background:linear-gradient(180deg,#14100A,#1A1410,#1C1610,#12100C);padding-bottom:60px}
+.zone-label{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.zone-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;backdrop-filter:blur(8px)}
+.zone-title{font-size:12px;text-transform:uppercase;letter-spacing:2px;font-weight:600}
+.zone-sub{font-size:11px;color:var(--t3);letter-spacing:.3px;margin-top:1px}
 
-  /* Metric strip */
-  .metric-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:8px}
-  .metric-card{composes:card}
-  .metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-  .mc-emerald::before{background:linear-gradient(90deg,var(--emerald),transparent)}
-  .mc-amber::before{background:linear-gradient(90deg,var(--amber),transparent)}
-  .mc-indigo::before{background:linear-gradient(90deg,var(--indigo),transparent)}
-  .mc-cyan::before{background:linear-gradient(90deg,var(--cyan),transparent)}
-  .metric-label{font-size:11.5px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
-  .metric-value{font-size:28px;font-weight:700;letter-spacing:-1px;line-height:1.1}
-  .metric-value.green{color:var(--emerald)}.metric-value.amber-c{color:var(--amber)}.metric-value.indigo-c{color:var(--indigo)}.metric-value.cyan-c{color:var(--cyan)}
-  .metric-sub{font-size:12px;color:var(--text-2);margin-top:6px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
-  .tag{font-size:10.5px;padding:2px 7px;border-radius:6px;font-weight:600}
-  .tag-green{background:var(--emerald-glow);color:var(--emerald)}
-  .tag-red{background:var(--red-glow);color:var(--red)}
-  .sparkline-wrap{position:absolute;bottom:14px;right:16px;width:90px;height:36px}
-  .sparkline-wrap svg{width:100%;height:100%}
+/* ── CARDS ── */
+.g{display:grid;gap:16px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r2);padding:20px;position:relative;overflow:hidden;transition:border-color .3s,box-shadow .3s;backdrop-filter:blur(8px)}
+.card:hover{border-color:var(--border-h);box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.c-green::before{background:linear-gradient(90deg,var(--green),transparent)}
+.c-amber::before{background:linear-gradient(90deg,var(--amber),transparent)}
+.c-indigo::before{background:linear-gradient(90deg,var(--indigo),transparent)}
+.c-cyan::before{background:linear-gradient(90deg,var(--cyan),transparent)}
+.c-red::before{background:linear-gradient(90deg,var(--red),transparent)}
+.card-label{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.card-val{font-size:26px;font-weight:700;letter-spacing:-1px;line-height:1.1}
+.card-sub{font-size:12px;color:var(--t2);margin-top:6px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.tag{font-size:10px;padding:2px 7px;border-radius:5px;font-weight:600}
+.tag-g{background:var(--green-g);color:var(--green)}.tag-r{background:var(--red-g);color:var(--red)}.tag-a{background:var(--amber-g);color:var(--amber)}
 
-  /* Panels */
-  .panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-  .panel{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;position:relative;transition:border-color .3s,box-shadow .3s;backdrop-filter:blur(12px)}
-  .panel:hover{border-color:var(--border-hover);box-shadow:0 4px 20px rgba(0,0,0,.2)}
-  .panel-title{font-size:13px;color:var(--text-2);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:20px;display:flex;align-items:center;gap:8px}
-  .panel-title .dot{width:7px;height:7px;border-radius:50%}
-  .dot-emerald{background:var(--emerald)}.dot-indigo{background:var(--indigo)}.dot-amber{background:var(--amber)}.dot-cyan{background:var(--cyan)}
+/* ── PANEL ── */
+.panel{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r2);padding:22px;backdrop-filter:blur(8px)}
+.panel-head{font-size:12px;color:var(--t2);text-transform:uppercase;letter-spacing:1px;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.dot{width:7px;height:7px;border-radius:50%}
 
-  /* Dual Ring */
-  .ring-container{display:flex;align-items:center;gap:40px}
-  .ring-svg-wrap{position:relative;width:280px;height:280px;flex-shrink:0}
-  .ring-svg-wrap svg{width:100%;height:100%}
-  .ring-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none}
-  .ring-center-val{font-size:26px;font-weight:700;letter-spacing:-1px;color:var(--text-1)}
-  .ring-center-label{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px}
-  .ring-legend{flex:1;min-width:0}
-  .legend-item{display:flex;align-items:center;gap:12px;padding:10px 8px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;border-radius:6px}
-  .legend-item:last-child{border-bottom:none}
-  .legend-item:hover,.legend-item.active{background:var(--bg-hover)}
-  .legend-swatch{width:10px;height:10px;border-radius:3px;flex-shrink:0}
-  .legend-name{flex:1;font-size:13.5px;color:var(--text-2);min-width:0}
-  .legend-name .he{font-size:11px;color:var(--text-3);margin-left:6px}
-  .legend-vals{text-align:right;flex-shrink:0}
-  .legend-cur{font-size:14px;font-weight:600;color:var(--text-1)}
-  .legend-delta{font-size:11px;font-weight:600}
-  .legend-delta.pos{color:var(--red)}.legend-delta.neg{color:var(--emerald)}
-  .ring-tooltip{position:absolute;background:var(--bg-raised);border:1px solid var(--border-hover);border-radius:8px;padding:12px 16px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:10;white-space:nowrap;font-size:12.5px;box-shadow:0 8px 30px rgba(0,0,0,.4)}
-  .ring-tooltip.visible{opacity:1}
-  .tt-cat{font-weight:600;color:var(--text-1);margin-bottom:6px}
-  .tt-row{display:flex;justify-content:space-between;gap:20px;color:var(--text-2);line-height:1.7}
-  .tt-row span:last-child{font-weight:600;color:var(--text-1)}
-  .tt-delta{margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font-weight:700}
-  .ring-labels{display:flex;gap:16px;margin-top:16px;font-size:11px;color:var(--text-3)}
-  .ring-labels span{display:flex;align-items:center;gap:6px}
+/* ── RING CHART ── */
+.ring-wrap{display:flex;align-items:center;gap:32px}
+.ring-svg{position:relative;width:240px;height:240px;flex-shrink:0}
+.ring-svg svg{width:100%;height:100%}
+.ring-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.ring-center-v{font-size:22px;font-weight:700;letter-spacing:-.5px}
+.ring-center-l{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:1px}
+.ring-legend{flex:1;min-width:0}
+.leg-row{display:flex;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px solid var(--border);font-size:13px;cursor:pointer;border-radius:6px;transition:background .15s}
+.leg-row:last-child{border-bottom:none}
+.leg-row:hover{background:var(--bg-3)}
+.leg-sw{width:8px;height:8px;border-radius:3px;flex-shrink:0}
+.leg-name{flex:1;color:var(--t2)}
+.leg-val{font-weight:600;color:var(--t1)}
+.leg-d{font-size:11px;font-weight:600;margin-left:6px}
+.leg-d.up{color:var(--red)}.leg-d.dn{color:var(--green)}
 
-  /* Runway */
-  .runway-display{display:flex;align-items:flex-end;gap:20px}
-  .runway-months{font-size:56px;font-weight:800;letter-spacing:-3px;line-height:1}
-  .runway-months .unit{font-size:18px;font-weight:500;color:var(--text-2);letter-spacing:0}
-  .runway-detail{flex:1}
-  .runway-detail p{font-size:13px;color:var(--text-2);line-height:1.65;margin-bottom:14px}
-  .runway-bar-track{height:8px;background:var(--bg-raised);border-radius:4px;overflow:hidden;margin-bottom:8px}
-  .runway-bar-fill{height:100%;border-radius:4px;transition:width 1s ease-out}
-  .runway-bar-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text-3)}
-  .stat-row{margin-top:8px;padding:14px 16px;background:rgba(27,35,49,.6);border-radius:8px;display:flex;justify-content:space-between;font-size:12.5px}
-  .stat-row .lbl{color:var(--text-3)}.stat-row .val{color:var(--text-1);font-weight:600}
+/* ── BAR CHART ── */
+.bars{display:flex;align-items:flex-end;gap:14px;height:160px;padding-top:8px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar-pair{display:flex;gap:3px;align-items:flex-end;height:130px}
+.bar{width:22px;border-radius:4px 4px 0 0;transition:height .8s ease-out;position:relative}
+.bar.inc{background:var(--green);opacity:.8}.bar.exp{background:var(--red);opacity:.65}
+.bar:hover{opacity:1}
+.bar-tip{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:600;white-space:nowrap;opacity:0;transition:opacity .2s;pointer-events:none}
+.bar:hover .bar-tip{opacity:1}
+.bar-lbl{font-size:10px;color:var(--t3)}
 
-  /* Cash flow bars */
-  .cf-chart{display:flex;align-items:flex-end;gap:16px;height:180px;padding-top:10px}
-  .cf-month{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
-  .cf-bars{display:flex;gap:4px;align-items:flex-end;height:140px}
-  .cf-bar{width:24px;border-radius:4px 4px 0 0;transition:height .8s ease-out;position:relative}
-  .cf-bar.income{background:var(--emerald);opacity:.85}
-  .cf-bar.expense{background:var(--red);opacity:.7}
-  .cf-bar:hover{opacity:1}
-  .cf-bar-label{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:600;white-space:nowrap;opacity:0;transition:opacity .2s;pointer-events:none}
-  .cf-bar:hover .cf-bar-label{opacity:1}
-  .cf-month-label{font-size:11px;color:var(--text-3);letter-spacing:.5px}
+/* ── RUNWAY ── */
+.runway-num{font-size:48px;font-weight:800;letter-spacing:-2px;line-height:1}
+.runway-unit{font-size:16px;font-weight:500;color:var(--t2);letter-spacing:0}
+.rw-track{height:7px;background:var(--bg-3);border-radius:4px;overflow:hidden;margin:12px 0 6px}
+.rw-fill{height:100%;border-radius:4px;transition:width 1s ease-out}
+.rw-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--t3)}
+.stat-r{display:flex;justify-content:space-between;padding:10px 14px;background:var(--bg-3);border-radius:7px;font-size:12px;margin-top:6px}
+.stat-r .l{color:var(--t3)}.stat-r .v{font-weight:600}
 
-  /* Income zone - candlestick canvas */
-  #candlestickBg{position:absolute;inset:0;z-index:0;opacity:.18;pointer-events:none}
+/* ── MONTHLY VIEW ── */
+.month-nav{display:flex;align-items:center;gap:16px;margin:24px 28px 20px}
+.month-nav h2{font-size:22px;font-weight:700;letter-spacing:-.5px;min-width:160px;text-align:center}
+.nav-btn{width:36px;height:36px;border-radius:8px;background:var(--bg-2);border:1px solid var(--border);color:var(--t2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
+.nav-btn:hover{background:var(--bg-3);border-color:var(--border-h);color:var(--t1)}
+.nav-btn:disabled{opacity:.3;pointer-events:none}
+.month-content{padding:0 28px 40px}
+.ed-table{width:100%;border-collapse:collapse}
+.ed-table th{text-align:left;font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;padding:8px 12px;border-bottom:1px solid var(--border)}
+.ed-table td{padding:10px 12px;border-bottom:1px solid rgba(30,39,54,.4);font-size:13.5px;color:var(--t1)}
+.ed-table tr:hover{background:rgba(30,39,54,.3)}
+.ed-table .cat-sw{display:inline-block;width:8px;height:8px;border-radius:3px;margin-right:8px}
+.ed-table .cat-he{font-size:11px;color:var(--t3);margin-left:6px}
+.ed-input{background:var(--bg-3);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--t1);font-size:13px;width:110px;outline:none;transition:border .2s;text-align:right}
+.ed-input:focus{border-color:var(--indigo)}
+.ed-table .total-row{font-weight:700;border-top:2px solid var(--border)}
 
-  /* Quick Entry */
-  .entry-tabs{display:flex;gap:4px;margin-bottom:20px;background:rgba(27,35,49,.6);border-radius:8px;padding:3px}
-  .entry-tab{flex:1;padding:8px 16px;border-radius:6px;border:none;background:transparent;color:var(--text-3);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px}
-  .entry-tab.active{background:var(--bg-card);color:var(--text-1);box-shadow:0 2px 8px rgba(0,0,0,.3)}
-  .entry-form{display:none}.entry-form.active{display:block}
-  .quick-input{display:flex;gap:8px;margin-bottom:12px;align-items:flex-end}
-  .quick-input .fi{flex:1}
-  .quick-input .fi label{display:block;font-size:11px;color:var(--text-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
-  .quick-input .fi input,.quick-input .fi select{width:100%;padding:8px 12px;background:rgba(27,35,49,.6);border:1px solid var(--border);border-radius:8px;color:var(--text-1);font-size:13px;outline:none;transition:border .2s}
-  .quick-input .fi input:focus,.quick-input .fi select:focus{border-color:var(--indigo)}
-  .quick-input .fi input[type="number"]{-moz-appearance:textfield}
-  .quick-input .fi input::-webkit-outer-spin-button,.quick-input .fi input::-webkit-inner-spin-button{-webkit-appearance:none}
-  .submit-btn{padding:8px 20px;border-radius:8px;border:1px solid var(--emerald);background:var(--emerald-soft);color:var(--emerald);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;height:37px}
-  .submit-btn:hover{background:var(--emerald);color:var(--bg-deep)}
-  .recent-entries{margin-top:16px}
-  .recent-title{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
-  .recent-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(27,35,49,.6);border-radius:8px;margin-bottom:4px;font-size:12.5px;animation:slideIn .3s ease-out}
-  @keyframes slideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
-  .recent-item .ri-cat{width:8px;height:8px;border-radius:3px;flex-shrink:0}
-  .recent-item .ri-desc{flex:1;color:var(--text-2)}
-  .recent-item .ri-amount{font-weight:600;color:var(--text-1)}
+/* ── ANNUAL VIEW ── */
+.annual-content{padding:0 28px 40px}
+.annual-bar{display:flex;align-items:flex-end;gap:10px;height:200px}
+.annual-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.annual-bar-inner{width:100%;max-width:40px;border-radius:4px 4px 0 0;transition:height .8s ease-out;position:relative}
+.annual-bar-inner .bar-tip{top:-18px}
+.annual-bar-inner:hover .bar-tip{opacity:1}
 
-  /* Modals */
-  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
-  .modal-overlay.open{display:flex}
-  .modal{background:#141A23;border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:520px;position:relative;animation:modalIn .2s ease-out}
-  @keyframes modalIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-  .modal h2{font-size:18px;font-weight:700;margin-bottom:20px;color:var(--text-1)}
-  .modal label{display:block;font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
-  .modal input[type="text"],.modal input[type="number"],.modal select{width:100%;padding:10px 14px;background:var(--bg-raised);border:1px solid var(--border);border-radius:8px;color:var(--text-1);font-size:14px;outline:none;transition:border .2s}
-  .modal input:focus,.modal select:focus{border-color:var(--indigo)}
-  .modal .btn-row{display:flex;gap:10px;margin-top:20px}
-  .modal .btn{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .2s}
-  .btn-primary{background:var(--emerald-soft);border-color:var(--emerald)!important;color:var(--emerald)}
-  .btn-primary:hover{background:var(--emerald);color:var(--bg-deep)}
-  .btn-ghost{background:transparent;border-color:var(--border)!important;color:var(--text-2)}
-  .btn-ghost:hover{border-color:var(--border-hover)!important}
-  .modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text-3);cursor:pointer;font-size:18px}
-  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .form-group{margin-bottom:14px}
+/* ── SETTINGS ── */
+.settings-content{padding:0 28px 40px;max-width:560px}
+.setting-group{margin-bottom:24px}
+.setting-group label{display:block;font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.setting-input{width:100%;padding:10px 14px;background:var(--bg-2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;outline:none;transition:border .2s}
+.setting-input:focus{border-color:var(--indigo)}
+.setting-note{font-size:11px;color:var(--t3);margin-top:6px;line-height:1.5}
+.btn{padding:9px 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .2s}
+.btn-g{background:var(--green-d);border-color:rgba(52,211,153,.3);color:var(--green)}
+.btn-g:hover{background:var(--green);color:var(--bg-0)}
+.btn-o{background:transparent;border-color:var(--border);color:var(--t2)}
+.btn-o:hover{border-color:var(--border-h);color:var(--t1)}
+.btn-r{background:var(--red-d);border-color:rgba(248,113,113,.3);color:var(--red)}
+.btn-r:hover{background:var(--red);color:var(--bg-0)}
+.btn-row{display:flex;gap:10px;margin-top:16px}
 
-  /* Toast */
-  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--bg-raised);border:1px solid var(--emerald);border-radius:10px;padding:12px 24px;font-size:13px;color:var(--emerald);z-index:200;transition:transform .3s ease-out;display:flex;align-items:center;gap:8px;box-shadow:0 8px 30px rgba(0,0,0,.4);backdrop-filter:blur(8px)}
-  .toast.show{transform:translateX(-50%) translateY(0)}
+/* ── QUICK ENTRY ── */
+.qe-tabs{display:flex;gap:3px;margin-bottom:16px;background:var(--bg-3);border-radius:7px;padding:3px}
+.qe-tab{flex:1;padding:7px;border-radius:5px;border:none;background:transparent;color:var(--t3);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px}
+.qe-tab.active{background:var(--bg-2);color:var(--t1);box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.qe-form{display:none}.qe-form.active{display:block}
+.qe-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:10px}
+.qe-field{flex:1}
+.qe-field label{display:block;font-size:10px;color:var(--t3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
+.qe-field input,.qe-field select{width:100%;padding:7px 10px;background:var(--bg-3);border:1px solid var(--border);border-radius:7px;color:var(--t1);font-size:12px;outline:none;transition:border .2s}
+.qe-field input:focus,.qe-field select:focus{border-color:var(--indigo)}
+.qe-submit{padding:7px 16px;border-radius:7px;border:1px solid var(--green);background:var(--green-d);color:var(--green);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;height:33px}
+.qe-submit:hover{background:var(--green);color:var(--bg-0)}
+.recent-title{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 6px}
+.recent-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg-3);border-radius:6px;margin-bottom:3px;font-size:12px}
+.ri-dot{width:6px;height:6px;border-radius:3px;flex-shrink:0}
+.ri-desc{flex:1;color:var(--t2)}.ri-amt{font-weight:600}
 
-  /* Zone divider */
-  .zone-divider{height:1px;background:linear-gradient(90deg,transparent,var(--border-hover),transparent);margin:0;opacity:.5}
+/* ── MODAL ── */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-ov.open{display:flex}
+.modal{background:var(--bg-1);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%;max-width:480px;position:relative;animation:mIn .2s ease-out}
+@keyframes mIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:18px}
+.modal-x{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:16px}
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px}
+.fg input,.fg select{width:100%;padding:9px 12px;background:var(--bg-2);border:1px solid var(--border);border-radius:7px;color:var(--t1);font-size:13px;outline:none}
+.fg input:focus,.fg select:focus{border-color:var(--indigo)}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
-  /* Dollar cursor */
-  body{cursor:none}
-  .dollar-cursor{position:fixed;pointer-events:none;z-index:9999;font-size:28px;font-weight:800;color:var(--emerald);text-shadow:0 0 12px rgba(52,211,153,.7),0 0 30px rgba(52,211,153,.4),0 0 50px rgba(52,211,153,.2);transform:translate(-50%,-50%);transition:transform .06s ease-out;font-family:'Segoe UI',system-ui,sans-serif}
-  .dollar-halo{position:fixed;pointer-events:none;z-index:9998;width:60px;height:60px;border-radius:50%;background:radial-gradient(circle,rgba(52,211,153,.18) 0%,rgba(52,211,153,.06) 40%,transparent 70%);transform:translate(-50%,-50%);transition:transform .08s ease-out}
-  .dollar-particle{position:fixed;pointer-events:none;z-index:9997;font-size:14px;font-weight:700;color:var(--emerald);opacity:0;transform:translate(-50%,-50%);animation:particleFade .8s ease-out forwards}
-  @keyframes particleFade{0%{opacity:.7;transform:translate(-50%,-50%) scale(1) rotate(0deg)}100%{opacity:0;transform:translate(-50%,-120%) scale(.4) rotate(25deg)}}
+/* ── TOAST ── */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg-3);border:1px solid var(--green);border-radius:8px;padding:10px 20px;font-size:12px;color:var(--green);z-index:200;transition:transform .3s ease-out;box-shadow:0 6px 24px rgba(0,0,0,.4)}
+.toast.show{transform:translateX(-50%) translateY(0)}
 
-  /* Restore cursor on inputs */
-  input,select,button,textarea,.action-btn,.entry-tab,.submit-btn,.btn,.modal-close,.legend-item{cursor:pointer!important}
-  input[type="text"],input[type="number"],textarea{cursor:text!important}
+/* ── HALO CURSOR ── */
+.halo{position:fixed;pointer-events:none;z-index:9999;width:50px;height:50px;border-radius:50%;background:radial-gradient(circle,rgba(52,211,153,.20) 0%,rgba(52,211,153,.08) 35%,transparent 70%);transform:translate(-50%,-50%);transition:opacity .3s}
 
-  /* Mobile */
-  @media(max-width:900px){
-    .metric-strip{grid-template-columns:repeat(2,1fr)}
-    .panel-grid{grid-template-columns:1fr}
-    .ring-container{flex-direction:column}
-    .ring-svg-wrap{width:240px;height:240px;margin:0 auto}
-    .runway-display{flex-direction:column;align-items:flex-start}
-    .runway-months{font-size:44px}
-    .cf-bar{width:18px}
-    .quick-input{flex-wrap:wrap}
-  }
-  @media(max-width:540px){
-    .metric-strip{grid-template-columns:1fr}
-    .zone{padding:24px 0}
-    .zone-inner{padding:0 14px}
-    .ring-svg-wrap{width:200px;height:200px}
-    .brand h1{font-size:18px}
-    .metric-value{font-size:24px}
-    .form-grid{grid-template-columns:1fr}
-  }
+/* ── RESPONSIVE ── */
+@media(max-width:900px){.g4{grid-template-columns:repeat(2,1fr)}.g2{grid-template-columns:1fr}.ring-wrap{flex-direction:column}.ring-svg{width:200px;height:200px;margin:0 auto}.bars{height:130px}.bar{width:16px}}
+@media(max-width:540px){.g4{grid-template-columns:1fr}.sidebar{width:52px}.zone-inner,.month-content,.annual-content,.settings-content{padding:0 14px}.card-val{font-size:22px}.month-nav{margin:16px 14px 12px}}
 </style>
 </head>
 <body>
 
-<div id="app"></div>
-
-<!-- Settings Modal -->
-<div class="modal-overlay" id="settingsModal">
-  <div class="modal">
-    <button class="modal-close" id="modalClose">&times;</button>
-    <h2>Settings</h2>
-    <div class="form-group">
-      <label>Google Apps Script URL</label>
-      <input type="text" id="gasUrl" placeholder="https://script.google.com/macros/s/...../exec">
-      <p style="font-size:11px;color:var(--text-3);margin-top:8px;line-height:1.5">Data syncs automatically to your Google Sheet.</p>
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-primary" id="saveSettings">Save &amp; Sync</button>
-      <button class="btn btn-ghost" id="cancelSettings">Cancel</button>
-    </div>
+<!-- PIN SCREEN -->
+<div id="pinScreen" style="display:none">
+  <div class="pin-logo">LH</div>
+  <div class="pin-sub" id="pinLabel">Enter PIN</div>
+  <div class="pin-dots" id="pinDots"><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div></div>
+  <div class="pin-msg" id="pinMsg"></div>
+  <div class="pin-pad" id="pinPad">
+    <button class="pin-key" data-k="1">1</button><button class="pin-key" data-k="2">2</button><button class="pin-key" data-k="3">3</button>
+    <button class="pin-key" data-k="4">4</button><button class="pin-key" data-k="5">5</button><button class="pin-key" data-k="6">6</button>
+    <button class="pin-key" data-k="7">7</button><button class="pin-key" data-k="8">8</button><button class="pin-key" data-k="9">9</button>
+    <button class="pin-key empty"></button><button class="pin-key" data-k="0">0</button><button class="pin-key del" data-k="del">&#9003;</button>
   </div>
+  <button class="pin-skip" id="pinSkip" style="display:none">Skip</button>
 </div>
 
-<!-- Add Month Modal -->
-<div class="modal-overlay" id="addMonthModal">
+<!-- APP -->
+<div id="app">
+<div class="shell">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sb-logo">LH</div>
+  <div class="sb-item active" data-view="dashboard" title="Dashboard">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+  </div>
+  <div class="sb-item" data-view="monthly" title="Monthly">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+  </div>
+  <div class="sb-item" data-view="annual" title="Annual Summary">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+  </div>
+  <div class="sb-bottom">
+    <div class="sb-item" data-view="settings" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main" id="mainScroll">
+  <div class="view active" id="v-dashboard"></div>
+  <div class="view" id="v-monthly"></div>
+  <div class="view" id="v-annual"></div>
+  <div class="view" id="v-settings"></div>
+</div>
+
+</div><!-- shell -->
+</div><!-- app -->
+
+<!-- ADD MONTH MODAL -->
+<div class="modal-ov" id="addMonthModal">
   <div class="modal">
-    <button class="modal-close" id="addMonthClose">&times;</button>
-    <h2>Add / Edit Month</h2>
-    <div class="form-group">
-      <label>Month</label>
-      <select id="amMonth"></select>
+    <button class="modal-x" onclick="closeModal('addMonthModal')">&times;</button>
+    <h3>Add / Edit Month</h3>
+    <div class="fg"><label>Month</label><select id="amMonth"></select></div>
+    <div class="fg"><label>Income (₪)</label><input type="number" id="amIncome" placeholder="0"></div>
+    <div class="fg2">
+      <div class="fg"><label>Food</label><input type="number" id="amFood" placeholder="0"></div>
+      <div class="fg"><label>Housing</label><input type="number" id="amHousing" placeholder="0"></div>
+      <div class="fg"><label>Investments</label><input type="number" id="amInvest" placeholder="0"></div>
+      <div class="fg"><label>Savings</label><input type="number" id="amSavings" placeholder="0"></div>
+      <div class="fg"><label>Car</label><input type="number" id="amCar" placeholder="0"></div>
+      <div class="fg"><label>Telecom</label><input type="number" id="amTelecom" placeholder="0"></div>
     </div>
-    <div class="form-group"><label>Income (₪)</label><input type="number" id="amIncome" placeholder="0"></div>
-    <div class="form-grid">
-      <div class="form-group"><label>Food (₪)</label><input type="number" id="amFood" placeholder="0"></div>
-      <div class="form-group"><label>Housing (₪)</label><input type="number" id="amHousing" placeholder="0"></div>
-      <div class="form-group"><label>Investments (₪)</label><input type="number" id="amInvest" placeholder="0"></div>
-      <div class="form-group"><label>Savings (₪)</label><input type="number" id="amSavings" placeholder="0"></div>
-      <div class="form-group"><label>Car (₪)</label><input type="number" id="amCar" placeholder="0"></div>
-      <div class="form-group"><label>Telecom (₪)</label><input type="number" id="amTelecom" placeholder="0"></div>
+    <div class="fg2">
+      <div class="fg"><label>Net Worth</label><input type="number" id="amNetWorth" placeholder="0"></div>
+      <div class="fg"><label>Liquid Savings</label><input type="number" id="amLiquid" placeholder="0"></div>
     </div>
-    <div class="form-grid">
-      <div class="form-group"><label>Net Worth (₪)</label><input type="number" id="amNetWorth" placeholder="0"></div>
-      <div class="form-group"><label>Liquid Savings (₪)</label><input type="number" id="amLiquid" placeholder="0"></div>
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-primary" id="amSave">Save Month</button>
-      <button class="btn btn-ghost" id="amCancel">Cancel</button>
-    </div>
+    <div class="btn-row"><button class="btn btn-g" id="amSave">Save</button><button class="btn btn-o" onclick="closeModal('addMonthModal')">Cancel</button></div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="halo" id="halo"></div>
 
 <script>
 (function(){
-  const CATS=[
-    {key:'food',name:'Food & Groceries',he:'מזון',color:'#34D399'},
-    {key:'housing',name:'Housing & Utilities',he:'דיור',color:'#818CF8'},
-    {key:'invest',name:'Investments & Wealth',he:'השקעות',color:'#F6C042'},
-    {key:'savings',name:'Savings',he:'חיסכון',color:'#22D3EE'},
-    {key:'car',name:'Car & Transport',he:'רכב',color:'#FB923C'},
-    {key:'telecom',name:'Telecom & Internet',he:'תקשורת ואינטרנט',color:'#A78BFA'},
-  ];
-  const DEFAULT_DATA={
-    months:{'May 2026':{income:21500,expenses:{food:3200,housing:6500,invest:4000,savings:3500,car:2100,telecom:450}},
-      'Jun 2026':{income:22000,expenses:{food:2800,housing:6800,invest:4500,savings:3200,car:1900,telecom:420}},
-      'Jul 2026':{income:22800,expenses:{food:2950,housing:6700,invest:5000,savings:3800,car:2300,telecom:380}}},
-    netWorth:[{month:'Feb',value:245000},{month:'Mar',value:252000},{month:'Apr',value:248000},
-      {month:'May',value:258000},{month:'Jun',value:265000},{month:'Jul',value:273000}],
-    liquidSavings:95000,transactions:[],manualEntries:[]
-  };
-  let STATE=loadLocal()||JSON.parse(JSON.stringify(DEFAULT_DATA));
-  if(!STATE.manualEntries)STATE.manualEntries=[];
-  let GAS_URL=localStorage.getItem('lh_gas_url')||'https://script.google.com/macros/s/AKfycbwMDQpxmLCiXM62_imOz6p63DwQvT6A7kyJ_59qps8SwrELidbQ4KZQDicUDn1qZlzd/exec';
+const CATS=[
+  {key:'food',name:'Food & Groceries',he:'מזון',color:'#34D399'},
+  {key:'housing',name:'Housing & Utilities',he:'דיור',color:'#818CF8'},
+  {key:'invest',name:'Investments',he:'השקעות',color:'#F6C042'},
+  {key:'savings',name:'Savings',he:'חיסכון',color:'#22D3EE'},
+  {key:'car',name:'Car & Transport',he:'רכב',color:'#FB923C'},
+  {key:'telecom',name:'Telecom',he:'תקשורת',color:'#A78BFA'},
+];
+const MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DEFAULT_DATA={
+  months:{
+    'Jan 2026':{income:20000,expenses:{food:3000,housing:6200,invest:3500,savings:3000,car:2000,telecom:480}},
+    'Feb 2026':{income:20500,expenses:{food:3100,housing:6300,invest:3600,savings:3100,car:1900,telecom:460}},
+    'Mar 2026':{income:21000,expenses:{food:2900,housing:6400,invest:3800,savings:3200,car:2200,telecom:440}},
+    'Apr 2026':{income:21200,expenses:{food:3050,housing:6450,invest:3900,savings:3300,car:2050,telecom:430}},
+    'May 2026':{income:21500,expenses:{food:3200,housing:6500,invest:4000,savings:3500,car:2100,telecom:450}},
+    'Jun 2026':{income:22000,expenses:{food:2800,housing:6800,invest:4500,savings:3200,car:1900,telecom:420}},
+    'Jul 2026':{income:22800,expenses:{food:2950,housing:6700,invest:5000,savings:3800,car:2300,telecom:380}}
+  },
+  netWorth:[{month:'Jan',value:235000},{month:'Feb',value:242000},{month:'Mar',value:248000},{month:'Apr',value:252000},{month:'May',value:258000},{month:'Jun',value:265000},{month:'Jul',value:273000}],
+  liquidSavings:95000,manualEntries:[]
+};
 
-  function loadLocal(){try{return JSON.parse(localStorage.getItem('lh_state'))}catch(e){return null}}
-  function saveLocal(){localStorage.setItem('lh_state',JSON.stringify(STATE))}
-  async function syncToCloud(){
-    if(!GAS_URL)return;
-    try{const r=await fetch(GAS_URL+'?action=save',{method:'POST',body:JSON.stringify(STATE),headers:{'Content-Type':'text/plain'}});
-      await r.json();setSyncStatus('ok','Synced '+new Date().toLocaleTimeString())}
-    catch(e){setSyncStatus('err','Sync failed')}
-  }
-  async function loadFromCloud(){
-    if(!GAS_URL)return false;
-    try{const r=await fetch(GAS_URL+'?action=get');const d=await r.json();
-      if(d&&d.months){STATE=d;if(!STATE.manualEntries)STATE.manualEntries=[];saveLocal();render();setSyncStatus('ok','Loaded');return true}}
-    catch(e){setSyncStatus('err','Load failed')}return false;
-  }
-  function setSyncStatus(s,t){const b=document.getElementById('syncBadge');if(!b)return;b.className='sync-badge '+s;b.querySelector('.sync-text').textContent=t}
-  function showToast(msg){const t=document.getElementById('toast');t.innerHTML='✓ '+msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
-  const fmt=n=>'₪'+n.toLocaleString('en-IL');
-  const fmtK=n=>n>=1000?'₪'+(n/1000).toFixed(0)+'K':fmt(n);
-  function totalExp(d){return Object.values(d.expenses).reduce((a,b)=>a+b,0)}
+let S=loadLocal()||JSON.parse(JSON.stringify(DEFAULT_DATA));
+if(!S.manualEntries)S.manualEntries=[];
+let GAS=ls('lh_gas')||'https://script.google.com/macros/s/AKfycbwMDQpxmLCiXM62_imOz6p63DwQvT6A7kyJ_59qps8SwrELidbQ4KZQDicUDn1qZlzd/exec';
+let curView='dashboard',curMonthIdx=-1;
 
-  function sparkSVG(data,color,w,h){
-    w=w||90;h=h||36;const vals=data.map(d=>d.value),mn=Math.min(...vals),mx=Math.max(...vals),range=mx-mn||1;
-    const pts=vals.map((v,i)=>{const x=(i/(vals.length-1))*w,y=h-4-((v-mn)/range)*(h-8);return x+','+y});
-    const gid='sg'+Math.random().toString(36).slice(2,6);
-    return '<svg viewBox="0 0 '+w+' '+h+'" xmlns="http://www.w3.org/2000/svg">'+
-      '<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+color+'" stop-opacity=".3"/><stop offset="100%" stop-color="'+color+'" stop-opacity="0"/></linearGradient></defs>'+
-      '<polygon points="0,'+h+' '+pts.join(' ')+' '+w+','+h+'" fill="url(#'+gid+')"/>'+
-      '<polyline points="'+pts.join(' ')+'" fill="none" stroke="'+color+'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'+
-      '<circle cx="'+pts[pts.length-1].split(',')[0]+'" cy="'+pts[pts.length-1].split(',')[1]+'" r="2.5" fill="'+color+'"/></svg>';
-  }
-  function ringArcs(data,r,w,cx,cy,prefix){
-    const total=Object.values(data).reduce((a,b)=>a+b,0);let angle=-90,paths='';
-    CATS.forEach(cat=>{const val=data[cat.key],pct=val/total,sweep=pct*360,gap=2,sA=angle+gap/2,eA=angle+sweep-gap/2;
-      if(sweep>gap){const sr=sA*Math.PI/180,er=eA*Math.PI/180,x1=cx+r*Math.cos(sr),y1=cy+r*Math.sin(sr),x2=cx+r*Math.cos(er),y2=cy+r*Math.sin(er),large=sweep-gap>180?1:0;
-        paths+='<path d="M '+x1+' '+y1+' A '+r+' '+r+' 0 '+large+' 1 '+x2+' '+y2+'" fill="none" stroke="'+cat.color+'" stroke-width="'+w+'" stroke-linecap="round" data-cat="'+cat.key+'" data-ring="'+prefix+'" style="opacity:.85;transition:opacity .2s,stroke-width .2s;cursor:pointer"/>';}
-      angle+=sweep});return paths;
-  }
-  function animateValue(el,start,end,duration,prefix,suffix){
-    prefix=prefix||'';suffix=suffix||'';const range=end-start;let startTime=null;
-    function step(ts){if(!startTime)startTime=ts;const p=Math.min((ts-startTime)/duration,1),ease=1-Math.pow(1-p,3);
-      el.textContent=prefix+Math.round(start+range*ease).toLocaleString('en-IL')+suffix;if(p<1)requestAnimationFrame(step)}
-    requestAnimationFrame(step);
-  }
-  function updateClock(){const el=document.getElementById('liveClock');if(!el)return;el.textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
-  setInterval(updateClock,1000);
+function ls(k,v){if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}
+function loadLocal(){try{return JSON.parse(ls('lh_state'))}catch(e){return null}}
+function save(){ls('lh_state',JSON.stringify(S))}
+function toast(m){const t=document.getElementById('toast');t.textContent='✓ '+m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+const fmt=n=>'₪'+n.toLocaleString('en-IL');
+const fmtK=n=>n>=1e3?'₪'+(n/1e3).toFixed(0)+'K':fmt(n);
+function totE(d){return Object.values(d.expenses).reduce((a,b)=>a+b,0)}
+function mKeys(){return Object.keys(S.months)}
+function sortMonths(){const sorted=Object.entries(S.months).sort((a,b)=>{const[mA,yA]=a[0].split(' '),[mB,yB]=b[0].split(' ');return(+yA-+yB)||(MO.indexOf(mA)-MO.indexOf(mB))});S.months=Object.fromEntries(sorted)}
 
-  // ═══ CANDLESTICK BACKGROUND ═══
-  function drawCandlesticks(canvasId){
-    const canvas=document.getElementById(canvasId);if(!canvas)return;
-    const ctx=canvas.getContext('2d');
-    const W=canvas.parentElement.offsetWidth,H=canvas.parentElement.offsetHeight;
-    canvas.width=W;canvas.height=H;
-    const count=Math.floor(W/18);
-    let price=100+Math.random()*50;
-    for(let i=0;i<count;i++){
-      const open=price,change=(Math.random()-.48)*8;price+=change;
-      const close=price,high=Math.max(open,close)+Math.random()*5,low=Math.min(open,close)-Math.random()*5;
-      const bull=close>open,x=i*18+9,bw=8;
-      const scale=H/80,base=H*.1;
-      const oY=H-base-(open-60)*scale,cY=H-base-(close-60)*scale,hY=H-base-(high-60)*scale,lY=H-base-(low-60)*scale;
-      ctx.strokeStyle=bull?'rgba(52,211,153,.6)':'rgba(248,113,113,.5)';
-      ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,hY);ctx.lineTo(x,lY);ctx.stroke();
-      ctx.fillStyle=bull?'rgba(52,211,153,.25)':'rgba(248,113,113,.2)';
-      ctx.fillRect(x-bw/2,Math.min(oY,cY),bw,Math.abs(cY-oY)||1);
+async function syncCloud(){
+  if(!GAS)return;
+  try{await fetch(GAS+'?action=save',{method:'POST',body:JSON.stringify(S),headers:{'Content-Type':'text/plain'}});
+    setSyncBadge('ok','Synced')}catch(e){setSyncBadge('err','Failed')}
+}
+async function loadCloud(){
+  if(!GAS)return;
+  try{const r=await fetch(GAS+'?action=get');const d=await r.json();
+    if(d&&d.months){S=d;if(!S.manualEntries)S.manualEntries=[];save();setSyncBadge('ok','Loaded')}}
+  catch(e){setSyncBadge('err','Load failed')}
+}
+function setSyncBadge(s,t){document.querySelectorAll('.sync-badge').forEach(b=>{b.className='sync-badge '+s;b.querySelector('.st').textContent=t})}
+
+// ── PIN ──
+async function hashPin(p){const e=new TextEncoder().encode(p);const h=await crypto.subtle.digest('SHA-256',e);return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('')}
+function initPin(){
+  const stored=ls('lh_pin');
+  if(!stored){document.getElementById('app').style.display='';return}
+  const ps=document.getElementById('pinScreen');ps.style.display='';
+  document.getElementById('app').style.display='none';
+  let code='',isSet=stored==='new';
+  if(isSet){document.getElementById('pinLabel').textContent='Set a 4-digit PIN';document.getElementById('pinSkip').style.display=''}
+  document.getElementById('pinSkip').onclick=()=>{ls('lh_pin','');ps.style.display='none';document.getElementById('app').style.display='';renderAll()};
+  document.getElementById('pinPad').onclick=async e=>{
+    const k=e.target.closest('[data-k]');if(!k)return;
+    const v=k.dataset.k;
+    if(v==='del'){code=code.slice(0,-1)}else if(code.length<4){code+=v}
+    updateDots(code.length);
+    if(code.length===4){
+      if(isSet){ls('lh_pin',await hashPin(code));ps.style.display='none';document.getElementById('app').style.display='';renderAll();toast('PIN set')}
+      else{const h=await hashPin(code);
+        if(h===stored){ps.style.display='none';document.getElementById('app').style.display='';renderAll()}
+        else{document.getElementById('pinMsg').textContent='Wrong PIN';document.getElementById('pinDots').classList.add('pin-shake');
+          setTimeout(()=>{code='';updateDots(0);document.getElementById('pinDots').classList.remove('pin-shake');document.getElementById('pinMsg').textContent=''},600)}}
     }
-  }
+  };
+}
+function updateDots(n){document.querySelectorAll('.pin-dot').forEach((d,i)=>d.classList.toggle('filled',i<n))}
 
-  // ═══ RENDER ═══
-  function render(){
-    const mKeys=Object.keys(STATE.months);
-    const curMonth=mKeys[mKeys.length-1],prevMonth=mKeys[mKeys.length-2];
-    const cur=STATE.months[curMonth],prev=STATE.months[prevMonth];
-    const curTot=totalExp(cur),prevTot=totalExp(prev);
-    const cfr=((cur.income/curTot)*100).toFixed(1);
-    const nwCur=STATE.netWorth[STATE.netWorth.length-1].value,nwPrev=STATE.netWorth[STATE.netWorth.length-2].value;
-    const nwDelta=((nwCur-nwPrev)/nwPrev*100).toFixed(1);
-    const avgExp=Math.round(mKeys.reduce((a,k)=>a+totalExp(STATE.months[k]),0)/mKeys.length);
-    const runway=(STATE.liquidSavings/avgExp).toFixed(1);
-    const cfIncome=mKeys.map(m=>STATE.months[m].income),cfExp=mKeys.map(m=>totalExp(STATE.months[m]));
-    const barMax=Math.max(...cfIncome,...cfExp);
-    const surplus=cur.income-curTot;
+// ── VIEWS ──
+function switchView(v){
+  curView=v;
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.toggle('active',i.dataset.view===v));
+  document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='v-'+v));
+  if(v==='dashboard')renderDashboard();
+  else if(v==='monthly')renderMonthly();
+  else if(v==='annual')renderAnnual();
+  else if(v==='settings')renderSettings();
+}
 
-    document.getElementById('app').innerHTML=`
-    <!-- ═══ ZONE 1: OVERVIEW ═══ -->
-    <div class="zone zone-overview">
-      <div class="zone-bg"></div>
-      <div class="zone-inner">
-        <div class="brand">
-          <div class="brand-icon">LH</div>
-          <h1>Ledger<span>House</span></h1>
-          <div class="brand-right">
-            <div class="live-clock"><span class="live-dot"></span><span id="liveClock">--:--:--</span></div>
-            <div class="sync-badge" id="syncBadge"><span class="pulse"></span><span class="sync-text">${GAS_URL?'Ready':'No sync'}</span></div>
-            <button class="action-btn add-btn" id="openAddMonth" title="Add / Edit Data">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            </button>
-            <button class="action-btn" id="openSettings" title="Settings">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-            </button>
+// ── DASHBOARD ──
+function renderDashboard(){
+  const mk=mKeys(),cur=S.months[mk[mk.length-1]],prev=S.months[mk[mk.length-2]];
+  const curM=mk[mk.length-1],prevM=mk[mk.length-2];
+  const cT=totE(cur),pT=totE(prev),cfr=((cur.income/cT)*100).toFixed(1);
+  const nwC=S.netWorth[S.netWorth.length-1].value,nwP=S.netWorth[S.netWorth.length-2].value,nwD=((nwC-nwP)/nwP*100).toFixed(1);
+  const avgE=Math.round(mk.reduce((a,k)=>a+totE(S.months[k]),0)/mk.length);
+  const rw=(S.liquidSavings/avgE).toFixed(1),surplus=cur.income-cT;
+  const barMax=Math.max(...mk.map(k=>Math.max(S.months[k].income,totE(S.months[k]))));
+  const last6=mk.slice(-6);
+
+  document.getElementById('v-dashboard').innerHTML=`
+  <div class="topbar">
+    <h2>Dashboard</h2>
+    <div class="topbar-right">
+      <div class="live-clock"><span class="live-dot"></span><span id="clock">--:--:--</span></div>
+      <div class="sync-badge"><span class="dot" style="width:5px;height:5px;border-radius:50%;background:var(--t3)"></span><span class="st">${GAS?'Ready':'No sync'}</span></div>
+      <button class="nav-btn" onclick="openAddMonth()" title="Add/Edit Month" style="background:var(--green-d);border-color:rgba(52,211,153,.3);color:var(--green)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ZONE 1: OVERVIEW -->
+  <div class="zone zone-overview">
+    <canvas class="zone-canvas" id="zc0"></canvas>
+    <div class="zone-inner">
+      <div class="zone-label">
+        <div class="zone-icon" style="background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.25)">📊</div>
+        <div><div class="zone-title" style="color:var(--indigo)">Overview</div><div class="zone-sub">Financial health at a glance</div></div>
+      </div>
+      <div class="g g4">
+        <div class="card c-green"><div class="card-label">Cash Flow Ratio</div><div class="card-val" style="color:var(--green)" id="a-cfr">0%</div><div class="card-sub">Income / Expenses <span class="tag ${+cfr>=100?'tag-g':'tag-r'}">${+cfr>=100?'Healthy':'Warning'}</span></div></div>
+        <div class="card c-indigo"><div class="card-label">Net Worth</div><div class="card-val" style="color:var(--indigo)" id="a-nw">₪0</div><div class="card-sub"><span class="tag ${+nwD>=0?'tag-g':'tag-r'}">${+nwD>=0?'+':''}${nwD}%</span> vs last month</div></div>
+        <div class="card c-amber"><div class="card-label">Expenses</div><div class="card-val" style="color:var(--amber)" id="a-exp">₪0</div><div class="card-sub"><span class="tag ${cT>pT?'tag-r':'tag-g'}">${((cT-pT)/pT*100).toFixed(1)}%</span> vs ${prevM}</div></div>
+        <div class="card c-cyan"><div class="card-label">Income</div><div class="card-val" style="color:var(--cyan)" id="a-inc">₪0</div><div class="card-sub">Surplus: <strong style="color:${surplus>=0?'var(--green)':'var(--red)'}"> ${fmt(surplus)}</strong></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ZONE 2: INCOME -->
+  <div class="zone zone-income">
+    <canvas class="zone-canvas" id="zc1"></canvas>
+    <div class="zone-inner">
+      <div class="zone-label">
+        <div class="zone-icon" style="background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25)">💰</div>
+        <div><div class="zone-title" style="color:var(--green)">Income & Growth</div><div class="zone-sub">Revenue streams & wealth building</div></div>
+      </div>
+      <div class="g g2">
+        <div class="panel">
+          <div class="panel-head"><span class="dot" style="background:var(--green)"></span>Cash Flow — ${last6.length} Months</div>
+          <div class="bars" id="cfBars">
+            ${last6.map(m=>{const inc=S.months[m].income,exp=totE(S.months[m]);return`<div class="bar-col"><div class="bar-pair"><div class="bar inc" data-v="${inc}" style="height:0"><span class="bar-tip" style="color:var(--green)">${fmtK(inc)}</span></div><div class="bar exp" data-v="${exp}" style="height:0"><span class="bar-tip" style="color:var(--red)">${fmtK(exp)}</span></div></div><div class="bar-lbl">${m.split(' ')[0]}</div></div>`}).join('')}
+          </div>
+          <div style="display:flex;gap:14px;margin-top:12px;font-size:10px;color:var(--t3)">
+            <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--green);opacity:.8;vertical-align:middle;margin-right:4px"></span>Income</span>
+            <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--red);opacity:.65;vertical-align:middle;margin-right:4px"></span>Expenses</span>
           </div>
         </div>
-
-        <div class="zone-header">
-          <div class="zone-icon" style="background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.3)">📊</div>
-          <div><div class="zone-title" style="color:var(--indigo)">Overview</div><div class="zone-subtitle">Financial health at a glance</div></div>
-        </div>
-
-        <div class="metric-strip">
-          <div class="card mc-emerald"><div class="metric-label">Cash Flow Ratio</div><div class="metric-value green" id="anim-cfr">0%</div>
-            <div class="metric-sub">Income / Expenses × 100 <span class="tag ${+cfr>=100?'tag-green':'tag-red'}">${+cfr>=100?'Healthy':'Warning'}</span></div></div>
-          <div class="card mc-indigo"><div class="metric-label">Net Worth</div><div class="metric-value indigo-c" id="anim-nw">₪0</div>
-            <div class="metric-sub"><span class="tag ${+nwDelta>=0?'tag-green':'tag-red'}">${+nwDelta>=0?'+':''}${nwDelta}%</span> vs last month</div>
-            <div class="sparkline-wrap">${sparkSVG(STATE.netWorth,'#818CF8')}</div></div>
-          <div class="card mc-amber"><div class="metric-label">Monthly Expenses</div><div class="metric-value amber-c" id="anim-exp">₪0</div>
-            <div class="metric-sub"><span class="tag ${curTot>prevTot?'tag-red':'tag-green'}">${curTot>prevTot?'+':''}${((curTot-prevTot)/prevTot*100).toFixed(1)}%</span> vs ${prevMonth}</div></div>
-          <div class="card mc-cyan"><div class="metric-label">Monthly Income</div><div class="metric-value cyan-c" id="anim-inc">₪0</div>
-            <div class="metric-sub">Net surplus: <strong style="color:${surplus>=0?'var(--emerald)':'var(--red)'}">${fmt(surplus)}</strong></div></div>
+        <div class="panel">
+          <div class="panel-head"><span class="dot" style="background:var(--amber)"></span>Financial Runway</div>
+          <div class="runway-num" style="color:${+rw>6?'var(--green)':+rw>3?'var(--amber)':'var(--red)'}"><span id="a-rw">0</span><span class="runway-unit"> months</span></div>
+          <p style="font-size:12px;color:var(--t2);margin:10px 0">Liquid reserves sustain <strong style="color:var(--t1)">${rw} months</strong> of spending if income stops.</p>
+          <div class="rw-track"><div class="rw-fill" id="rwBar" style="width:0;background:linear-gradient(90deg,${+rw>6?'var(--green)':'var(--amber)'},transparent)"></div></div>
+          <div class="rw-labels"><span>0</span><span style="color:var(--amber)">3 mo</span><span style="color:var(--green)">6 mo</span><span>12</span></div>
+          <div class="stat-r"><span class="l">Liquid Savings</span><span class="v">${fmt(S.liquidSavings)}</span></div>
+          <div class="stat-r"><span class="l">Avg Monthly Burn</span><span class="v">${fmt(avgE)}</span></div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- ═══ ZONE 2: INCOME ═══ -->
-    <div class="zone zone-income">
-      <canvas id="candlestickBg"></canvas>
-      <div class="zone-inner">
-        <div class="zone-header">
-          <div class="zone-icon" style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3)">💰</div>
-          <div><div class="zone-title" style="color:var(--emerald)">Income & Growth</div><div class="zone-subtitle">Revenue streams & wealth building</div></div>
-        </div>
-        <div class="panel-grid">
-          <div class="panel">
-            <div class="panel-title"><span class="dot dot-emerald"></span>Cash Flow — ${mKeys.length} Month Trend</div>
-            <div class="cf-chart" id="cfChart">
-              ${mKeys.map((m,i)=>'<div class="cf-month"><div class="cf-bars">'+
-                '<div class="cf-bar income" data-val="'+cfIncome[i]+'" style="height:0"><span class="cf-bar-label" style="color:var(--emerald)">'+fmtK(cfIncome[i])+'</span></div>'+
-                '<div class="cf-bar expense" data-val="'+cfExp[i]+'" style="height:0"><span class="cf-bar-label" style="color:var(--red)">'+fmtK(cfExp[i])+'</span></div>'+
-                '</div><div class="cf-month-label">'+m.split(' ')[0]+'</div></div>').join('')}
+  <!-- ZONE 3: EXPENSES -->
+  <div class="zone zone-expenses">
+    <canvas class="zone-canvas" id="zc2"></canvas>
+    <div class="zone-inner">
+      <div class="zone-label">
+        <div class="zone-icon" style="background:rgba(246,192,66,.08);border:1px solid rgba(246,192,66,.25)">📋</div>
+        <div><div class="zone-title" style="color:var(--amber)">Expenses & Entry</div><div class="zone-sub">Where your money goes</div></div>
+      </div>
+      <div class="g g2">
+        <div class="panel">
+          <div class="panel-head"><span class="dot" style="background:var(--indigo)"></span>Spending — Dual Ring</div>
+          <div class="ring-wrap">
+            <div class="ring-svg">
+              <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" id="ringChart">
+                <circle cx="120" cy="120" r="100" fill="none" stroke="rgba(30,39,54,.5)" stroke-width="20"/>
+                <circle cx="120" cy="120" r="72" fill="none" stroke="rgba(30,39,54,.5)" stroke-width="24"/>
+                ${ringArcs(prev.expenses,100,20,120,120)+''+ringArcs(cur.expenses,72,24,120,120)}
+              </svg>
+              <div class="ring-center"><div class="ring-center-v">${fmt(cT)}</div><div class="ring-center-l">${curM}</div></div>
             </div>
-            <div class="ring-labels" style="margin-top:14px">
-              <span><span style="width:10px;height:10px;border-radius:2px;background:var(--emerald);opacity:.85;display:inline-block"></span>Income</span>
-              <span><span style="width:10px;height:10px;border-radius:2px;background:var(--red);opacity:.7;display:inline-block"></span>Expenses</span>
+            <div class="ring-legend">
+              ${CATS.map(c=>{const cv=cur.expenses[c.key],pv=prev.expenses[c.key],d=((cv-pv)/pv*100).toFixed(1),up=+d>0;
+                return`<div class="leg-row"><div class="leg-sw" style="background:${c.color}"></div><div class="leg-name">${c.name}</div><div class="leg-val">${fmt(cv)}<span class="leg-d ${up?'up':'dn'}">${up?'+':''}${d}%</span></div></div>`}).join('')}
             </div>
           </div>
-          <div class="panel" style="display:flex;flex-direction:column;justify-content:space-between">
-            <div>
-              <div class="panel-title"><span class="dot dot-amber"></span>Financial Runway</div>
-              <div class="runway-display">
-                <div class="runway-months" style="color:${+runway>6?'var(--emerald)':+runway>3?'var(--amber)':'var(--red)'}">
-                  <span id="anim-runway">0</span><span class="unit"> months</span></div>
-                <div class="runway-detail"><p>Liquid reserves sustain <strong style="color:var(--text-1)">${runway} months</strong> of spending if income stops.</p></div>
-              </div>
+          <div style="display:flex;gap:14px;margin-top:12px;font-size:10px;color:var(--t3)">
+            <span>Outer: ${prevM}</span><span>Inner: ${curM}</span>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><span class="dot" style="background:var(--cyan)"></span>Quick Entry</div>
+          <div class="qe-tabs"><button class="qe-tab active" data-t="exp">Expense</button><button class="qe-tab" data-t="inc">Income</button></div>
+          <div class="qe-form active" id="qf-exp">
+            <div class="qe-row">
+              <div class="qe-field"><label>Amount (₪)</label><input type="number" id="qeAmt" placeholder="0"></div>
+              <div class="qe-field"><label>Category</label><select id="qeCat">${CATS.map(c=>'<option value="'+c.key+'">'+c.name+'</option>').join('')}</select></div>
+              <button class="qe-submit" id="qeAdd">Add</button>
             </div>
-            <div style="margin-top:24px">
-              <div class="runway-bar-track"><div class="runway-bar-fill" id="runwayBar" style="width:0;background:linear-gradient(90deg,${+runway>6?'var(--emerald)':'var(--amber)'},transparent)"></div></div>
-              <div class="runway-bar-labels"><span>0 mo</span><span style="color:var(--amber)">3 mo</span><span style="color:var(--emerald)">6 mo</span><span>12 mo</span></div>
-              <div class="stat-row" style="margin-top:16px"><span class="lbl">Liquid Savings</span><span class="val">${fmt(STATE.liquidSavings)}</span></div>
-              <div class="stat-row"><span class="lbl">Avg Monthly Burn</span><span class="val">${fmt(avgExp)}</span></div>
+            <div class="qe-row"><div class="qe-field"><label>Note</label><input type="text" id="qeNote" placeholder="Optional"></div></div>
+          </div>
+          <div class="qe-form" id="qf-inc">
+            <div class="qe-row">
+              <div class="qe-field"><label>Amount (₪)</label><input type="number" id="qiAmt" placeholder="0"></div>
+              <div class="qe-field"><label>Source</label><input type="text" id="qiSrc" placeholder="e.g. Salary"></div>
+              <button class="qe-submit" id="qiAdd">Add</button>
             </div>
+          </div>
+          <div class="recent-title">Recent Entries</div>
+          <div id="recentList">
+            ${(S.manualEntries||[]).slice(-5).reverse().map(e=>{const c=CATS.find(x=>x.key===e.cat);
+              return`<div class="recent-item"><div class="ri-dot" style="background:${c?c.color:'var(--green)'}"></div><div class="ri-desc">${e.note||e.source||(c?c.name:'Income')}</div><div class="ri-amt" style="color:${e.type==='income'?'var(--green)':'var(--t1)'}">${e.type==='income'?'+':'-'}${fmt(e.amount)}</div></div>`}).join('')||'<div style="font-size:11px;color:var(--t3);padding:6px 0">No entries yet</div>'}
           </div>
         </div>
       </div>
     </div>
+  </div>`;
 
-    <!-- ═══ ZONE 3: EXPENSES ═══ -->
-    <div class="zone zone-expenses">
-      <div class="zone-inner">
-        <div class="zone-header">
-          <div class="zone-icon" style="background:rgba(246,192,66,.1);border:1px solid rgba(246,192,66,.3)">📋</div>
-          <div><div class="zone-title" style="color:var(--amber)">Expenses & Entry</div><div class="zone-subtitle">Where your money goes</div></div>
-        </div>
-        <div class="panel-grid">
-          <div class="panel">
-            <div class="panel-title"><span class="dot dot-indigo"></span>Spending Comparison — Dual Ring</div>
-            <div class="ring-container">
-              <div class="ring-svg-wrap">
-                <svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg" id="ringChart">
-                  <circle cx="140" cy="140" r="120" fill="none" stroke="rgba(30,39,54,.5)" stroke-width="22"/>
-                  <circle cx="140" cy="140" r="88" fill="none" stroke="rgba(30,39,54,.5)" stroke-width="26"/>
-                  ${ringArcs(prev.expenses,120,22,140,140,'prev')}
-                  ${ringArcs(cur.expenses,88,26,140,140,'cur')}
-                </svg>
-                <div class="ring-center"><div class="ring-center-val">${fmt(curTot)}</div><div class="ring-center-label">${curMonth}</div></div>
-                <div class="ring-tooltip" id="ringTooltip"></div>
-              </div>
-              <div class="ring-legend" id="ringLegend">
-                ${CATS.map(cat=>{const c=cur.expenses[cat.key],p=prev.expenses[cat.key];
-                  const d=((c-p)/p*100).toFixed(1),up=+d>0;
-                  return '<div class="legend-item" data-cat="'+cat.key+'"><div class="legend-swatch" style="background:'+cat.color+'"></div>'+
-                    '<div class="legend-name">'+cat.name+'<span class="he" dir="rtl">'+cat.he+'</span></div>'+
-                    '<div class="legend-vals"><div class="legend-cur">'+fmt(c)+'</div><div class="legend-delta '+(up?'pos':'neg')+'">'+(up?'+':'')+d+'%</div></div></div>'}).join('')}
-              </div>
-            </div>
-            <div class="ring-labels">
-              <span><span style="width:12px;height:3px;background:var(--text-3);border-radius:2px;opacity:.5;display:inline-block"></span>Outer: ${prevMonth}</span>
-              <span><span style="width:12px;height:5px;background:var(--text-2);border-radius:2px;display:inline-block"></span>Inner: ${curMonth}</span>
-            </div>
-          </div>
-          <div class="panel">
-            <div class="panel-title"><span class="dot dot-cyan"></span>Quick Entry</div>
-            <div class="entry-tabs">
-              <button class="entry-tab active" data-tab="expense">Expense</button>
-              <button class="entry-tab" data-tab="income">Income</button>
-            </div>
-            <div class="entry-form active" id="form-expense">
-              <div class="quick-input">
-                <div class="fi"><label>Amount (₪)</label><input type="number" id="qeAmount" placeholder="0"></div>
-                <div class="fi"><label>Category</label><select id="qeCat">${CATS.map(c=>'<option value="'+c.key+'">'+c.name+'</option>').join('')}</select></div>
-                <button class="submit-btn" id="qeSubmit">Add</button>
-              </div>
-              <div class="quick-input"><div class="fi"><label>Note</label><input type="text" id="qeNote" placeholder="Optional description"></div></div>
-            </div>
-            <div class="entry-form" id="form-income">
-              <div class="quick-input">
-                <div class="fi"><label>Amount (₪)</label><input type="number" id="qiAmount" placeholder="0"></div>
-                <div class="fi"><label>Source</label><input type="text" id="qiSource" placeholder="e.g. Salary"></div>
-                <button class="submit-btn" id="qiSubmit">Add</button>
-              </div>
-            </div>
-            <div class="recent-entries" id="recentEntries">
-              <div class="recent-title">Recent Entries</div>
-              ${(STATE.manualEntries||[]).slice(-5).reverse().map(e=>{
-                const cat=CATS.find(c=>c.key===e.cat);
-                return '<div class="recent-item"><div class="ri-cat" style="background:'+(cat?cat.color:'var(--emerald)')+'"></div>'+
-                  '<div class="ri-desc">'+(e.note||e.source||(cat?cat.name:'Income'))+'</div>'+
-                  '<div class="ri-amount" style="color:'+(e.type==='income'?'var(--emerald)':'var(--text-1)')+'">'+
-                  (e.type==='income'?'+':'-')+fmt(e.amount)+'</div></div>'}).join('')
-                ||'<div style="font-size:12px;color:var(--text-3);padding:8px 0">No entries yet</div>'}
-            </div>
-          </div>
+  setTimeout(()=>{
+    animVal(document.getElementById('a-cfr'),0,+cfr,1e3,'','%');
+    animVal(document.getElementById('a-nw'),0,nwC,1e3,'₪','');
+    animVal(document.getElementById('a-exp'),0,cT,1e3,'₪','');
+    animVal(document.getElementById('a-inc'),0,cur.income,1e3,'₪','');
+    const rwEl=document.getElementById('a-rw');if(rwEl){let v=0;const tgt=+rw;const iv=setInterval(()=>{v+=.1;if(v>=tgt){v=tgt;clearInterval(iv)}rwEl.textContent=v.toFixed(1)},50)}
+    setTimeout(()=>{const rb=document.getElementById('rwBar');if(rb)rb.style.width=Math.min((+rw/12)*100,100)+'%'},400);
+    setTimeout(()=>{document.querySelectorAll('.bar[data-v]').forEach(b=>{b.style.height=Math.max((+b.dataset.v/barMax)*120,6)+'px'})},500);
+  },200);
+  updateClock();
+  drawZoneCanvases();
+  bindDashboardEvents(cur,prev,curM,prevM);
+}
+
+function bindDashboardEvents(cur,prev,curM,prevM){
+  document.querySelectorAll('.qe-tab').forEach(t=>t.onclick=()=>{
+    document.querySelectorAll('.qe-tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.qe-form').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');document.getElementById('qf-'+t.dataset.t).classList.add('active')});
+  const qeAdd=document.getElementById('qeAdd');if(qeAdd)qeAdd.onclick=()=>{
+    const a=+document.getElementById('qeAmt').value;if(!a||a<=0)return;
+    const cat=document.getElementById('qeCat').value,note=document.getElementById('qeNote').value,mk2=mKeys(),cm=mk2[mk2.length-1];
+    S.months[cm].expenses[cat]=(S.months[cm].expenses[cat]||0)+a;
+    S.manualEntries.push({type:'expense',cat,amount:a,note,ts:Date.now()});save();syncCloud();toast('Expense: '+fmt(a));renderDashboard()};
+  const qiAdd=document.getElementById('qiAdd');if(qiAdd)qiAdd.onclick=()=>{
+    const a=+document.getElementById('qiAmt').value;if(!a||a<=0)return;
+    const src=document.getElementById('qiSrc').value,mk2=mKeys(),cm=mk2[mk2.length-1];
+    S.months[cm].income+=a;S.manualEntries.push({type:'income',amount:a,source:src,ts:Date.now()});save();syncCloud();toast('Income: +'+fmt(a));renderDashboard()};
+}
+
+// ── MONTHLY VIEW ──
+function renderMonthly(){
+  const mk=mKeys();if(curMonthIdx<0)curMonthIdx=mk.length-1;
+  curMonthIdx=Math.max(0,Math.min(mk.length-1,curMonthIdx));
+  const key=mk[curMonthIdx],d=S.months[key],tot=totE(d),surp=d.income-tot,savRate=((surp/d.income)*100).toFixed(1);
+
+  document.getElementById('v-monthly').innerHTML=`
+  <div class="topbar"><h2>Monthly Detail</h2></div>
+  <div class="month-nav">
+    <button class="nav-btn" id="mPrev" ${curMonthIdx<=0?'disabled':''}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <h2>${key}</h2>
+    <button class="nav-btn" id="mNext" ${curMonthIdx>=mk.length-1?'disabled':''}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+  </div>
+  <div class="month-content">
+    <div class="g g3" style="margin-bottom:20px">
+      <div class="card c-cyan"><div class="card-label">Income</div><div class="card-val" style="color:var(--cyan)">${fmt(d.income)}</div></div>
+      <div class="card c-amber"><div class="card-label">Expenses</div><div class="card-val" style="color:var(--amber)">${fmt(tot)}</div></div>
+      <div class="card ${surp>=0?'c-green':'c-red'}"><div class="card-label">Surplus / Deficit</div><div class="card-val" style="color:${surp>=0?'var(--green)':'var(--red)'}">${fmt(surp)}</div><div class="card-sub">Savings rate: <span class="tag ${+savRate>=0?'tag-g':'tag-r'}">${savRate}%</span></div></div>
+    </div>
+    <div class="g g2">
+      <div class="panel">
+        <div class="panel-head"><span class="dot" style="background:var(--green)"></span>Income</div>
+        <table class="ed-table">
+          <tr><th>Source</th><th style="text-align:right">Amount</th></tr>
+          <tr><td>Total Income</td><td style="text-align:right"><input class="ed-input" type="number" value="${d.income}" data-field="income"></td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="dot" style="background:var(--amber)"></span>Expenses by Category</div>
+        <table class="ed-table" id="expTable">
+          <tr><th>Category</th><th style="text-align:right">Amount</th></tr>
+          ${CATS.map(c=>`<tr><td><span class="cat-sw" style="background:${c.color}"></span>${c.name}<span class="cat-he">${c.he}</span></td><td style="text-align:right"><input class="ed-input" type="number" value="${d.expenses[c.key]||0}" data-cat="${c.key}"></td></tr>`).join('')}
+          <tr class="total-row"><td>Total</td><td style="text-align:right;font-size:15px">${fmt(tot)}</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="btn-row" style="margin-top:16px"><button class="btn btn-g" id="mSave">Save Changes</button></div>
+  </div>`;
+
+  document.getElementById('mPrev').onclick=()=>{curMonthIdx--;renderMonthly()};
+  document.getElementById('mNext').onclick=()=>{curMonthIdx++;renderMonthly()};
+  document.getElementById('mSave').onclick=()=>{
+    const key2=mKeys()[curMonthIdx],incInput=document.querySelector('[data-field="income"]');
+    S.months[key2].income=+incInput.value||0;
+    document.querySelectorAll('[data-cat]').forEach(inp=>{S.months[key2].expenses[inp.dataset.cat]=+inp.value||0});
+    save();syncCloud();toast('Saved: '+key2);renderMonthly()};
+}
+
+// ── ANNUAL VIEW ──
+function renderAnnual(){
+  const mk=mKeys(),year=new Date().getFullYear();
+  const yearMonths=mk.filter(k=>k.endsWith(' '+year));
+  let totInc=0,totExp=0,totInvest=0,totSave=0;
+  yearMonths.forEach(k=>{const d=S.months[k];totInc+=d.income;totExp+=totE(d);totInvest+=(d.expenses.invest||0);totSave+=(d.expenses.savings||0)});
+  const net=totInc-totExp;
+  const barMax2=Math.max(...yearMonths.map(k=>Math.max(S.months[k].income,totE(S.months[k]))),1);
+
+  document.getElementById('v-annual').innerHTML=`
+  <div class="topbar"><h2>Annual Summary — ${year}</h2></div>
+  <div class="annual-content" style="margin-top:20px">
+    <div class="g g4" style="margin-bottom:24px">
+      <div class="card c-cyan"><div class="card-label">Total Income</div><div class="card-val" style="color:var(--cyan)">${fmt(totInc)}</div><div class="card-sub">${yearMonths.length} months</div></div>
+      <div class="card c-amber"><div class="card-label">Total Expenses</div><div class="card-val" style="color:var(--amber)">${fmt(totExp)}</div></div>
+      <div class="card c-indigo"><div class="card-label">Invested</div><div class="card-val" style="color:var(--indigo)">${fmt(totInvest)}</div><div class="card-sub"><span class="tag tag-a">${((totInvest/totInc)*100).toFixed(1)}% of income</span></div></div>
+      <div class="card c-green"><div class="card-label">Saved</div><div class="card-val" style="color:var(--green)">${fmt(totSave)}</div><div class="card-sub"><span class="tag tag-g">${((totSave/totInc)*100).toFixed(1)}% of income</span></div></div>
+    </div>
+    <div class="card ${net>=0?'c-green':'c-red'}" style="margin-bottom:24px;max-width:320px">
+      <div class="card-label">Net Balance</div>
+      <div class="card-val" style="color:${net>=0?'var(--green)':'var(--red)'}"> ${net>=0?'+':''}${fmt(net)}</div>
+      <div class="card-sub">Income minus all expenses</div>
+    </div>
+    <div class="g g2">
+      <div class="panel">
+        <div class="panel-head"><span class="dot" style="background:var(--cyan)"></span>Monthly Breakdown — ${year}</div>
+        <div class="bars" style="height:180px">
+          ${yearMonths.map(m=>{const inc=S.months[m].income,exp=totE(S.months[m]);return`<div class="bar-col"><div class="bar-pair" style="height:150px"><div class="bar inc" data-v="${inc}" style="height:${Math.max((inc/barMax2)*140,4)}px"><span class="bar-tip" style="color:var(--green)">${fmtK(inc)}</span></div><div class="bar exp" data-v="${exp}" style="height:${Math.max((exp/barMax2)*140,4)}px"><span class="bar-tip" style="color:var(--red)">${fmtK(exp)}</span></div></div><div class="bar-lbl">${m.split(' ')[0]}</div></div>`}).join('')}
         </div>
       </div>
-    </div>`;
+      <div class="panel">
+        <div class="panel-head"><span class="dot" style="background:var(--amber)"></span>Category Totals — ${year}</div>
+        <table class="ed-table">
+          <tr><th>Category</th><th style="text-align:right">Total</th><th style="text-align:right">% of Expenses</th></tr>
+          ${CATS.map(c=>{let catTot=0;yearMonths.forEach(k=>catTot+=(S.months[k].expenses[c.key]||0));
+            return`<tr><td><span class="cat-sw" style="background:${c.color}"></span>${c.name}</td><td style="text-align:right">${fmt(catTot)}</td><td style="text-align:right;color:var(--t2)">${((catTot/totExp)*100).toFixed(1)}%</td></tr>`}).join('')}
+          <tr class="total-row"><td>Total</td><td style="text-align:right">${fmt(totExp)}</td><td style="text-align:right">100%</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>`;
+}
 
-    // Animations
-    requestAnimationFrame(()=>{
-      setTimeout(()=>{
-        animateValue(document.getElementById('anim-cfr'),0,parseFloat(cfr),1200,'','%');
-        animateValue(document.getElementById('anim-nw'),0,nwCur,1200,'₪','');
-        animateValue(document.getElementById('anim-exp'),0,curTot,1200,'₪','');
-        animateValue(document.getElementById('anim-inc'),0,cur.income,1200,'₪','');
-        const rEl=document.getElementById('anim-runway');
-        if(rEl){let v=0;const t=parseFloat(runway);const i=setInterval(()=>{v+=.1;if(v>=t){v=t;clearInterval(i)}rEl.textContent=v.toFixed(1)},50)}
-      },300);
-      setTimeout(()=>{const rb=document.getElementById('runwayBar');if(rb)rb.style.width=Math.min((+runway/12)*100,100)+'%'},500);
-      setTimeout(()=>{document.querySelectorAll('.cf-bar').forEach(b=>{b.style.height=Math.max((+b.dataset.val/barMax)*140,8)+'px'})},600);
-    });
+// ── SETTINGS ──
+function renderSettings(){
+  const hasPin=!!ls('lh_pin')&&ls('lh_pin')!=='';
+  document.getElementById('v-settings').innerHTML=`
+  <div class="topbar"><h2>Settings</h2></div>
+  <div class="settings-content" style="margin-top:20px">
+    <div class="setting-group">
+      <label>Google Apps Script URL</label>
+      <input class="setting-input" type="text" id="sGas" value="${GAS||''}" placeholder="https://script.google.com/macros/s/.../exec">
+      <div class="setting-note">Data syncs to your Google Sheet automatically.</div>
+    </div>
+    <div class="btn-row"><button class="btn btn-g" id="sSaveGas">Save & Sync</button></div>
 
-    updateClock();
-    drawCandlesticks('candlestickBg');
-    window.addEventListener('resize',()=>drawCandlesticks('candlestickBg'),{once:true});
-    bindRingInteractions(cur,prev,curMonth,prevMonth);
-    bindSettings();bindAddMonth();bindQuickEntry();bindEntryTabs();
-  }
+    <hr style="border:none;border-top:1px solid var(--border);margin:28px 0">
 
-  function bindEntryTabs(){document.querySelectorAll('.entry-tab').forEach(tab=>{
-    tab.addEventListener('click',()=>{document.querySelectorAll('.entry-tab').forEach(t=>t.classList.remove('active'));
-      document.querySelectorAll('.entry-form').forEach(f=>f.classList.remove('active'));
-      tab.classList.add('active');document.getElementById('form-'+tab.dataset.tab).classList.add('active')})})}
+    <div class="setting-group">
+      <label>PIN Lock</label>
+      <div class="setting-note" style="margin-bottom:10px">${hasPin?'PIN is set. Your data is protected on this device.':'No PIN set.'}</div>
+      <div class="btn-row">
+        ${hasPin?'<button class="btn btn-o" id="sChangePin">Change PIN</button><button class="btn btn-r" id="sRemovePin">Remove PIN</button>':'<button class="btn btn-g" id="sSetPin">Set PIN</button>'}
+      </div>
+    </div>
 
-  function bindQuickEntry(){
-    const eb=document.getElementById('qeSubmit'),ib=document.getElementById('qiSubmit');
-    if(eb)eb.addEventListener('click',()=>{
-      const a=parseFloat(document.getElementById('qeAmount').value);if(!a||a<=0)return;
-      const cat=document.getElementById('qeCat').value,note=document.getElementById('qeNote').value;
-      const mk=Object.keys(STATE.months),cm=mk[mk.length-1];
-      STATE.months[cm].expenses[cat]=(STATE.months[cm].expenses[cat]||0)+a;
-      STATE.manualEntries.push({type:'expense',cat,amount:a,note,ts:Date.now()});
-      saveLocal();syncToCloud();showToast('Expense added: '+fmt(a));render()});
-    if(ib)ib.addEventListener('click',()=>{
-      const a=parseFloat(document.getElementById('qiAmount').value);if(!a||a<=0)return;
-      const src=document.getElementById('qiSource').value;
-      const mk=Object.keys(STATE.months),cm=mk[mk.length-1];
-      STATE.months[cm].income+=a;
-      STATE.manualEntries.push({type:'income',amount:a,source:src,ts:Date.now()});
-      saveLocal();syncToCloud();showToast('Income added: +'+fmt(a));render()});
-  }
+    <hr style="border:none;border-top:1px solid var(--border);margin:28px 0">
 
-  function bindAddMonth(){
-    const openBtn=document.getElementById('openAddMonth'),modal=document.getElementById('addMonthModal'),sel=document.getElementById('amMonth');
-    if(!openBtn)return;
-    const ms=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const now=new Date();sel.innerHTML='';
-    for(let i=-2;i<=6;i++){const d=new Date(now.getFullYear(),now.getMonth()+i,1);
-      const l=ms[d.getMonth()]+' '+d.getFullYear();const o=document.createElement('option');
-      o.value=l;o.textContent=l;if(i===0)o.selected=true;sel.appendChild(o)}
-    function fillForm(){const s=sel.value;
-      if(STATE.months[s]){const m=STATE.months[s];
-        document.getElementById('amIncome').value=m.income;
-        document.getElementById('amFood').value=m.expenses.food||0;document.getElementById('amHousing').value=m.expenses.housing||0;
-        document.getElementById('amInvest').value=m.expenses.invest||0;document.getElementById('amSavings').value=m.expenses.savings||0;
-        document.getElementById('amCar').value=m.expenses.car||0;document.getElementById('amTelecom').value=m.expenses.telecom||0;
-      }else{['amIncome','amFood','amHousing','amInvest','amSavings','amCar','amTelecom'].forEach(id=>document.getElementById(id).value='')}
-      const nw=STATE.netWorth.find(n=>n.month===s.split(' ')[0]);
-      document.getElementById('amNetWorth').value=nw?nw.value:(STATE.netWorth[STATE.netWorth.length-1].value);
-      document.getElementById('amLiquid').value=STATE.liquidSavings}
-    openBtn.addEventListener('click',()=>{fillForm();modal.classList.add('open')});
-    sel.addEventListener('change',fillForm);
-    document.getElementById('addMonthClose').addEventListener('click',()=>modal.classList.remove('open'));
-    document.getElementById('amCancel').addEventListener('click',()=>modal.classList.remove('open'));
-    modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open')});
-    document.getElementById('amSave').addEventListener('click',()=>{
-      const s=sel.value;
-      STATE.months[s]={income:parseFloat(document.getElementById('amIncome').value)||0,
-        expenses:{food:parseFloat(document.getElementById('amFood').value)||0,housing:parseFloat(document.getElementById('amHousing').value)||0,
-          invest:parseFloat(document.getElementById('amInvest').value)||0,savings:parseFloat(document.getElementById('amSavings').value)||0,
-          car:parseFloat(document.getElementById('amCar').value)||0,telecom:parseFloat(document.getElementById('amTelecom').value)||0}};
-      const ms2=s.split(' ')[0],nwV=parseFloat(document.getElementById('amNetWorth').value)||0;
-      const nwI=STATE.netWorth.findIndex(n=>n.month===ms2);
-      if(nwI>=0)STATE.netWorth[nwI].value=nwV;else STATE.netWorth.push({month:ms2,value:nwV});
-      STATE.liquidSavings=parseFloat(document.getElementById('amLiquid').value)||STATE.liquidSavings;
-      const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      const sorted=Object.entries(STATE.months).sort((a,b)=>{const[mA,yA]=a[0].split(' '),[mB,yB]=b[0].split(' ');return(+yA-+yB)||(mo.indexOf(mA)-mo.indexOf(mB))});
-      STATE.months=Object.fromEntries(sorted);
-      saveLocal();syncToCloud();modal.classList.remove('open');showToast('Month saved: '+s);render()});
-  }
+    <div class="setting-group">
+      <label>Data Management</label>
+      <div class="btn-row">
+        <button class="btn btn-o" id="sExport">Export JSON</button>
+        <button class="btn btn-r" id="sReset">Reset to Defaults</button>
+      </div>
+    </div>
+  </div>`;
 
-  function bindRingInteractions(cur,prev,curMonth,prevMonth){
-    const chart=document.getElementById('ringChart'),tooltip=document.getElementById('ringTooltip'),legends=document.querySelectorAll('.legend-item');
-    if(!chart)return;
-    function highlight(k){chart.querySelectorAll('path').forEach(p=>{p.style.opacity=p.dataset.cat===k?'1':'.25';
-      p.style.strokeWidth=p.dataset.cat===k?(p.dataset.ring==='cur'?'30':'26'):(p.dataset.ring==='cur'?'26':'22')});
-      legends.forEach(li=>li.classList.toggle('active',li.dataset.cat===k))}
-    function reset(){chart.querySelectorAll('path').forEach(p=>{p.style.opacity='.85';p.style.strokeWidth=p.dataset.ring==='cur'?'26':'22'});
-      legends.forEach(li=>li.classList.remove('active'));tooltip.classList.remove('visible')}
-    function showTT(k,x,y){const cat=CATS.find(c=>c.key===k),c=cur.expenses[k],p=prev.expenses[k],d=((c-p)/p*100).toFixed(1),up=+d>0;
-      tooltip.innerHTML='<div class="tt-cat" style="color:'+cat.color+'">'+cat.name+'</div><div class="tt-row"><span>'+curMonth+':</span><span>'+fmt(c)+'</span></div><div class="tt-row"><span>'+prevMonth+':</span><span>'+fmt(p)+'</span></div><div class="tt-delta" style="color:'+(up?'var(--red)':'var(--emerald)')+'">'+(up?'▲':'▼')+' '+(up?'+':'')+d+'%</div>';
-      const wrap=chart.closest('.ring-svg-wrap'),rect=wrap.getBoundingClientRect();
-      tooltip.style.left=(x-rect.left+16)+'px';tooltip.style.top=(y-rect.top-30)+'px';tooltip.classList.add('visible')}
-    chart.addEventListener('mousemove',e=>{const p=e.target.closest('path[data-cat]');if(p){highlight(p.dataset.cat);showTT(p.dataset.cat,e.clientX,e.clientY)}});
-    chart.addEventListener('mouseleave',reset);
-    legends.forEach(li=>{li.addEventListener('mouseenter',()=>{highlight(li.dataset.cat);
-      const cat=CATS.find(c=>c.key===li.dataset.cat),c=cur.expenses[li.dataset.cat],p=prev.expenses[li.dataset.cat],d=((c-p)/p*100).toFixed(1),up=+d>0;
-      tooltip.innerHTML='<div class="tt-cat" style="color:'+cat.color+'">'+cat.name+'</div><div class="tt-row"><span>'+curMonth+':</span><span>'+fmt(c)+'</span></div><div class="tt-row"><span>'+prevMonth+':</span><span>'+fmt(p)+'</span></div><div class="tt-delta" style="color:'+(up?'var(--red)':'var(--emerald)')+'">'+(up?'▲':'▼')+' '+(up?'+':'')+d+'%</div>';
-      tooltip.style.left='60px';tooltip.style.top='60px';tooltip.classList.add('visible')});
-      li.addEventListener('mouseleave',reset)});
-  }
+  document.getElementById('sSaveGas').onclick=async()=>{GAS=document.getElementById('sGas').value.trim();ls('lh_gas',GAS);if(GAS){const ok=await loadCloud();if(!ok)await syncCloud()}toast('Settings saved')};
+  const sSet=document.getElementById('sSetPin');if(sSet)sSet.onclick=()=>{ls('lh_pin','new');location.reload()};
+  const sChange=document.getElementById('sChangePin');if(sChange)sChange.onclick=()=>{ls('lh_pin','new');location.reload()};
+  const sRemove=document.getElementById('sRemovePin');if(sRemove)sRemove.onclick=()=>{ls('lh_pin','');toast('PIN removed')};
+  document.getElementById('sExport').onclick=()=>{const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ledgerhouse-backup.json';a.click();toast('Exported')};
+  document.getElementById('sReset').onclick=()=>{if(confirm('Reset all data to defaults?')){S=JSON.parse(JSON.stringify(DEFAULT_DATA));save();syncCloud();renderAll();toast('Data reset')}};
+}
 
-  function bindSettings(){
-    const openBtn=document.getElementById('openSettings'),modal=document.getElementById('settingsModal'),urlInput=document.getElementById('gasUrl');
-    if(!openBtn)return;
-    openBtn.addEventListener('click',()=>{urlInput.value=GAS_URL;modal.classList.add('open')});
-    document.getElementById('modalClose').addEventListener('click',()=>modal.classList.remove('open'));
-    document.getElementById('cancelSettings').addEventListener('click',()=>modal.classList.remove('open'));
-    modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open')});
-    document.getElementById('saveSettings').addEventListener('click',async()=>{
-      GAS_URL=urlInput.value.trim();localStorage.setItem('lh_gas_url',GAS_URL);modal.classList.remove('open');
-      if(GAS_URL){setSyncStatus('','Syncing...');const loaded=await loadFromCloud();if(!loaded)await syncToCloud()}});
-  }
+// ── ADD MONTH MODAL ──
+window.openAddMonth=function(){
+  const modal=document.getElementById('addMonthModal'),sel=document.getElementById('amMonth');
+  const now=new Date();sel.innerHTML='';
+  for(let i=-3;i<=6;i++){const d=new Date(now.getFullYear(),now.getMonth()+i,1);
+    const l=MO[d.getMonth()]+' '+d.getFullYear();sel.innerHTML+='<option value="'+l+'"'+(i===0?' selected':'')+'>'+l+'</option>'}
+  fillAddMonth();modal.classList.add('open');
+  sel.onchange=fillAddMonth;
+};
+function fillAddMonth(){
+  const s=document.getElementById('amMonth').value;
+  if(S.months[s]){const m=S.months[s];document.getElementById('amIncome').value=m.income;
+    CATS.forEach(c=>document.getElementById('am'+c.key.charAt(0).toUpperCase()+c.key.slice(1)).value=m.expenses[c.key]||0)}
+  else{['amIncome','amFood','amHousing','amInvest','amSavings','amCar','amTelecom'].forEach(id=>document.getElementById(id).value='')}
+  const nw=S.netWorth.find(n=>n.month===document.getElementById('amMonth').value.split(' ')[0]);
+  document.getElementById('amNetWorth').value=nw?nw.value:(S.netWorth[S.netWorth.length-1]?.value||0);
+  document.getElementById('amLiquid').value=S.liquidSavings;
+}
+document.getElementById('amSave').onclick=()=>{
+  const s=document.getElementById('amMonth').value;
+  S.months[s]={income:+document.getElementById('amIncome').value||0,
+    expenses:{food:+document.getElementById('amFood').value||0,housing:+document.getElementById('amHousing').value||0,
+      invest:+document.getElementById('amInvest').value||0,savings:+document.getElementById('amSavings').value||0,
+      car:+document.getElementById('amCar').value||0,telecom:+document.getElementById('amTelecom').value||0}};
+  const ms2=s.split(' ')[0],nwV=+document.getElementById('amNetWorth').value||0;
+  const nwI=S.netWorth.findIndex(n=>n.month===ms2);
+  if(nwI>=0)S.netWorth[nwI].value=nwV;else S.netWorth.push({month:ms2,value:nwV});
+  S.liquidSavings=+document.getElementById('amLiquid').value||S.liquidSavings;
+  sortMonths();save();syncCloud();closeModal('addMonthModal');toast('Saved: '+s);renderAll()};
+window.closeModal=function(id){document.getElementById(id).classList.remove('open')};
+document.getElementById('addMonthModal').onclick=e=>{if(e.target.id==='addMonthModal')closeModal('addMonthModal')};
 
-  render();
-  if(GAS_URL)loadFromCloud();
+// ── HELPERS ──
+function ringArcs(data,r,w,cx,cy){
+  const total=Object.values(data).reduce((a,b)=>a+b,0);let ang=-90,paths='';
+  CATS.forEach(cat=>{const val=data[cat.key],pct=val/total,sweep=pct*360,gap=2;
+    if(sweep>gap){const sA=(ang+gap/2)*Math.PI/180,eA=(ang+sweep-gap/2)*Math.PI/180;
+      const x1=cx+r*Math.cos(sA),y1=cy+r*Math.sin(sA),x2=cx+r*Math.cos(eA),y2=cy+r*Math.sin(eA),large=sweep-gap>180?1:0;
+      paths+=`<path d="M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}" fill="none" stroke="${cat.color}" stroke-width="${w}" stroke-linecap="round" style="opacity:.85"/>`}
+    ang+=sweep});return paths;
+}
+function animVal(el,s,e,dur,pre,suf){
+  if(!el)return;pre=pre||'';suf=suf||'';const range=e-s;let t0=null;
+  function step(ts){if(!t0)t0=ts;const p=Math.min((ts-t0)/dur,1),ease=1-Math.pow(1-p,3);
+    el.textContent=pre+Math.round(s+range*ease).toLocaleString('en-IL')+suf;if(p<1)requestAnimationFrame(step)}requestAnimationFrame(step);
+}
+function updateClock(){const el=document.getElementById('clock');if(el)el.textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+setInterval(updateClock,1000);
 
-  // Dollar cursor with green halo
-  const $cur=document.createElement('div');$cur.className='dollar-cursor';$cur.textContent='$';document.body.appendChild($cur);
-  const $halo=document.createElement('div');$halo.className='dollar-halo';document.body.appendChild($halo);
-  let mx=-100,my=-100,cx=-100,cy=-100,lastParticle=0;
-  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;
-    const now=Date.now();if(now-lastParticle>120){lastParticle=now;
-      const p=document.createElement('div');p.className='dollar-particle';p.textContent='$';
-      p.style.left=mx+(Math.random()*20-10)+'px';p.style.top=my+(Math.random()*20-10)+'px';
-      p.style.fontSize=(10+Math.random()*8)+'px';document.body.appendChild(p);
-      setTimeout(()=>p.remove(),800)}});
-  function animCursor(){cx+=(mx-cx)*.15;cy+=(my-cy)*.15;
-    $cur.style.left=cx+'px';$cur.style.top=cy+'px';
-    $halo.style.left=cx+'px';$halo.style.top=cy+'px';requestAnimationFrame(animCursor)}
-  animCursor();
-  document.addEventListener('mouseleave',()=>{$cur.style.opacity='0';$halo.style.opacity='0'});
-  document.addEventListener('mouseenter',()=>{$cur.style.opacity='1';$halo.style.opacity='1'});
+// ── CANVAS BACKGROUNDS ──
+function drawZoneCanvases(){
+  drawGrid('zc0');drawCandlesticks('zc1');drawCoins('zc2');
+  const main=document.getElementById('mainScroll');
+  main.onscroll=()=>{document.querySelectorAll('.zone-canvas').forEach(c=>{
+    const rect=c.parentElement.getBoundingClientRect();c.style.transform='translateY('+(rect.top*-.15)+'px)'})};
+}
+function sizeCanvas(id){const c=document.getElementById(id);if(!c)return null;const p=c.parentElement;c.width=p.offsetWidth;c.height=p.offsetHeight;return c}
+function drawGrid(id){
+  const c=sizeCanvas(id);if(!c)return;const ctx=c.getContext('2d');
+  ctx.strokeStyle='rgba(129,140,248,.04)';ctx.lineWidth=1;
+  for(let x=0;x<c.width;x+=70){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,c.height);ctx.stroke()}
+  for(let y=0;y<c.height;y+=50){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(c.width,y);ctx.stroke()}
+  for(let i=0;i<12;i++){ctx.fillStyle='rgba(129,140,248,.03)';ctx.font='bold '+(20+Math.random()*30)+'px system-ui';
+    ctx.fillText('$',Math.random()*c.width,Math.random()*c.height)}
+}
+function drawCandlesticks(id){
+  const c=sizeCanvas(id);if(!c)return;const ctx=c.getContext('2d');
+  const count=Math.floor(c.width/16);let price=100+Math.random()*50;
+  for(let i=0;i<count;i++){const open=price;price+=(Math.random()-.48)*8;const close=price;
+    const high=Math.max(open,close)+Math.random()*5,low=Math.min(open,close)-Math.random()*5;
+    const bull=close>open,x=i*16+8,bw=7,scale=c.height/80,base=c.height*.1;
+    const oY=c.height-base-(open-60)*scale,cY=c.height-base-(close-60)*scale,hY=c.height-base-(high-60)*scale,lY=c.height-base-(low-60)*scale;
+    ctx.strokeStyle=bull?'rgba(52,211,153,.4)':'rgba(248,113,113,.3)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(x,hY);ctx.lineTo(x,lY);ctx.stroke();
+    ctx.fillStyle=bull?'rgba(52,211,153,.15)':'rgba(248,113,113,.12)';
+    ctx.fillRect(x-bw/2,Math.min(oY,cY),bw,Math.abs(cY-oY)||1)}
+  ctx.strokeStyle='rgba(52,211,153,.08)';ctx.lineWidth=1.5;ctx.beginPath();
+  price=100;for(let i=0;i<count;i++){price+=Math.sin(i*.15)*3+.5;
+    const y=c.height*.6-price*.8;i===0?ctx.moveTo(i*16,y):ctx.lineTo(i*16,y)}ctx.stroke();
+}
+function drawCoins(id){
+  const c=sizeCanvas(id);if(!c)return;const ctx=c.getContext('2d');
+  for(let i=0;i<20;i++){const x=Math.random()*c.width,y=Math.random()*c.height,r=8+Math.random()*16;
+    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle='rgba(246,192,66,.06)';ctx.fill();
+    ctx.strokeStyle='rgba(246,192,66,.1)';ctx.lineWidth=1;ctx.stroke();
+    ctx.fillStyle='rgba(246,192,66,.08)';ctx.font='bold '+r+'px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('₪',x,y)}
+  for(let i=0;i<8;i++){const x=Math.random()*c.width,y=Math.random()*c.height;
+    ctx.fillStyle='rgba(248,113,113,.04)';ctx.font='bold '+(14+Math.random()*20)+'px system-ui';ctx.fillText('$',x,y)}
+}
+
+// ── HALO CURSOR ──
+const halo=document.getElementById('halo');let hx=-100,hy=-100,cx2=-100,cy2=-100;
+document.addEventListener('mousemove',e=>{hx=e.clientX;hy=e.clientY});
+function animHalo(){cx2+=(hx-cx2)*.12;cy2+=(hy-cy2)*.12;halo.style.left=cx2+'px';halo.style.top=cy2+'px';requestAnimationFrame(animHalo)}
+animHalo();
+document.addEventListener('mouseleave',()=>halo.style.opacity='0');
+document.addEventListener('mouseenter',()=>halo.style.opacity='1');
+
+// ── NAV ──
+document.querySelectorAll('.sb-item').forEach(item=>item.onclick=()=>switchView(item.dataset.view));
+
+// ── INIT ──
+function renderAll(){if(curView==='dashboard')renderDashboard();else if(curView==='monthly')renderMonthly();else if(curView==='annual')renderAnnual();else renderSettings()}
+initPin();
+if(document.getElementById('app').style.display!=='none'){renderAll();if(GAS)loadCloud().then(()=>renderAll())}
 })();
 </script>
 </body>

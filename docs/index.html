@@ -224,6 +224,17 @@
   /* Zone divider */
   .zone-divider{height:1px;background:linear-gradient(90deg,transparent,var(--border-hover),transparent);margin:0;opacity:.5}
 
+  /* Dollar cursor */
+  body{cursor:none}
+  .dollar-cursor{position:fixed;pointer-events:none;z-index:9999;font-size:28px;font-weight:800;color:var(--emerald);text-shadow:0 0 12px rgba(52,211,153,.7),0 0 30px rgba(52,211,153,.4),0 0 50px rgba(52,211,153,.2);transform:translate(-50%,-50%);transition:transform .06s ease-out;font-family:'Segoe UI',system-ui,sans-serif}
+  .dollar-halo{position:fixed;pointer-events:none;z-index:9998;width:60px;height:60px;border-radius:50%;background:radial-gradient(circle,rgba(52,211,153,.18) 0%,rgba(52,211,153,.06) 40%,transparent 70%);transform:translate(-50%,-50%);transition:transform .08s ease-out}
+  .dollar-particle{position:fixed;pointer-events:none;z-index:9997;font-size:14px;font-weight:700;color:var(--emerald);opacity:0;transform:translate(-50%,-50%);animation:particleFade .8s ease-out forwards}
+  @keyframes particleFade{0%{opacity:.7;transform:translate(-50%,-50%) scale(1) rotate(0deg)}100%{opacity:0;transform:translate(-50%,-120%) scale(.4) rotate(25deg)}}
+
+  /* Restore cursor on inputs */
+  input,select,button,textarea,.action-btn,.entry-tab,.submit-btn,.btn,.modal-close,.legend-item{cursor:pointer!important}
+  input[type="text"],input[type="number"],textarea{cursor:text!important}
+
   /* Mobile */
   @media(max-width:900px){
     .metric-strip{grid-template-columns:repeat(2,1fr)}
@@ -671,6 +682,23 @@
 
   render();
   if(GAS_URL)loadFromCloud();
+
+  // Dollar cursor with green halo
+  const $cur=document.createElement('div');$cur.className='dollar-cursor';$cur.textContent='$';document.body.appendChild($cur);
+  const $halo=document.createElement('div');$halo.className='dollar-halo';document.body.appendChild($halo);
+  let mx=-100,my=-100,cx=-100,cy=-100,lastParticle=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;
+    const now=Date.now();if(now-lastParticle>120){lastParticle=now;
+      const p=document.createElement('div');p.className='dollar-particle';p.textContent='$';
+      p.style.left=mx+(Math.random()*20-10)+'px';p.style.top=my+(Math.random()*20-10)+'px';
+      p.style.fontSize=(10+Math.random()*8)+'px';document.body.appendChild(p);
+      setTimeout(()=>p.remove(),800)}});
+  function animCursor(){cx+=(mx-cx)*.15;cy+=(my-cy)*.15;
+    $cur.style.left=cx+'px';$cur.style.top=cy+'px';
+    $halo.style.left=cx+'px';$halo.style.top=cy+'px';requestAnimationFrame(animCursor)}
+  animCursor();
+  document.addEventListener('mouseleave',()=>{$cur.style.opacity='0';$halo.style.opacity='0'});
+  document.addEventListener('mouseenter',()=>{$cur.style.opacity='1';$halo.style.opacity='1'});
 })();
 </script>
 </body>

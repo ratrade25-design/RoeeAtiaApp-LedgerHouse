@@ -41,7 +41,7 @@ html,body{height:100%;background:var(--bg-0);color:var(--t1);font-family:-apple-
 .pin-shake{animation:pinShake .4s ease-in-out}
 
 /* ── SHELL ── */
-#app{display:none;height:100vh;overflow:hidden}
+#app{height:100vh;overflow:hidden}
 .shell{display:flex;height:100%}
 
 /* ── SIDEBAR ── */
@@ -381,21 +381,22 @@ function setSyncBadge(s,t){document.querySelectorAll('.sync-badge').forEach(b=>{
 async function hashPin(p){const e=new TextEncoder().encode(p);const h=await crypto.subtle.digest('SHA-256',e);return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('')}
 function initPin(){
   const stored=ls('lh_pin');
-  if(!stored){document.getElementById('app').style.display='';return}
+  const appEl=document.getElementById('app');
+  if(!stored){appEl.style.display='block';return}
   const ps=document.getElementById('pinScreen');ps.style.display='';
-  document.getElementById('app').style.display='none';
+  appEl.style.display='none';
   let code='',isSet=stored==='new';
   if(isSet){document.getElementById('pinLabel').textContent='Set a 4-digit PIN';document.getElementById('pinSkip').style.display=''}
-  document.getElementById('pinSkip').onclick=()=>{ls('lh_pin','');ps.style.display='none';document.getElementById('app').style.display='';renderAll()};
+  document.getElementById('pinSkip').onclick=()=>{ls('lh_pin','');ps.style.display='none';document.getElementById('app').style.display='block';renderAll()};
   document.getElementById('pinPad').onclick=async e=>{
     const k=e.target.closest('[data-k]');if(!k)return;
     const v=k.dataset.k;
     if(v==='del'){code=code.slice(0,-1)}else if(code.length<4){code+=v}
     updateDots(code.length);
     if(code.length===4){
-      if(isSet){ls('lh_pin',await hashPin(code));ps.style.display='none';document.getElementById('app').style.display='';renderAll();toast('PIN set')}
+      if(isSet){ls('lh_pin',await hashPin(code));ps.style.display='none';document.getElementById('app').style.display='block';renderAll();toast('PIN set')}
       else{const h=await hashPin(code);
-        if(h===stored){ps.style.display='none';document.getElementById('app').style.display='';renderAll()}
+        if(h===stored){ps.style.display='none';document.getElementById('app').style.display='block';renderAll()}
         else{document.getElementById('pinMsg').textContent='Wrong PIN';document.getElementById('pinDots').classList.add('pin-shake');
           setTimeout(()=>{code='';updateDots(0);document.getElementById('pinDots').classList.remove('pin-shake');document.getElementById('pinMsg').textContent=''},600)}}
     }

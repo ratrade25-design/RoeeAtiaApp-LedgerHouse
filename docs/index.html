@@ -3,116 +3,151 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#080C15">
-<title>LedgerHouse — ניהול פיננסי חכם</title>
+<meta name="theme-color" content="#050510">
+<title>LedgerHouse — מרכז פיקוד פיננסי</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-tailwind.config={
-  theme:{
-    extend:{
-      fontFamily:{heebo:['Heebo','sans-serif']},
-      colors:{
-        brand:{950:'#050810',900:'#080C15',850:'#0C1019',800:'#10151F',750:'#151B28',700:'#1A2233',650:'#1F2A3C'},
-        gold:{DEFAULT:'#C9A84C',light:'#E5D08A',dark:'#9A7E38',muted:'#8B7A4A'}
-      },
-      transitionDuration:{500:'500ms',700:'700ms'}
-    }
-  }
-}
+tailwind.config={theme:{extend:{
+  fontFamily:{heebo:['Heebo','sans-serif']},
+  colors:{brand:{950:'#030308',900:'#050510',850:'#0a0a1a',800:'#0f0f24',750:'#14142e',700:'#1a1a38'},
+    gold:{DEFAULT:'#C9A84C',light:'#E5D08A',dark:'#9A7E38'},
+    neon:{purple:'#A855F7',cyan:'#22D3EE',pink:'#F472B6',blue:'#6366F1'}},
+  transitionDuration:{500:'500ms',700:'700ms'}
+}}}
 </script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Heebo',sans-serif;font-variant-numeric:tabular-nums;background:#080C15;color:#E2E8F0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{font-family:'Heebo',sans-serif;font-variant-numeric:tabular-nums;background:#050510;color:#E2E8F0;-webkit-font-smoothing:antialiased;overflow:hidden}
 
-/* Grain overlay */
-body::after{content:'';position:fixed;inset:0;opacity:.012;pointer-events:none;z-index:9998;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.nebula{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.neb{position:absolute;border-radius:50%;filter:blur(120px);mix-blend-mode:screen;will-change:transform}
+@keyframes nd1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(90px,70px) scale(1.25)}}
+@keyframes nd2{0%,100%{transform:translate(0,0) scale(1.1)}50%{transform:translate(-70px,-90px) scale(1.35)}}
+@keyframes nd3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,-50px) scale(1.15)}}
+@keyframes nd4{0%,100%{transform:translate(0,0) scale(1.05)}50%{transform:translate(-50px,80px) scale(1.2)}}
+
+.grid-ov{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background-image:linear-gradient(rgba(99,102,241,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.02) 1px,transparent 1px);
+  background-size:60px 60px}
+
+.scan-ov{position:fixed;inset:0;z-index:2;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.015) 3px,rgba(0,0,0,.015) 6px)}
 
 .main::-webkit-scrollbar{width:3px}
 .main::-webkit-scrollbar-track{background:transparent}
-.main::-webkit-scrollbar-thumb{background:rgba(201,168,76,.08);border-radius:2px}
-.main::-webkit-scrollbar-thumb:hover{background:rgba(201,168,76,.2)}
+.main::-webkit-scrollbar-thumb{background:rgba(168,85,247,.12);border-radius:2px}
 
 .view{display:none;min-height:100%}.view.active{display:block}
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
 @keyframes modalIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 20px -5px var(--glow)}50%{box-shadow:0 0 35px -3px var(--glow)}}
 
-.zone .zone-inner{opacity:0;transform:translateY(22px);transition:opacity 1s cubic-bezier(.16,1,.3,1),transform 1s cubic-bezier(.16,1,.3,1)}
-.zone.visible .zone-inner{opacity:1;transform:none}
+.zone .zone-inner{opacity:0;transform:translateY(30px)}
+.zone.visible .zone-inner{opacity:1;transform:none;transition:all 1.2s cubic-bezier(.16,1,.3,1)}
 
-.ca{opacity:0;transform:translateY(14px);transition:all .6s cubic-bezier(.16,1,.3,1)}
-.zone.visible .ca,.view.active .ca{opacity:1;transform:none}
-.zone.visible .ca:nth-child(1){transition-delay:.07s}
-.zone.visible .ca:nth-child(2){transition-delay:.14s}
-.zone.visible .ca:nth-child(3){transition-delay:.21s}
-.zone.visible .ca:nth-child(4){transition-delay:.28s}
+.qc{position:relative;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);background:rgba(255,255,255,.02);
+  border:1px solid rgba(255,255,255,.04);border-radius:20px;padding:24px;overflow:hidden;
+  transition:all .6s cubic-bezier(.16,1,.3,1)}
+.qc::before{content:'';position:absolute;inset:-1px;border-radius:21px;padding:1px;
+  background:linear-gradient(135deg,rgba(168,85,247,.15),rgba(34,211,238,.08),rgba(201,168,76,.12));
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;transition:opacity .5s}
+.qc::after{content:'';position:absolute;bottom:-30px;left:15%;right:15%;height:50px;border-radius:50%;
+  background:radial-gradient(ellipse,var(--ambient,rgba(168,85,247,.08)),transparent 70%);filter:blur(20px);opacity:0;transition:opacity .5s;pointer-events:none}
+.qc:hover::after{opacity:1}
 
-.pa{opacity:0;transform:translateY(14px);transition:all .7s cubic-bezier(.16,1,.3,1)}
-.zone.visible .pa,.view.active .pa{opacity:1;transform:none}
-.zone.visible .pa:nth-child(1){transition-delay:.12s}
-.zone.visible .pa:nth-child(2){transition-delay:.24s}
+.qp{backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);background:rgba(255,255,255,.015);
+  border:1px solid rgba(255,255,255,.04);border-radius:20px;padding:28px;
+  box-shadow:0 4px 40px -8px rgba(0,0,0,.3);transition:all .6s cubic-bezier(.16,1,.3,1)}
 
-.zone-canvas{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.25}
-.bar{transition:height 1s cubic-bezier(.16,1,.3,1)}
+.ff{background:transparent!important;border:none!important;border-bottom:1px solid rgba(255,255,255,.08)!important;border-radius:0!important;
+  padding:10px 4px!important;color:#E2E8F0;outline:none;font-size:13px;transition:all .5s;width:100%}
+.ff:focus{border-bottom-color:rgba(168,85,247,.6)!important;box-shadow:0 2px 20px -4px rgba(168,85,247,.2)}
+.ff::placeholder{color:rgba(255,255,255,.15)}
+.ff-gold:focus{border-bottom-color:rgba(201,168,76,.6)!important;box-shadow:0 2px 20px -4px rgba(201,168,76,.2)}
 
+.btn-neon{background:linear-gradient(135deg,rgba(168,85,247,.15),rgba(99,102,241,.1));border:1px solid rgba(168,85,247,.25);
+  color:#E2E8F0;font-weight:700;border-radius:14px;padding:10px 24px;cursor:pointer;font-size:12px;
+  transition:all .5s;position:relative;overflow:hidden}
+.btn-neon:hover{background:linear-gradient(135deg,rgba(168,85,247,.25),rgba(99,102,241,.15));
+  box-shadow:0 0 30px -5px rgba(168,85,247,.3);transform:translateY(-1px)}
+.btn-neon:active{transform:scale(.97)}
+.btn-neon::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.05),transparent);
+  transform:translateX(-100%);transition:transform .6s}
+.btn-neon:hover::before{transform:translateX(100%)}
+
+.btn-gold{background:linear-gradient(135deg,#C9A84C,#9A7E38);color:#050510;font-weight:800;border:none;
+  border-radius:14px;padding:10px 24px;cursor:pointer;font-size:12px;transition:all .5s}
+.btn-gold:hover{box-shadow:0 0 30px -5px rgba(201,168,76,.35);transform:translateY(-1px)}
+.btn-gold:active{transform:scale(.97)}
+
+.lbl{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.25em;font-weight:600;margin-bottom:8px;
+  background:linear-gradient(90deg,rgba(168,85,247,.7),rgba(34,211,238,.5));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+.bar{transition:height 1.2s cubic-bezier(.16,1,.3,1)}
 .toast{transform:translateX(-50%) translateY(100px);transition:transform .5s cubic-bezier(.16,1,.3,1)}
 .toast.show{transform:translateX(-50%) translateY(0)}
 
-.halo{position:fixed;pointer-events:none;z-index:9997;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,.04) 0%,rgba(201,168,76,.01) 40%,transparent 70%);transform:translate(-50%,-50%);transition:opacity .4s}
+.halo{position:fixed;pointer-events:none;z-index:9997;width:160px;height:160px;border-radius:50%;
+  background:radial-gradient(circle,rgba(168,85,247,.03) 0%,rgba(99,102,241,.01) 40%,transparent 70%);
+  transform:translate(-50%,-50%);transition:opacity .4s}
 
+.sb-item.active .sb-bar{opacity:1;transform:scaleY(1)}
 input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none}
 input[type="number"]{-moz-appearance:textfield}
 
-.sb-item.active .sb-bar{opacity:1;transform:scaleY(1)}
-
-.card-glow{position:absolute;top:0;left:0;right:0;height:1px;opacity:.7}
-.card-shine{position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.015) 0%,transparent 50%);pointer-events:none;border-radius:inherit}
+#particleOverlay{position:fixed;inset:0;z-index:999;pointer-events:none}
 
 @media(max-width:768px){
   .mob-1{grid-template-columns:1fr!important}
-  .mob-p{padding-left:16px!important;padding-right:16px!important}
-  .mob-py{padding-top:24px!important;padding-bottom:24px!important}
-  .mob-text{font-size:26px!important}
-  .mob-gap{gap:12px!important}
+  .mob-p{padding-left:14px!important;padding-right:14px!important}
+  .mob-py{padding-top:20px!important;padding-bottom:20px!important}
+  .mob-text{font-size:24px!important}
   .mob-ring{flex-direction:column!important}
   .mob-ring>div:first-child{width:180px!important;height:180px!important;margin:0 auto!important}
 }
-@media(max-width:540px){
-  .sidebar{width:48px!important}
-  .sb-logo{width:32px!important;height:32px!important;font-size:10px!important}
-  .sb-item,.sb-item-s{width:36px!important;height:36px!important}
-}
+@media(max-width:540px){.sidebar{width:46px!important}}
 </style>
 </head>
 <body class="bg-brand-900 text-slate-200 font-heebo antialiased overflow-hidden h-screen">
 
-<div id="app" class="h-screen overflow-hidden">
+<div class="nebula">
+  <div class="neb" style="width:550px;height:550px;background:radial-gradient(circle,rgba(99,102,241,.13),transparent 70%);top:-12%;left:-8%;animation:nd1 28s infinite ease-in-out"></div>
+  <div class="neb" style="width:420px;height:420px;background:radial-gradient(circle,rgba(168,85,247,.11),transparent 70%);top:35%;right:-10%;animation:nd2 32s infinite ease-in-out"></div>
+  <div class="neb" style="width:600px;height:350px;background:radial-gradient(circle,rgba(201,168,76,.07),transparent 70%);bottom:-12%;left:25%;animation:nd3 36s infinite ease-in-out"></div>
+  <div class="neb" style="width:380px;height:380px;background:radial-gradient(circle,rgba(34,211,238,.06),transparent 70%);top:15%;left:45%;animation:nd4 30s infinite ease-in-out"></div>
+  <div class="neb" style="width:300px;height:300px;background:radial-gradient(circle,rgba(244,114,182,.05),transparent 70%);bottom:20%;right:20%;animation:nd1 34s infinite ease-in-out reverse"></div>
+</div>
+<div class="grid-ov"></div>
+<div class="scan-ov"></div>
+
+<div id="app" class="h-screen overflow-hidden relative z-10">
 <div class="flex h-full">
 
-<nav class="sidebar w-[66px] flex-shrink-0 bg-brand-950/90 backdrop-blur-3xl border-r border-white/[0.03] flex flex-col items-center py-5 gap-1.5 z-20 relative">
-  <div class="absolute inset-0 bg-gradient-to-b from-gold/[0.015] to-transparent pointer-events-none"></div>
-  <div class="sb-logo w-[38px] h-[38px] rounded-xl bg-gradient-to-br from-gold/15 to-gold-dark/10 border border-gold/15 flex items-center justify-center text-gold font-black text-[12px] mb-8 shadow-[0_4px_20px_-4px_rgba(201,168,76,0.08)] relative z-10 tracking-tight">LH</div>
+<nav class="sidebar w-[62px] flex-shrink-0 backdrop-blur-3xl bg-brand-950/60 border-r border-white/[0.03] flex flex-col items-center py-5 gap-1.5 z-20 relative">
+  <div class="absolute inset-0 bg-gradient-to-b from-neon-purple/[0.03] to-transparent pointer-events-none"></div>
+  <div class="w-[36px] h-[36px] rounded-xl bg-gradient-to-br from-neon-purple/20 to-neon-blue/15 border border-neon-purple/20 flex items-center justify-center text-neon-purple font-black text-[11px] mb-8 shadow-[0_0_20px_-4px_rgba(168,85,247,0.15)] relative z-10 tracking-tight" style="animation:glowPulse 4s infinite;--glow:rgba(168,85,247,.12)">LH</div>
 
-  <div class="sb-item active relative w-[42px] h-[42px] rounded-xl flex items-center justify-center text-slate-600 cursor-pointer transition-all duration-500 hover:text-slate-400 hover:bg-white/[0.02] group" data-view="dashboard">
-    <div class="sb-bar absolute left-0 top-3 bottom-3 w-[2.5px] rounded-r-full bg-gold shadow-[0_0_10px_rgba(201,168,76,0.3)] opacity-0 scale-y-0 transition-all duration-500"></div>
-    <svg class="w-[18px] h-[18px] relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+  <div class="sb-item active relative w-[40px] h-[40px] rounded-xl flex items-center justify-center text-slate-600 cursor-pointer transition-all duration-500 hover:text-slate-300 hover:bg-white/[0.03]" data-view="dashboard">
+    <div class="sb-bar absolute left-0 top-3 bottom-3 w-[2px] rounded-r-full bg-neon-purple shadow-[0_0_12px_rgba(168,85,247,0.5)] opacity-0 scale-y-0 transition-all duration-500"></div>
+    <svg class="w-[17px] h-[17px] relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
   </div>
-  <div class="sb-item relative w-[42px] h-[42px] rounded-xl flex items-center justify-center text-slate-600 cursor-pointer transition-all duration-500 hover:text-slate-400 hover:bg-white/[0.02]" data-view="monthly">
-    <div class="sb-bar absolute left-0 top-3 bottom-3 w-[2.5px] rounded-r-full bg-gold shadow-[0_0_10px_rgba(201,168,76,0.3)] opacity-0 scale-y-0 transition-all duration-500"></div>
-    <svg class="w-[18px] h-[18px] relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+  <div class="sb-item relative w-[40px] h-[40px] rounded-xl flex items-center justify-center text-slate-600 cursor-pointer transition-all duration-500 hover:text-slate-300 hover:bg-white/[0.03]" data-view="monthly">
+    <div class="sb-bar absolute left-0 top-3 bottom-3 w-[2px] rounded-r-full bg-neon-purple shadow-[0_0_12px_rgba(168,85,247,0.5)] opacity-0 scale-y-0 transition-all duration-500"></div>
+    <svg class="w-[17px] h-[17px] relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
   </div>
-  <div class="sb-item relative w-[42px] h-[42px] rounded-xl flex items-center justify-center text-slate-600 cursor-pointer transition-all duration-500 hover:text-slate-400 hover:bg-white/[0.02]" data-view="annual">
-    <div class="sb-bar absolute left-0 top-3 bottom-3 w-[2.5px] rounded-r-full bg-gold shadow-[0_0_10px_rgba(201,168,76,0.3)] opacity-0 scale-y-0 transition-all duration-500"></div>
-    <svg class="w-[18px] h-[18px] relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+  <div class="sb-item relative w-[40px] h-[40px] rounded-xl flex items-center justify-center text-slate-600 cursor-pointer transition-all duration-500 hover:text-slate-300 hover:bg-white/[0.03]" data-view="annual">
+    <div class="sb-bar absolute left-0 top-3 bottom-3 w-[2px] rounded-r-full bg-neon-purple shadow-[0_0_12px_rgba(168,85,247,0.5)] opacity-0 scale-y-0 transition-all duration-500"></div>
+    <svg class="w-[17px] h-[17px] relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
   </div>
-  <div class="mt-auto flex flex-col gap-1.5 items-center">
-    <div class="sb-item relative w-[42px] h-[42px] rounded-xl flex items-center justify-center text-slate-600 cursor-pointer transition-all duration-500 hover:text-slate-400 hover:bg-white/[0.02]" data-view="settings">
-      <div class="sb-bar absolute left-0 top-3 bottom-3 w-[2.5px] rounded-r-full bg-gold shadow-[0_0_10px_rgba(201,168,76,0.3)] opacity-0 scale-y-0 transition-all duration-500"></div>
-      <svg class="w-[18px] h-[18px] relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  <div class="mt-auto">
+    <div class="sb-item relative w-[40px] h-[40px] rounded-xl flex items-center justify-center text-slate-600 cursor-pointer transition-all duration-500 hover:text-slate-300 hover:bg-white/[0.03]" data-view="settings">
+      <div class="sb-bar absolute left-0 top-3 bottom-3 w-[2px] rounded-r-full bg-neon-purple shadow-[0_0_12px_rgba(168,85,247,0.5)] opacity-0 scale-y-0 transition-all duration-500"></div>
+      <svg class="w-[17px] h-[17px] relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </div>
   </div>
 </nav>
@@ -123,30 +158,27 @@ input[type="number"]{-moz-appearance:textfield}
   <div class="view" id="v-annual"></div>
   <div class="view" id="v-settings"></div>
 </div>
-
 </div>
 </div>
 
-<div class="fixed inset-0 bg-black/65 backdrop-blur-lg z-[100] items-center justify-center p-5" id="addMonthModal" style="display:none">
-  <div class="bg-brand-800 border border-white/[0.05] rounded-3xl p-8 w-full max-w-lg relative shadow-[0_32px_80px_-12px_rgba(0,0,0,.7)]" style="animation:modalIn .4s cubic-bezier(.16,1,.3,1)">
-    <button class="absolute top-5 right-5 w-8 h-8 rounded-lg bg-white/[0.03] border border-white/[0.04] text-slate-500 hover:text-white hover:bg-white/[0.06] transition-all duration-500 flex items-center justify-center text-lg" onclick="closeModal('addMonthModal')">&times;</button>
-    <h3 class="text-lg font-bold mb-7 tracking-tight">הוספה / עריכת חודש</h3>
-    <div class="mb-5"><label class="block text-[9px] uppercase tracking-[0.25em] text-slate-500 font-semibold mb-2">חודש</label><select id="amMonth" class="w-full bg-white/[0.025] border border-white/[0.04] rounded-xl px-4 py-3 text-slate-100 text-sm outline-none transition-all duration-500 focus:border-gold/25 focus:shadow-[0_0_0_3px_rgba(201,168,76,0.06)]"></select></div>
-    <div class="mb-5"><label class="block text-[9px] uppercase tracking-[0.25em] text-slate-500 font-semibold mb-2">הכנסות (₪)</label><input type="number" id="amIncome" placeholder="0" class="w-full bg-white/[0.025] border border-white/[0.04] rounded-xl px-4 py-3 text-slate-100 text-sm outline-none transition-all duration-500 focus:border-gold/25 focus:shadow-[0_0_0_3px_rgba(201,168,76,0.06)]"></div>
+<div class="fixed inset-0 bg-black/70 backdrop-blur-2xl z-[100] items-center justify-center p-5" id="addMonthModal" style="display:none">
+  <div class="bg-brand-800/90 backdrop-blur-3xl border border-neon-purple/10 rounded-3xl p-8 w-full max-w-lg relative shadow-[0_32px_80px_-12px_rgba(168,85,247,.15)]" style="animation:modalIn .4s cubic-bezier(.16,1,.3,1)">
+    <button class="absolute top-5 right-5 w-8 h-8 rounded-lg bg-white/[0.03] border border-white/[0.05] text-slate-500 hover:text-white hover:bg-neon-purple/10 transition-all duration-500 flex items-center justify-center text-lg" onclick="closeModal('addMonthModal')">&times;</button>
+    <h3 class="text-lg font-bold mb-7 tracking-tight bg-gradient-to-r from-neon-purple to-neon-cyan bg-clip-text text-transparent">עריכת מחזור</h3>
+    <div class="mb-5"><label class="lbl">מחזור</label><select id="amMonth" class="ff ff-gold w-full"></select></div>
+    <div class="mb-5"><label class="lbl">כניסות (₪)</label><input type="number" id="amIncome" placeholder="0" class="ff ff-gold" dir="ltr"></div>
     <div id="amCatFields"></div>
     <div class="grid grid-cols-2 gap-4 mb-6">
-      <div><label class="block text-[9px] uppercase tracking-[0.25em] text-slate-500 font-semibold mb-2">שווי נקי</label><input type="number" id="amNetWorth" placeholder="0" class="w-full bg-white/[0.025] border border-white/[0.04] rounded-xl px-4 py-3 text-slate-100 text-sm outline-none transition-all duration-500 focus:border-gold/25 focus:shadow-[0_0_0_3px_rgba(201,168,76,0.06)]"></div>
-      <div><label class="block text-[9px] uppercase tracking-[0.25em] text-slate-500 font-semibold mb-2">חיסכון נזיל</label><input type="number" id="amLiquid" placeholder="0" class="w-full bg-white/[0.025] border border-white/[0.04] rounded-xl px-4 py-3 text-slate-100 text-sm outline-none transition-all duration-500 focus:border-gold/25 focus:shadow-[0_0_0_3px_rgba(201,168,76,0.06)]"></div>
+      <div><label class="lbl">שווי נטו</label><input type="number" id="amNetWorth" placeholder="0" class="ff ff-gold" dir="ltr"></div>
+      <div><label class="lbl">רזרבה נזילה</label><input type="number" id="amLiquid" placeholder="0" class="ff ff-gold" dir="ltr"></div>
     </div>
-    <div class="flex gap-3">
-      <button class="bg-gradient-to-l from-gold to-gold-dark text-brand-950 font-bold text-sm rounded-xl px-7 py-3 transition-all duration-500 hover:shadow-[0_4px_24px_-4px_rgba(201,168,76,0.25)] hover:scale-[1.02] active:scale-[0.98]" id="amSave">שמור</button>
-      <button class="bg-white/[0.03] border border-white/[0.04] text-slate-400 text-sm rounded-xl px-6 py-3 transition-all duration-500 hover:bg-white/[0.06] hover:text-slate-200" onclick="closeModal('addMonthModal')">ביטול</button>
-    </div>
+    <div class="flex gap-3"><button class="btn-gold" id="amSave">אשר</button><button class="btn-neon" onclick="closeModal('addMonthModal')">בטל</button></div>
   </div>
 </div>
 
-<div class="toast fixed bottom-6 left-1/2 bg-brand-800/95 border border-gold/15 rounded-2xl px-7 py-4 text-[13px] font-medium text-gold z-[200] shadow-[0_16px_48px_-8px_rgba(0,0,0,.6)] backdrop-blur-2xl" id="toast"></div>
+<div class="toast fixed bottom-6 left-1/2 bg-brand-800/95 border border-neon-purple/20 rounded-2xl px-7 py-4 text-[13px] font-medium text-neon-purple z-[200] shadow-[0_0_40px_-8px_rgba(168,85,247,.2)] backdrop-blur-3xl" id="toast"></div>
 <div class="halo" id="halo"></div>
+<canvas id="particleOverlay"></canvas>
 
 <script>
 (function(){
@@ -160,7 +192,6 @@ const DEFAULT_CATS=[
 ];
 let CATS=JSON.parse(localStorage.getItem('lh_cats')||'null')||JSON.parse(JSON.stringify(DEFAULT_CATS));
 function saveCats(){localStorage.setItem('lh_cats',JSON.stringify(CATS))}
-
 const MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const MO_HE=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
 const MO_HE_S=['ינו׳','פבר׳','מרץ','אפר׳','מאי','יוני','יולי','אוג׳','ספט׳','אוק׳','נוב׳','דצמ׳'];
@@ -184,7 +215,7 @@ const DEFAULT_DATA={
 let S=loadLocal()||JSON.parse(JSON.stringify(DEFAULT_DATA));
 if(!S.manualEntries)S.manualEntries=[];
 let GAS=ls('lh_gas')||'https://script.google.com/macros/s/AKfycbwMDQpxmLCiXM62_imOz6p63DwQvT6A7kyJ_59qps8SwrELidbQ4KZQDicUDn1qZlzd/exec';
-let curView='dashboard',curMonthIdx=-1;
+let curView='dashboard',curMonthIdx=-1,vortexRAF=null;
 
 function ls(k,v){if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}
 function loadLocal(){try{return JSON.parse(ls('lh_state'))}catch(e){return null}}
@@ -196,23 +227,20 @@ function totE(d){return CATS.reduce((a,c)=>a+(d.expenses[c.key]||0),0)}
 function mKeys(){return Object.keys(S.months)}
 function sortMonths(){const sorted=Object.entries(S.months).sort((a,b)=>{const[mA,yA]=a[0].split(' '),[mB,yB]=b[0].split(' ');return(+yA-+yB)||(MO.indexOf(mA)-MO.indexOf(mB))});S.months=Object.fromEntries(sorted)}
 
-async function syncCloud(){if(!GAS)return;try{await fetch(GAS+'?action=save',{method:'POST',body:JSON.stringify(S),headers:{'Content-Type':'text/plain'}});setSyncBadge('ok','מסונכרן')}catch(e){setSyncBadge('err','נכשל')}}
-async function loadCloud(){if(!GAS)return;try{const r=await fetch(GAS+'?action=get');const d=await r.json();if(d&&d.months){S=d;if(!S.manualEntries)S.manualEntries=[];save();setSyncBadge('ok','נטען')}}catch(e){setSyncBadge('err','טעינה נכשלה')}}
-function setSyncBadge(s,t){document.querySelectorAll('.sync-badge').forEach(b=>{b.className='sync-badge flex items-center gap-2 text-[10px] px-3 py-1.5 rounded-lg bg-white/[0.02] border backdrop-blur-2xl transition-all duration-500 '+(s==='ok'?'text-emerald-400/80 border-emerald-500/15':'text-red-400/80 border-red-500/15');b.querySelector('.st').textContent=t})}
+async function syncCloud(){if(!GAS)return;try{await fetch(GAS+'?action=save',{method:'POST',body:JSON.stringify(S),headers:{'Content-Type':'text/plain'}});setSyncBadge('ok','מקושר')}catch(e){setSyncBadge('err','ניתוק')}}
+async function loadCloud(){if(!GAS)return;try{const r=await fetch(GAS+'?action=get');const d=await r.json();if(d&&d.months){S=d;if(!S.manualEntries)S.manualEntries=[];save();setSyncBadge('ok','נטען')}}catch(e){setSyncBadge('err','שגיאה')}}
+function setSyncBadge(s,t){document.querySelectorAll('.sync-badge').forEach(b=>{b.className='sync-badge flex items-center gap-2 text-[10px] px-3 py-1.5 rounded-lg backdrop-blur-2xl transition-all duration-500 '+(s==='ok'?'text-emerald-400/80 bg-emerald-400/[0.04] border border-emerald-500/10':'text-red-400/80 bg-red-400/[0.04] border border-red-500/10');b.querySelector('.st').textContent=t})}
+
+function heatStyle(pct){const a=Math.abs(pct),i=Math.min(a/15,1),up=pct>0;
+  const c=up?'248,113,113':'52,211,153';return`color:rgba(${c},${.5+i*.5});text-shadow:0 0 ${4+i*18}px rgba(${c},${i*.6})`}
 
 function switchView(v){
-  curView=v;
-  document.querySelectorAll('.sb-item').forEach(i=>{const a=i.dataset.view===v;i.classList.toggle('active',a);i.classList.toggle('text-gold',a);i.classList.toggle('bg-gold/[0.04]',a);i.classList.toggle('text-slate-600',!a)});
+  curView=v;if(vortexRAF){cancelAnimationFrame(vortexRAF);vortexRAF=null}
+  document.querySelectorAll('.sb-item').forEach(i=>{const a=i.dataset.view===v;i.classList.toggle('active',a);i.classList.toggle('text-neon-purple',a);i.classList.toggle('bg-neon-purple/[0.06]',a);i.classList.toggle('text-slate-600',!a)});
   document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='v-'+v));
   document.getElementById('mainScroll').scrollTop=0;
   if(v==='dashboard')renderDashboard();else if(v==='monthly')renderMonthly();else if(v==='annual')renderAnnual();else renderSettings();
 }
-
-const CC='group relative bg-white/[0.02] backdrop-blur-2xl border border-white/[0.03] rounded-2xl p-6 overflow-hidden transition-all duration-500 hover:bg-white/[0.035] hover:border-white/[0.06] hover:shadow-[0_12px_48px_-12px_rgba(0,0,0,.35)] hover:-translate-y-[2px]';
-const PP='bg-white/[0.02] backdrop-blur-2xl border border-white/[0.03] rounded-2xl p-7 shadow-[0_2px_16px_-4px_rgba(0,0,0,.15)] transition-all duration-500';
-const INP='w-full bg-white/[0.02] border border-white/[0.04] rounded-xl px-4 py-3 text-sm text-slate-100 outline-none transition-all duration-500 focus:border-gold/20 focus:shadow-[0_0_0_3px_rgba(201,168,76,0.05)] placeholder-slate-700';
-const LBL='block text-[9px] uppercase tracking-[0.25em] text-slate-500/80 font-semibold mb-2';
-const BTNG='bg-gradient-to-l from-gold to-gold-dark text-brand-950 font-bold text-sm rounded-xl px-7 py-3 transition-all duration-500 hover:shadow-[0_4px_24px_-4px_rgba(201,168,76,0.2)] hover:scale-[1.02] active:scale-[0.98]';
 
 function renderDashboard(){
   const mk=mKeys(),cur=S.months[mk[mk.length-1]],prev=S.months[mk[mk.length-2]];
@@ -226,148 +254,126 @@ function renderDashboard(){
   const expD=((cT-pT)/pT*100).toFixed(1);
 
   document.getElementById('v-dashboard').innerHTML=`
-  <div class="sticky top-0 z-10 px-8 mob-p py-5 flex items-center gap-4 flex-wrap bg-brand-900/80 backdrop-blur-3xl border-b border-white/[0.025]">
-    <h2 class="text-[22px] font-extrabold tracking-[-0.5px]">לוח בקרה</h2>
+  <div class="sticky top-0 z-10 px-8 mob-p py-4 flex items-center gap-4 flex-wrap bg-brand-900/50 backdrop-blur-3xl border-b border-white/[0.03]">
+    <h2 class="text-[20px] font-extrabold tracking-[-0.5px] bg-gradient-to-r from-neon-purple via-neon-cyan to-gold bg-clip-text text-transparent">מרכז פיקוד</h2>
     <div class="ml-auto flex items-center gap-3">
-      <div class="flex items-center gap-2 text-[10px] text-slate-600 font-mono px-3 py-1.5 rounded-lg bg-white/[0.015] border border-white/[0.03]">
-        <span class="w-[5px] h-[5px] rounded-full bg-emerald-400/80 shadow-[0_0_8px_rgba(52,211,153,.4)]" style="animation:pulse 2.5s ease-in-out infinite"></span>
+      <div class="flex items-center gap-2 text-[10px] text-neon-cyan/60 font-mono px-3 py-1.5 rounded-lg bg-neon-cyan/[0.03] border border-neon-cyan/10">
+        <span class="w-[5px] h-[5px] rounded-full bg-neon-cyan/80 shadow-[0_0_8px_rgba(34,211,238,.5)]" style="animation:pulse 2.5s ease-in-out infinite"></span>
         <span id="clock">--:--:--</span>
       </div>
-      <div class="sync-badge flex items-center gap-2 text-[10px] px-3 py-1.5 rounded-lg bg-white/[0.015] border border-white/[0.03] text-slate-600"><span class="w-[4px] h-[4px] rounded-full bg-current"></span><span class="st">${GAS?'מוכן':'ללא סנכרון'}</span></div>
-      <button onclick="openAddMonth()" title="הוספה / עריכת חודש" class="w-9 h-9 rounded-xl bg-gold/[0.08] border border-gold/15 text-gold flex items-center justify-center transition-all duration-500 hover:shadow-[0_4px_20px_-4px_rgba(201,168,76,0.15)] hover:scale-105 hover:bg-gold/[0.12]">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <div class="sync-badge flex items-center gap-2 text-[10px] px-3 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.04] text-slate-600"><span class="w-[4px] h-[4px] rounded-full bg-current"></span><span class="st">${GAS?'מערכת פעילה':'לא מקושר'}</span></div>
+      <button onclick="openAddMonth()" title="עריכת מחזור" class="w-9 h-9 rounded-xl bg-neon-purple/[0.08] border border-neon-purple/15 text-neon-purple flex items-center justify-center transition-all duration-500 hover:shadow-[0_0_24px_-4px_rgba(168,85,247,.2)] hover:scale-105">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
     </div>
   </div>
 
-  <div class="zone relative py-14 mob-py overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-b from-brand-900 via-brand-850 to-[#0C1620]"></div>
-    <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_110%,rgba(201,168,76,0.02),transparent)]"></div>
-    <canvas class="zone-canvas" id="zc0"></canvas>
+  <div class="zone relative py-14 mob-py">
     <div class="zone-inner max-w-[1360px] mx-auto px-8 mob-p relative z-[2]">
       <div class="flex items-center gap-4 mb-10">
-        <div class="w-11 h-11 rounded-[14px] bg-gold/[0.05] border border-gold/[0.08] flex items-center justify-center text-lg shadow-[0_2px_12px_-2px_rgba(201,168,76,0.06)]">📊</div>
-        <div><div class="text-[11px] uppercase tracking-[0.3em] font-bold text-gold/70">סקירה כוללת</div><div class="text-[11px] text-slate-600 mt-0.5 tracking-wide">התמונה הפיננסית שלך — במבט אחד</div></div>
+        <div class="w-10 h-10 rounded-[14px] bg-neon-purple/[0.06] border border-neon-purple/10 flex items-center justify-center text-base shadow-[0_0_16px_-4px_rgba(168,85,247,.1)]">⚡</div>
+        <div><div class="text-[10px] uppercase tracking-[0.3em] font-bold text-neon-purple/70">סריקה קוונטית</div><div class="text-[10px] text-slate-700 mt-0.5 tracking-wide">מצב מערכת — סריקה בזמן אמת</div></div>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mob-gap mob-1">
-        <div class="ca ${CC}"><div class="card-glow bg-gradient-to-r from-emerald-400/30 via-emerald-400/5 to-transparent"></div><div class="card-shine"></div>
-          <div class="${LBL}">יחס תזרים</div><div class="text-[34px] mob-text font-black tracking-[-1.5px] leading-none text-emerald-400" id="a-cfr">0%</div>
-          <div class="text-[12px] text-slate-500 mt-4 flex items-center gap-2 leading-relaxed">הכנסות מול הוצאות <span class="text-[9px] font-bold px-2 py-0.5 rounded-md ${+cfr>=100?'bg-emerald-400/8 text-emerald-400/80':'bg-red-400/8 text-red-400/80'}">${+cfr>=100?'תקין':'דורש תשומת לב'}</span></div></div>
-
-        <div class="ca ${CC}"><div class="card-glow bg-gradient-to-r from-gold/40 via-gold/8 to-transparent"></div><div class="card-shine"></div>
-          <div class="${LBL}">שווי נקי</div><div class="text-[34px] mob-text font-black tracking-[-1.5px] leading-none text-gold" id="a-nw">₪0</div>
-          <div class="text-[12px] text-slate-500 mt-4 flex items-center gap-2"><span class="text-[9px] font-bold px-2 py-0.5 rounded-md ${+nwD>=0?'bg-emerald-400/8 text-emerald-400/80':'bg-red-400/8 text-red-400/80'}">${+nwD>=0?'+':''}${nwD}%</span> מהחודש הקודם</div></div>
-
-        <div class="ca ${CC}"><div class="card-glow bg-gradient-to-r from-amber-400/30 via-amber-400/5 to-transparent"></div><div class="card-shine"></div>
-          <div class="${LBL}">הוצאות</div><div class="text-[34px] mob-text font-black tracking-[-1.5px] leading-none text-amber-300/90" id="a-exp">₪0</div>
-          <div class="text-[12px] text-slate-500 mt-4 flex items-center gap-2"><span class="text-[9px] font-bold px-2 py-0.5 rounded-md ${+expD>0?'bg-red-400/8 text-red-400/80':'bg-emerald-400/8 text-emerald-400/80'}">${expD}%</span> מ-${heMonth(prevM)}</div></div>
-
-        <div class="ca ${CC}"><div class="card-glow bg-gradient-to-r from-cyan-400/30 via-cyan-400/5 to-transparent"></div><div class="card-shine"></div>
-          <div class="${LBL}">הכנסות</div><div class="text-[34px] mob-text font-black tracking-[-1.5px] leading-none text-cyan-300/90" id="a-inc">₪0</div>
-          <div class="text-[12px] text-slate-500 mt-4">עודף: <strong class="${surplus>=0?'text-emerald-400/80':'text-red-400/80'}">${fmt(surplus)}</strong></div></div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mob-1" id="overviewCards">
+        <div class="qc" style="--ambient:rgba(52,211,153,.1)"><div class="lbl">יחס קוונטי</div><div class="text-[32px] mob-text font-black tracking-[-1.5px] leading-none text-emerald-400" id="a-cfr">0%</div>
+          <div class="text-[11px] text-slate-600 mt-4 flex items-center gap-2">כניסות מול יציאות <span class="text-[9px] font-bold px-2 py-0.5 rounded-md ${+cfr>=100?'bg-emerald-400/8 text-emerald-400/80':'bg-red-400/8 text-red-400/80'}">${+cfr>=100?'יציב':'דורש תשומת לב'}</span></div></div>
+        <div class="qc" style="--ambient:rgba(201,168,76,.1)"><div class="lbl">שווי נטו</div><div class="text-[32px] mob-text font-black tracking-[-1.5px] leading-none text-gold" id="a-nw">₪0</div>
+          <div class="text-[11px] text-slate-600 mt-4 flex items-center gap-2"><span class="text-[9px] font-bold px-2 py-0.5 rounded-md ${+nwD>=0?'bg-emerald-400/8 text-emerald-400/80':'bg-red-400/8 text-red-400/80'}" style="${heatStyle(+nwD)}">${+nwD>=0?'+':''}${nwD}%</span> מהמחזור הקודם</div></div>
+        <div class="qc" style="--ambient:rgba(248,113,113,.08)"><div class="lbl">יציאות</div><div class="text-[32px] mob-text font-black tracking-[-1.5px] leading-none text-amber-300/90" id="a-exp">₪0</div>
+          <div class="text-[11px] text-slate-600 mt-4 flex items-center gap-2"><span class="text-[9px] font-bold px-2 py-0.5 rounded-md" style="${heatStyle(+expD)}">${expD}%</span> מ-${heMonth(prevM)}</div></div>
+        <div class="qc" style="--ambient:rgba(34,211,238,.08)"><div class="lbl">כניסות</div><div class="text-[32px] mob-text font-black tracking-[-1.5px] leading-none text-neon-cyan/90" id="a-inc">₪0</div>
+          <div class="text-[11px] text-slate-600 mt-4">דלתא: <strong class="${surplus>=0?'text-emerald-400/80':'text-red-400/80'}">${fmt(surplus)}</strong></div></div>
       </div>
     </div>
-    <div class="absolute bottom-0 left-0 right-0 h-36 bg-gradient-to-b from-transparent to-[#0A1518] z-[1]"></div>
   </div>
 
-  <div class="zone relative py-20 mob-py overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-b from-[#0A1518] via-[#0C1A18] to-[#12160E]"></div>
-    <div class="absolute inset-0 bg-[radial-gradient(ellipse_45%_45%_at_80%_50%,rgba(52,211,153,.025),transparent)]"></div>
-    <canvas class="zone-canvas" id="zc1"></canvas>
+  <div class="zone relative py-16 mob-py">
     <div class="zone-inner max-w-[1360px] mx-auto px-8 mob-p relative z-[2]">
       <div class="flex items-center gap-4 mb-12">
-        <div class="w-11 h-11 rounded-[14px] bg-emerald-400/[0.04] border border-emerald-400/[0.08] flex items-center justify-center text-lg shadow-[0_2px_12px_-2px_rgba(52,211,153,0.04)]">💰</div>
-        <div><div class="text-[11px] uppercase tracking-[0.3em] font-bold text-emerald-400/60">הכנסות וצמיחה</div><div class="text-[11px] text-slate-600 mt-0.5 tracking-wide">ניהול הכנסות ובניית הון עצמי</div></div>
+        <div class="w-10 h-10 rounded-[14px] bg-emerald-400/[0.05] border border-emerald-400/10 flex items-center justify-center text-base shadow-[0_0_16px_-4px_rgba(52,211,153,.08)]">🚀</div>
+        <div><div class="text-[10px] uppercase tracking-[0.3em] font-bold text-emerald-400/60">מנוע צמיחה</div><div class="text-[10px] text-slate-700 mt-0.5 tracking-wide">מערך כניסות ובניית הון</div></div>
       </div>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="pa ${PP}">
-          <div class="text-[10px] uppercase tracking-[0.2em] text-slate-500/70 font-semibold mb-7 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-emerald-400/70"></span>תזרים מזומנים — ${last6.length} חודשים</div>
+        <div class="qp">
+          <div class="text-[9px] uppercase tracking-[0.2em] text-neon-cyan/50 font-semibold mb-7 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-neon-cyan/70 shadow-[0_0_6px_rgba(34,211,238,.4)]"></span>פולס תזרימי — ${last6.length} מחזורים</div>
           <div class="flex items-end gap-4 h-[165px] pt-2" dir="ltr">
             ${last6.map(m=>{const inc=S.months[m].income,exp=totE(S.months[m]);return`
             <div class="flex-1 flex flex-col items-center gap-1.5">
               <div class="flex gap-1 items-end h-[135px]">
-                <div class="bar w-[20px] rounded-t-[5px] bg-gradient-to-t from-emerald-600/40 to-emerald-400/90 relative group cursor-pointer" data-v="${inc}" style="height:0"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-bold text-emerald-400/80 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-500 bg-brand-800/95 px-1.5 py-0.5 rounded-md shadow-lg">${fmtK(inc)}</span></div>
-                <div class="bar w-[20px] rounded-t-[5px] bg-gradient-to-t from-red-600/30 to-red-400/70 relative group cursor-pointer" data-v="${exp}" style="height:0"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-bold text-red-400/80 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-500 bg-brand-800/95 px-1.5 py-0.5 rounded-md shadow-lg">${fmtK(exp)}</span></div>
+                <div class="bar w-[18px] rounded-t-[4px] bg-gradient-to-t from-emerald-600/40 to-emerald-400/90 relative group cursor-pointer shadow-[0_0_12px_-3px_rgba(52,211,153,.2)]" data-v="${inc}" style="height:0"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-bold text-emerald-400/80 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-500 bg-brand-900/95 px-1.5 py-0.5 rounded-md shadow-lg border border-emerald-400/10">${fmtK(inc)}</span></div>
+                <div class="bar w-[18px] rounded-t-[4px] bg-gradient-to-t from-red-600/30 to-red-400/70 relative group cursor-pointer shadow-[0_0_12px_-3px_rgba(248,113,113,.15)]" data-v="${exp}" style="height:0"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-bold text-red-400/80 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-500 bg-brand-900/95 px-1.5 py-0.5 rounded-md shadow-lg border border-red-400/10">${fmtK(exp)}</span></div>
               </div>
               <div class="text-[9px] text-slate-600 font-medium">${heMonthS(m)}</div>
             </div>`}).join('')}
           </div>
-          <div class="flex gap-5 mt-6 text-[9px] text-slate-600"><span class="flex items-center gap-1.5"><span class="w-[6px] h-[6px] rounded-[2px] bg-emerald-400/80"></span>הכנסות</span><span class="flex items-center gap-1.5"><span class="w-[6px] h-[6px] rounded-[2px] bg-red-400/70"></span>הוצאות</span></div>
+          <div class="flex gap-5 mt-6 text-[9px] text-slate-600"><span class="flex items-center gap-1.5"><span class="w-[6px] h-[6px] rounded-[2px] bg-emerald-400/80 shadow-[0_0_4px_rgba(52,211,153,.3)]"></span>כניסות</span><span class="flex items-center gap-1.5"><span class="w-[6px] h-[6px] rounded-[2px] bg-red-400/70 shadow-[0_0_4px_rgba(248,113,113,.2)]"></span>יציאות</span></div>
         </div>
-        <div class="pa ${PP}">
-          <div class="text-[10px] uppercase tracking-[0.2em] text-slate-500/70 font-semibold mb-7 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-gold/70"></span>כרית ביטחון פיננסית</div>
-          <div class="flex items-baseline gap-1"><span class="text-[58px] font-black tracking-[-3px] leading-none ${+rw>6?'text-emerald-400/90':+rw>3?'text-gold':'text-red-400/90'}" id="a-rw">0</span><span class="text-[15px] font-medium text-slate-500 mr-1.5">חודשים</span></div>
-          <p class="text-[12px] text-slate-500 mt-5 leading-[1.8]">הרזרבות הנזילות שלך מספיקות ל-<strong class="text-slate-300">${rw} חודשי</strong> הוצאות, גם ללא הכנסה.</p>
-          <div class="h-[6px] bg-white/[0.025] rounded-full overflow-hidden mt-6 mb-2.5"><div class="h-full rounded-full transition-all duration-[1.4s] ease-out" id="rwBar" style="width:0;background:linear-gradient(90deg,${+rw>6?'#34D399':'#C9A84C'},transparent)"></div></div>
-          <div class="flex justify-between text-[9px] text-slate-700 mb-5"><span>0</span><span class="text-gold/40">3 חודשים</span><span class="text-emerald-400/40">6 חודשים</span><span>12</span></div>
-          <div class="flex justify-between py-3.5 px-4 bg-white/[0.015] border border-white/[0.025] rounded-xl text-[12px] mb-2"><span class="text-slate-600">חיסכון נזיל</span><span class="font-bold text-slate-300">${fmt(S.liquidSavings)}</span></div>
-          <div class="flex justify-between py-3.5 px-4 bg-white/[0.015] border border-white/[0.025] rounded-xl text-[12px]"><span class="text-slate-600">הוצאה חודשית ממוצעת</span><span class="font-bold text-slate-300">${fmt(avgE)}</span></div>
+        <div class="qp">
+          <div class="text-[9px] uppercase tracking-[0.2em] text-gold/50 font-semibold mb-7 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-gold/70 shadow-[0_0_6px_rgba(201,168,76,.3)]"></span>מגן קוונטי</div>
+          <div class="flex items-baseline gap-1"><span class="text-[56px] font-black tracking-[-3px] leading-none ${+rw>6?'text-emerald-400/90':+rw>3?'text-gold':'text-red-400/90'}" id="a-rw" style="text-shadow:0 0 30px ${+rw>6?'rgba(52,211,153,.2)':+rw>3?'rgba(201,168,76,.2)':'rgba(248,113,113,.2)'}">0</span><span class="text-[14px] font-medium text-slate-600 mr-1.5">מחזורים</span></div>
+          <p class="text-[11px] text-slate-600 mt-5 leading-[1.8]">הרזרבות הנזילות שלך מספיקות ל-<strong class="text-slate-300">${rw} מחזורי</strong> הוצאות, גם ללא כניסות.</p>
+          <div class="h-[5px] bg-white/[0.03] rounded-full overflow-hidden mt-6 mb-2.5 shadow-inner"><div class="h-full rounded-full transition-all duration-[1.4s] ease-out" id="rwBar" style="width:0;background:linear-gradient(90deg,${+rw>6?'#34D399,rgba(52,211,153,.2)':'#C9A84C,rgba(201,168,76,.2)'});box-shadow:0 0 12px -2px ${+rw>6?'rgba(52,211,153,.4)':'rgba(201,168,76,.3)'}"></div></div>
+          <div class="flex justify-between text-[9px] text-slate-700 mb-5"><span>0</span><span class="text-gold/30">3</span><span class="text-emerald-400/30">6</span><span>12</span></div>
+          <div class="flex justify-between py-3 px-4 bg-white/[0.015] border border-white/[0.03] rounded-xl text-[11px] mb-2 transition-all duration-500 hover:bg-white/[0.025]"><span class="text-slate-600">רזרבה נזילה</span><span class="font-bold text-slate-300">${fmt(S.liquidSavings)}</span></div>
+          <div class="flex justify-between py-3 px-4 bg-white/[0.015] border border-white/[0.03] rounded-xl text-[11px] transition-all duration-500 hover:bg-white/[0.025]"><span class="text-slate-600">שריפה חודשית ממוצעת</span><span class="font-bold text-slate-300">${fmt(avgE)}</span></div>
         </div>
       </div>
     </div>
-    <div class="absolute bottom-0 left-0 right-0 h-36 bg-gradient-to-b from-transparent to-[#14150E] z-[1]"></div>
   </div>
 
-  <div class="zone relative py-20 pb-28 mob-py overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-b from-[#14150E] via-[#17150D] to-[#0E0C0A]"></div>
-    <div class="absolute inset-0 bg-[radial-gradient(ellipse_45%_45%_at_25%_50%,rgba(201,168,76,.02),transparent)]"></div>
-    <canvas class="zone-canvas" id="zc2"></canvas>
+  <div class="zone relative py-16 pb-24 mob-py">
     <div class="zone-inner max-w-[1360px] mx-auto px-8 mob-p relative z-[2]">
       <div class="flex items-center gap-4 mb-12">
-        <div class="w-11 h-11 rounded-[14px] bg-amber-400/[0.04] border border-amber-400/[0.08] flex items-center justify-center text-lg shadow-[0_2px_12px_-2px_rgba(251,191,36,0.04)]">📋</div>
-        <div><div class="text-[11px] uppercase tracking-[0.3em] font-bold text-amber-300/60">הוצאות ורישום</div><div class="text-[11px] text-slate-600 mt-0.5 tracking-wide">לאן הכסף שלך זורם</div></div>
+        <div class="w-10 h-10 rounded-[14px] bg-neon-purple/[0.05] border border-neon-purple/10 flex items-center justify-center text-base shadow-[0_0_16px_-4px_rgba(168,85,247,.08)]">🌀</div>
+        <div><div class="text-[10px] uppercase tracking-[0.3em] font-bold text-neon-purple/60">מערך זרימה</div><div class="text-[10px] text-slate-700 mt-0.5 tracking-wide">מפת הזרימה הפיננסית</div></div>
       </div>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="pa ${PP}">
-          <div class="text-[10px] uppercase tracking-[0.2em] text-slate-500/70 font-semibold mb-7 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-indigo-400/70"></span>התפלגות הוצאות</div>
+        <div class="qp">
+          <div class="text-[9px] uppercase tracking-[0.2em] text-neon-purple/50 font-semibold mb-7 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-neon-purple/70 shadow-[0_0_6px_rgba(168,85,247,.4)]"></span>מבנה הזרם הפיננסי</div>
           <div class="flex items-center gap-8 mob-ring">
-            <div class="relative w-[210px] h-[210px] flex-shrink-0">
-              <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">${ringArcs(prev.expenses,100,16,120,120)+''+ringArcs(cur.expenses,72,20,120,120)}<circle cx="120" cy="120" r="100" fill="none" stroke="rgba(255,255,255,.02)" stroke-width="16"/><circle cx="120" cy="120" r="72" fill="none" stroke="rgba(255,255,255,.02)" stroke-width="20"/></svg>
-              <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center"><div class="text-[19px] font-bold tracking-tight">${fmt(cT)}</div><div class="text-[8px] text-slate-600 uppercase tracking-[0.2em] mt-1">${heMonth(curM)}</div></div>
-            </div>
+            <div class="relative w-[220px] h-[220px] flex-shrink-0"><canvas id="vortexCanvas" width="440" height="440" style="width:220px;height:220px"></canvas></div>
             <div class="flex-1 min-w-0 w-full">
               ${CATS.map(c=>{const cv=cur.expenses[c.key]||0,pv=prev.expenses[c.key]||1,d=((cv-pv)/pv*100).toFixed(1),up=+d>0;
-                return`<div class="flex items-center gap-3 py-2.5 px-2 border-b border-white/[0.025] last:border-0 rounded-lg hover:bg-white/[0.015] transition-all duration-500 text-[12px]">
-                  <span class="w-[6px] h-[6px] rounded-[2px] flex-shrink-0" style="background:${c.color}"></span>
+                return`<div class="flex items-center gap-3 py-2.5 px-2 border-b border-white/[0.025] last:border-0 rounded-lg hover:bg-white/[0.02] transition-all duration-500 text-[11px]">
+                  <span class="w-[6px] h-[6px] rounded-full flex-shrink-0 shadow-[0_0_6px_var(--c)]" style="background:${c.color};--c:${c.color}80"></span>
                   <span class="flex-1 text-slate-500">${c.he}</span>
                   <span class="font-bold text-slate-300">${fmt(cv)}</span>
-                  <span class="text-[10px] font-bold ml-1 ${up?'text-red-400/70':'text-emerald-400/70'}">${up?'+':''}${d}%</span>
+                  <span class="text-[10px] font-bold ml-1" style="${heatStyle(+d)}">${up?'+':''}${d}%</span>
                 </div>`}).join('')}
             </div>
           </div>
-          <div class="flex gap-5 mt-6 text-[9px] text-slate-600"><span>חיצוני: ${heMonth(prevM)}</span><span>פנימי: ${heMonth(curM)}</span></div>
         </div>
-        <div class="pa ${PP}">
-          <div class="text-[10px] uppercase tracking-[0.2em] text-slate-500/70 font-semibold mb-7 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-cyan-400/70"></span>רישום מהיר</div>
-          <div class="flex gap-1 mb-6 bg-white/[0.015] rounded-xl p-1 border border-white/[0.03]">
-            <button class="qe-tab active flex-1 py-2.5 rounded-[10px] text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-500" data-t="exp">הוצאה</button>
-            <button class="qe-tab flex-1 py-2.5 rounded-[10px] text-[10px] font-bold uppercase tracking-[0.15em] text-slate-600 transition-all duration-500 hover:text-slate-400" data-t="inc">הכנסה</button>
+        <div class="qp">
+          <div class="text-[9px] uppercase tracking-[0.2em] text-gold/50 font-semibold mb-7 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-gold/70 shadow-[0_0_6px_rgba(201,168,76,.3)]"></span>פקודת קליטה מיידית</div>
+          <div class="flex gap-1 mb-6 bg-white/[0.02] rounded-xl p-1 border border-white/[0.04]">
+            <button class="qe-tab active flex-1 py-2.5 rounded-[10px] text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-500" data-t="exp">יציאה</button>
+            <button class="qe-tab flex-1 py-2.5 rounded-[10px] text-[10px] font-bold uppercase tracking-[0.15em] text-slate-600 transition-all duration-500 hover:text-slate-400" data-t="inc">כניסה</button>
           </div>
           <div class="qe-form active" id="qf-exp">
-            <div class="flex gap-3 items-end mb-3">
-              <div class="flex-1"><label class="${LBL}">סכום (₪)</label><input type="number" id="qeAmt" placeholder="0" class="${INP}" dir="ltr"></div>
-              <div class="flex-1"><label class="${LBL}">קטגוריה</label><select id="qeCat" class="${INP}">${CATS.map(c=>'<option value="'+c.key+'">'+c.he+'</option>').join('')}</select></div>
-              <button class="${BTNG} whitespace-nowrap h-[42px] text-[11px] px-5" id="qeAdd">הוסף</button>
+            <div class="flex gap-4 items-end mb-4">
+              <div class="flex-1"><label class="lbl">ערך (₪)</label><input type="number" id="qeAmt" placeholder="0" class="ff ff-gold" dir="ltr"></div>
+              <div class="flex-1"><label class="lbl">ערוץ</label><select id="qeCat" class="ff ff-gold">${CATS.map(c=>'<option value="'+c.key+'">'+c.he+'</option>').join('')}</select></div>
+              <button class="btn-gold whitespace-nowrap h-[40px] text-[10px] px-5 tracking-wider" id="qeAdd">שגר לרשת</button>
             </div>
-            <div><label class="${LBL}">הערה</label><input type="text" id="qeNote" placeholder="לא חובה" class="${INP}"></div>
+            <div><label class="lbl">תיוג</label><input type="text" id="qeNote" placeholder="לא חובה" class="ff"></div>
           </div>
           <div class="qe-form" id="qf-inc" style="display:none">
-            <div class="flex gap-3 items-end">
-              <div class="flex-1"><label class="${LBL}">סכום (₪)</label><input type="number" id="qiAmt" placeholder="0" class="${INP}" dir="ltr"></div>
-              <div class="flex-1"><label class="${LBL}">מקור</label><input type="text" id="qiSrc" placeholder="למשל: משכורת" class="${INP}"></div>
-              <button class="${BTNG} whitespace-nowrap h-[42px] text-[11px] px-5" id="qiAdd">הוסף</button>
+            <div class="flex gap-4 items-end">
+              <div class="flex-1"><label class="lbl">ערך (₪)</label><input type="number" id="qiAmt" placeholder="0" class="ff ff-gold" dir="ltr"></div>
+              <div class="flex-1"><label class="lbl">ערוץ מקור</label><input type="text" id="qiSrc" placeholder="למשל: משכורת" class="ff"></div>
+              <button class="btn-gold whitespace-nowrap h-[40px] text-[10px] px-5 tracking-wider" id="qiAdd">שגר לרשת</button>
             </div>
           </div>
-          <div class="text-[9px] uppercase tracking-[0.2em] text-slate-600 font-semibold mt-7 mb-3">רשומות אחרונות</div>
+          <div class="text-[9px] uppercase tracking-[0.2em] text-slate-700 font-semibold mt-7 mb-3">פקודות אחרונות</div>
           <div id="recentList">
             ${(S.manualEntries||[]).slice(-5).reverse().map((e,ri)=>{const c=CATS.find(x=>x.key===e.cat);const idx=S.manualEntries.length-1-ri;
               return`<div class="flex items-center gap-3 py-2.5 px-3 bg-white/[0.01] border border-white/[0.025] rounded-xl mb-1.5 text-[11px] transition-all duration-500 hover:bg-white/[0.025] group/row">
-                <span class="w-[5px] h-[5px] rounded-full flex-shrink-0" style="background:${c?c.color:'#34D399'}"></span>
-                <span class="flex-1 text-slate-500">${e.note||e.source||(c?c.he:'הכנסה')}</span>
+                <span class="w-[5px] h-[5px] rounded-full flex-shrink-0 shadow-[0_0_4px_var(--c)]" style="background:${c?c.color:'#34D399'};--c:${c?c.color+'80':'#34D39980'}"></span>
+                <span class="flex-1 text-slate-500">${e.note||e.source||(c?c.he:'כניסה')}</span>
                 <span class="font-bold ${e.type==='income'?'text-emerald-400/80':'text-slate-300'}">${e.type==='income'?'+':'-'}${fmt(e.amount)}</span>
-                <button class="re-edit w-6 h-6 rounded-md bg-white/[0.02] border border-white/[0.04] text-slate-600 flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-all duration-500 hover:!text-gold hover:!border-gold/20 hover:!bg-gold/[0.06]" data-idx="${idx}" title="עריכה"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                <button class="re-edit w-6 h-6 rounded-md bg-white/[0.02] border border-white/[0.04] text-slate-600 flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-all duration-500 hover:!text-neon-purple hover:!border-neon-purple/20 hover:!bg-neon-purple/[0.06]" data-idx="${idx}" title="עריכה"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
                 <button class="re-del w-6 h-6 rounded-md bg-white/[0.02] border border-white/[0.04] text-slate-600 flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-all duration-500 hover:!text-red-400 hover:!border-red-400/20 hover:!bg-red-400/[0.06]" data-idx="${idx}" title="מחיקה"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-              </div>`}).join('')||'<div class="text-[11px] text-slate-700 py-2">אין רשומות עדיין</div>'}
+              </div>`}).join('')||'<div class="text-[11px] text-slate-700 py-2">אין פקודות עדיין</div>'}
           </div>
         </div>
       </div>
@@ -375,37 +381,93 @@ function renderDashboard(){
   </div>`;
 
   setTimeout(()=>{
-    animVal(document.getElementById('a-cfr'),0,+cfr,1200,'','%');
-    animVal(document.getElementById('a-nw'),0,nwC,1200,'₪','');
-    animVal(document.getElementById('a-exp'),0,cT,1200,'₪','');
-    animVal(document.getElementById('a-inc'),0,cur.income,1200,'₪','');
-    const rwEl=document.getElementById('a-rw');if(rwEl){let v=0;const tgt=+rw;const iv=setInterval(()=>{v+=.08;if(v>=tgt){v=tgt;clearInterval(iv)}rwEl.textContent=v.toFixed(1)},40)}
+    if(typeof gsap!=='undefined'){
+      gsap.from('#overviewCards .qc',{y:40,opacity:0,duration:.8,stagger:.1,ease:'power3.out',delay:.2});
+    }
+    animVal(document.getElementById('a-cfr'),0,+cfr,1400,'','%');
+    animVal(document.getElementById('a-nw'),0,nwC,1400,'₪','');
+    animVal(document.getElementById('a-exp'),0,cT,1400,'₪','');
+    animVal(document.getElementById('a-inc'),0,cur.income,1400,'₪','');
+    const rwEl=document.getElementById('a-rw');if(rwEl){let v=0;const tgt=+rw;const iv=setInterval(()=>{v+=.06;if(v>=tgt){v=tgt;clearInterval(iv)}rwEl.textContent=v.toFixed(1)},40)}
     setTimeout(()=>{const rb=document.getElementById('rwBar');if(rb)rb.style.width=Math.min((+rw/12)*100,100)+'%'},500);
     setTimeout(()=>{document.querySelectorAll('.bar[data-v]').forEach(b=>{b.style.height=Math.max((+b.dataset.v/barMax)*120,6)+'px'})},600);
+    initVortex(cur.expenses,prev.expenses,curM);
   },250);
-  updateClock();drawZoneCanvases();bindDashboardEvents();
+  updateClock();observeZones();bindDashboardEvents();
+}
+
+function initVortex(curExp,prevExp,curM){
+  const c=document.getElementById('vortexCanvas');if(!c)return;
+  const ctx=c.getContext('2d'),w=c.width,h=c.height,cx=w/2,cy=h/2;
+  const total=CATS.reduce((a,cat)=>a+(curExp[cat.key]||0),0);
+  const particles=[];
+  function makeRing(exp,radius,alpha,speed){
+    const t2=CATS.reduce((a,cat)=>a+(exp[cat.key]||0),0);if(!t2)return;
+    let ang=-Math.PI/2;
+    CATS.forEach(cat=>{
+      const val=exp[cat.key]||0,sweep=(val/t2)*Math.PI*2,cnt=Math.max(2,Math.floor((val/t2)*55));
+      for(let i=0;i<cnt;i++){
+        particles.push({angle:ang+(i/cnt)*sweep,radius:radius+(Math.random()-.5)*8,
+          color:cat.color,alpha:alpha*(.5+Math.random()*.5),speed:speed+(Math.random()-.5)*.0004,
+          size:1+Math.random()*2.5,glow:3+Math.random()*8})}
+      ang+=sweep})
+  }
+  makeRing(prevExp,190,.35,.0008);makeRing(curExp,140,.75,.0015);
+  let time=0;
+  function draw(){
+    ctx.clearRect(0,0,w,h);time+=.016;
+    ctx.fillStyle='rgba(5,5,16,.04)';ctx.fillRect(0,0,w,h);
+    particles.forEach(p=>{
+      p.angle+=p.speed;const x=cx+p.radius*Math.cos(p.angle),y=cy+p.radius*Math.sin(p.angle);
+      ctx.save();ctx.globalAlpha=p.alpha;ctx.beginPath();ctx.arc(x,y,p.size,0,Math.PI*2);
+      ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=p.glow;ctx.fill();ctx.restore()});
+    const pulse=.85+.15*Math.sin(time*1.5);
+    ctx.save();ctx.globalAlpha=pulse;ctx.font='800 '+Math.round(40*(.95+.05*Math.sin(time*1.5)))+'px Heebo';
+    ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.shadowColor='rgba(168,85,247,.4)';ctx.shadowBlur=20;
+    ctx.fillText('₪'+total.toLocaleString('en-IL'),cx,cy-8);
+    ctx.font='400 16px Heebo';ctx.fillStyle='rgba(255,255,255,.3)';ctx.shadowBlur=0;
+    ctx.fillText(heMonth(curM),cx,cy+20);ctx.restore();
+    vortexRAF=requestAnimationFrame(draw)}
+  draw()
+}
+
+function particleBurst(fromEl){
+  const cv=document.getElementById('particleOverlay'),ctx=cv.getContext('2d');
+  cv.width=window.innerWidth;cv.height=window.innerHeight;
+  const r=fromEl.getBoundingClientRect(),fx=r.left+r.width/2,fy=r.top+r.height/2;
+  const ps=[];for(let i=0;i<25;i++){ps.push({x:fx,y:fy,vx:(Math.random()-.5)*10,vy:(Math.random()-.5)*10-4,
+    life:1,color:`hsl(${260+Math.random()*60},70%,${50+Math.random()*30}%)`,size:1+Math.random()*3})}
+  function anim(){ctx.clearRect(0,0,cv.width,cv.height);let alive=false;
+    ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.12;p.life-=.025;if(p.life<=0)return;alive=true;
+      ctx.save();ctx.globalAlpha=p.life;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+      ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=8;ctx.fill();ctx.restore()});
+    if(alive)requestAnimationFrame(anim);else ctx.clearRect(0,0,cv.width,cv.height)}
+  anim()
 }
 
 function bindDashboardEvents(){
   document.querySelectorAll('.qe-tab').forEach(t=>t.onclick=()=>{
-    document.querySelectorAll('.qe-tab').forEach(x=>{x.classList.remove('active','bg-white/[0.04]','text-slate-100','shadow-lg','border','border-white/[0.05]');x.classList.add('text-slate-600')});
+    document.querySelectorAll('.qe-tab').forEach(x=>{x.classList.remove('active','bg-neon-purple/[0.06]','text-slate-100','shadow-lg','border','border-neon-purple/15');x.classList.add('text-slate-600')});
     document.querySelectorAll('.qe-form').forEach(x=>x.style.display='none');
-    t.classList.add('active','bg-white/[0.04]','text-slate-100','shadow-lg','border','border-white/[0.05]');t.classList.remove('text-slate-600');
+    t.classList.add('active','bg-neon-purple/[0.06]','text-slate-100','shadow-lg','border','border-neon-purple/15');t.classList.remove('text-slate-600');
     document.getElementById('qf-'+t.dataset.t).style.display='block'});
   const qeAdd=document.getElementById('qeAdd');if(qeAdd)qeAdd.onclick=()=>{
     const a=+document.getElementById('qeAmt').value;if(!a||a<=0)return;
     const cat=document.getElementById('qeCat').value,note=document.getElementById('qeNote').value,mk2=mKeys(),cm=mk2[mk2.length-1];
     S.months[cm].expenses[cat]=(S.months[cm].expenses[cat]||0)+a;
-    S.manualEntries.push({type:'expense',cat,amount:a,note,month:cm,ts:Date.now()});save();syncCloud();toast('הוצאה נוספה: '+fmt(a));renderDashboard()};
+    S.manualEntries.push({type:'expense',cat,amount:a,note,month:cm,ts:Date.now()});save();syncCloud();
+    particleBurst(qeAdd);toast('יציאה הוזרמה: '+fmt(a));setTimeout(()=>renderDashboard(),400)};
   const qiAdd=document.getElementById('qiAdd');if(qiAdd)qiAdd.onclick=()=>{
     const a=+document.getElementById('qiAmt').value;if(!a||a<=0)return;
     const src=document.getElementById('qiSrc').value,mk2=mKeys(),cm=mk2[mk2.length-1];
-    S.months[cm].income+=a;S.manualEntries.push({type:'income',amount:a,source:src,month:cm,ts:Date.now()});save();syncCloud();toast('הכנסה נוספה: +'+fmt(a));renderDashboard()};
+    S.months[cm].income+=a;S.manualEntries.push({type:'income',amount:a,source:src,month:cm,ts:Date.now()});save();syncCloud();
+    particleBurst(qiAdd);toast('כניסה נקלטה: +'+fmt(a));setTimeout(()=>renderDashboard(),400)};
   document.querySelectorAll('.re-del').forEach(btn=>btn.onclick=()=>{
     const i=+btn.dataset.idx,e=S.manualEntries[i];if(!e)return;
     const m=e.month||mKeys()[mKeys().length-1];
     if(S.months[m]){if(e.type==='expense'){S.months[m].expenses[e.cat]=Math.max(0,(S.months[m].expenses[e.cat]||0)-e.amount)}else{S.months[m].income=Math.max(0,S.months[m].income-e.amount)}}
-    S.manualEntries.splice(i,1);save();syncCloud();toast('הרשומה נמחקה');renderDashboard()});
+    S.manualEntries.splice(i,1);save();syncCloud();toast('הפקודה בוטלה');renderDashboard()});
   document.querySelectorAll('.re-edit').forEach(btn=>btn.onclick=()=>{
     const i=+btn.dataset.idx,e=S.manualEntries[i];if(!e)return;
     const m=e.month||mKeys()[mKeys().length-1];
@@ -413,59 +475,64 @@ function bindDashboardEvents(){
     S.manualEntries.splice(i,1);save();renderDashboard();
     setTimeout(()=>{
       if(e.type==='expense'){
-        document.querySelectorAll('.qe-tab').forEach(x=>{x.classList.remove('active','bg-white/[0.04]','text-slate-100','shadow-lg','border','border-white/[0.05]');x.classList.add('text-slate-600')});
+        document.querySelectorAll('.qe-tab').forEach(x=>{x.classList.remove('active','bg-neon-purple/[0.06]','text-slate-100','shadow-lg','border','border-neon-purple/15');x.classList.add('text-slate-600')});
         document.querySelectorAll('.qe-form').forEach(x=>x.style.display='none');
-        const expTab=document.querySelector('.qe-tab[data-t="exp"]');expTab.classList.add('active','bg-white/[0.04]','text-slate-100','shadow-lg','border','border-white/[0.05]');expTab.classList.remove('text-slate-600');
+        const expTab=document.querySelector('.qe-tab[data-t="exp"]');expTab.classList.add('active','bg-neon-purple/[0.06]','text-slate-100','shadow-lg','border','border-neon-purple/15');expTab.classList.remove('text-slate-600');
         document.getElementById('qf-exp').style.display='block';
         document.getElementById('qeAmt').value=e.amount;document.getElementById('qeCat').value=e.cat;document.getElementById('qeNote').value=e.note||'';
       }else{
-        document.querySelectorAll('.qe-tab').forEach(x=>{x.classList.remove('active','bg-white/[0.04]','text-slate-100','shadow-lg','border','border-white/[0.05]');x.classList.add('text-slate-600')});
+        document.querySelectorAll('.qe-tab').forEach(x=>{x.classList.remove('active','bg-neon-purple/[0.06]','text-slate-100','shadow-lg','border','border-neon-purple/15');x.classList.add('text-slate-600')});
         document.querySelectorAll('.qe-form').forEach(x=>x.style.display='none');
-        const incTab=document.querySelector('.qe-tab[data-t="inc"]');incTab.classList.add('active','bg-white/[0.04]','text-slate-100','shadow-lg','border','border-white/[0.05]');incTab.classList.remove('text-slate-600');
+        const incTab=document.querySelector('.qe-tab[data-t="inc"]');incTab.classList.add('active','bg-neon-purple/[0.06]','text-slate-100','shadow-lg','border','border-neon-purple/15');incTab.classList.remove('text-slate-600');
         document.getElementById('qf-inc').style.display='block';
         document.getElementById('qiAmt').value=e.amount;document.getElementById('qiSrc').value=e.source||'';
       }
-      toast('ערוך ושמור מחדש');
+      toast('ערוך ושגר מחדש');
       const zone=document.querySelector('.zone:last-child');if(zone)zone.scrollIntoView({behavior:'smooth',block:'center'});
     },100)});
+  if(typeof gsap!=='undefined'){
+    document.querySelectorAll('.qc').forEach(card=>{
+      card.addEventListener('mouseenter',()=>gsap.to(card,{y:-6,duration:.4,ease:'power2.out'}));
+      card.addEventListener('mouseleave',()=>gsap.to(card,{y:0,duration:.5,ease:'power2.out'}))})
+  }
 }
 
 function renderMonthly(){
   const mk=mKeys();if(curMonthIdx<0)curMonthIdx=mk.length-1;
   curMonthIdx=Math.max(0,Math.min(mk.length-1,curMonthIdx));
   const key=mk[curMonthIdx],d=S.months[key],tot=totE(d),surp=d.income-tot,savRate=((surp/d.income)*100).toFixed(1);
-
   document.getElementById('v-monthly').innerHTML=`
-  <div class="sticky top-0 z-10 px-8 mob-p py-5 bg-brand-900/80 backdrop-blur-3xl border-b border-white/[0.025]"><h2 class="text-[22px] font-extrabold tracking-[-0.5px]">פירוט חודשי</h2></div>
+  <div class="sticky top-0 z-10 px-8 mob-p py-4 bg-brand-900/50 backdrop-blur-3xl border-b border-white/[0.03]"><h2 class="text-[20px] font-extrabold tracking-[-0.5px] bg-gradient-to-r from-neon-purple to-neon-cyan bg-clip-text text-transparent">ניתוח מחזורי</h2></div>
   <div class="flex items-center gap-5 mx-8 mob-p mt-8 mb-10">
-    <button class="w-10 h-10 rounded-xl bg-white/[0.02] border border-white/[0.03] text-slate-500 flex items-center justify-center cursor-pointer transition-all duration-500 hover:bg-white/[0.05] hover:text-white disabled:opacity-15 disabled:cursor-default" id="mPrev" ${curMonthIdx<=0?'disabled':''}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <button class="w-10 h-10 rounded-xl bg-white/[0.02] border border-white/[0.04] text-slate-500 flex items-center justify-center cursor-pointer transition-all duration-500 hover:bg-neon-purple/[0.06] hover:text-neon-purple hover:border-neon-purple/15 disabled:opacity-15" id="mPrev" ${curMonthIdx<=0?'disabled':''}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
     <h2 class="text-2xl font-extrabold tracking-[-0.5px] min-w-[180px] text-center">${heMonth(key)}</h2>
-    <button class="w-10 h-10 rounded-xl bg-white/[0.02] border border-white/[0.03] text-slate-500 flex items-center justify-center cursor-pointer transition-all duration-500 hover:bg-white/[0.05] hover:text-white disabled:opacity-15 disabled:cursor-default" id="mNext" ${curMonthIdx>=mk.length-1?'disabled':''}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+    <button class="w-10 h-10 rounded-xl bg-white/[0.02] border border-white/[0.04] text-slate-500 flex items-center justify-center cursor-pointer transition-all duration-500 hover:bg-neon-purple/[0.06] hover:text-neon-purple hover:border-neon-purple/15 disabled:opacity-15" id="mNext" ${curMonthIdx>=mk.length-1?'disabled':''}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
   </div>
   <div class="px-8 mob-p pb-16">
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10 mob-1">
-      <div class="ca ${CC}"><div class="card-glow bg-gradient-to-r from-cyan-400/30 to-transparent"></div><div class="${LBL}">הכנסות</div><div class="text-[28px] mob-text font-black tracking-[-1px] text-cyan-300/90">${fmt(d.income)}</div></div>
-      <div class="ca ${CC}"><div class="card-glow bg-gradient-to-r from-amber-400/30 to-transparent"></div><div class="${LBL}">הוצאות</div><div class="text-[28px] mob-text font-black tracking-[-1px] text-amber-300/90">${fmt(tot)}</div></div>
-      <div class="ca ${CC}"><div class="card-glow bg-gradient-to-r from-${surp>=0?'emerald':'red'}-400/30 to-transparent"></div><div class="${LBL}">עודף / גירעון</div><div class="text-[28px] mob-text font-black tracking-[-1px] ${surp>=0?'text-emerald-400/90':'text-red-400/90'}">${fmt(surp)}</div><div class="text-[11px] text-slate-500 mt-2">שיעור חיסכון: <span class="text-[9px] font-bold px-2 py-0.5 rounded-md ${+savRate>=0?'bg-emerald-400/8 text-emerald-400/80':'bg-red-400/8 text-red-400/80'}">${savRate}%</span></div></div>
+      <div class="qc" style="--ambient:rgba(34,211,238,.08)"><div class="lbl">כניסות</div><div class="text-[26px] mob-text font-black tracking-[-1px] text-neon-cyan/90">${fmt(d.income)}</div></div>
+      <div class="qc" style="--ambient:rgba(248,113,113,.06)"><div class="lbl">יציאות</div><div class="text-[26px] mob-text font-black tracking-[-1px] text-amber-300/90">${fmt(tot)}</div></div>
+      <div class="qc" style="--ambient:rgba(${surp>=0?'52,211,153':'248,113,113'},.08)"><div class="lbl">דלתא פיננסית</div><div class="text-[26px] mob-text font-black tracking-[-1px] ${surp>=0?'text-emerald-400/90':'text-red-400/90'}">${fmt(surp)}</div><div class="text-[10px] text-slate-600 mt-2">יחס חיסכון: <span class="text-[9px] font-bold px-2 py-0.5 rounded-md" style="${heatStyle(+savRate)}">${savRate}%</span></div></div>
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="pa ${PP}"><div class="text-[10px] uppercase tracking-[0.2em] text-slate-500/70 font-semibold mb-6 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-emerald-400/70"></span>הכנסות</div>
-        <table class="w-full"><tr><th class="text-left text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">מקור</th><th class="text-right text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">סכום</th></tr>
-        <tr><td class="py-4 text-[13px] text-slate-400">סה״כ הכנסות</td><td class="py-4 text-right"><input class="${INP} !w-[130px]" type="number" value="${d.income}" data-field="income" dir="ltr"></td></tr></table>
+      <div class="qp"><div class="text-[9px] uppercase tracking-[0.2em] text-neon-cyan/50 font-semibold mb-6 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-neon-cyan/70 shadow-[0_0_6px_rgba(34,211,238,.3)]"></span>כניסות</div>
+        <table class="w-full"><tr><th class="text-left text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">ערוץ</th><th class="text-right text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">ערך</th></tr>
+        <tr><td class="py-4 text-[12px] text-slate-400">סה״כ כניסות</td><td class="py-4 text-right"><input class="ff ff-gold !w-[130px] text-right" type="number" value="${d.income}" data-field="income" dir="ltr"></td></tr></table>
       </div>
-      <div class="pa ${PP}"><div class="text-[10px] uppercase tracking-[0.2em] text-slate-500/70 font-semibold mb-6 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-amber-400/70"></span>הוצאות לפי קטגוריה</div>
+      <div class="qp"><div class="text-[9px] uppercase tracking-[0.2em] text-neon-purple/50 font-semibold mb-6 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-neon-purple/70 shadow-[0_0_6px_rgba(168,85,247,.3)]"></span>מפת יציאות</div>
         <table class="w-full">
-          <tr><th class="text-left text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">קטגוריה</th><th class="text-right text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">סכום</th></tr>
-          ${CATS.map(c=>`<tr class="group hover:bg-white/[0.01] transition-all duration-500"><td class="py-3.5 text-[13px] text-slate-400 border-b border-white/[0.02]"><span class="inline-block w-[6px] h-[6px] rounded-[2px] mr-3" style="background:${c.color}"></span>${c.he}</td><td class="py-3.5 text-right border-b border-white/[0.02]"><input class="${INP} !w-[130px]" type="number" value="${d.expenses[c.key]||0}" data-cat="${c.key}" dir="ltr"></td></tr>`).join('')}
-          <tr class="font-bold border-t-2 border-white/[0.05]"><td class="py-4 text-[13px]">סה״כ</td><td class="py-4 text-right text-[15px]">${fmt(tot)}</td></tr>
+          <tr><th class="text-left text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">ערוץ</th><th class="text-right text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">ערך</th></tr>
+          ${CATS.map(c=>`<tr class="group hover:bg-white/[0.015] transition-all duration-500"><td class="py-3 text-[12px] text-slate-400 border-b border-white/[0.02]"><span class="inline-block w-[6px] h-[6px] rounded-full mr-3 shadow-[0_0_4px_var(--c)]" style="background:${c.color};--c:${c.color}80"></span>${c.he}</td><td class="py-3 text-right border-b border-white/[0.02]"><input class="ff ff-gold !w-[130px] text-right" type="number" value="${d.expenses[c.key]||0}" data-cat="${c.key}" dir="ltr"></td></tr>`).join('')}
+          <tr class="font-bold border-t-2 border-neon-purple/10"><td class="py-4 text-[12px]">סה״כ</td><td class="py-4 text-right text-[14px]">${fmt(tot)}</td></tr>
         </table>
       </div>
     </div>
-    <div class="flex gap-3 mt-8"><button class="${BTNG}" id="mSave">שמור שינויים</button></div>
+    <div class="flex gap-3 mt-8"><button class="btn-neon" id="mSave">עדכן מטריצה</button></div>
   </div>`;
   document.getElementById('mPrev').onclick=()=>{curMonthIdx--;renderMonthly()};
   document.getElementById('mNext').onclick=()=>{curMonthIdx++;renderMonthly()};
-  document.getElementById('mSave').onclick=()=>{const key2=mKeys()[curMonthIdx];S.months[key2].income=+(document.querySelector('[data-field="income"]').value)||0;document.querySelectorAll('[data-cat]').forEach(inp=>{S.months[key2].expenses[inp.dataset.cat]=+inp.value||0});save();syncCloud();toast('נשמר: '+heMonth(key2));renderMonthly()};
+  document.getElementById('mSave').onclick=()=>{const key2=mKeys()[curMonthIdx];S.months[key2].income=+(document.querySelector('[data-field="income"]').value)||0;document.querySelectorAll('[data-cat]').forEach(inp=>{S.months[key2].expenses[inp.dataset.cat]=+inp.value||0});save();syncCloud();toast('המטריצה עודכנה: '+heMonth(key2));renderMonthly()};
+  if(typeof gsap!=='undefined')gsap.from('.qc,.qp',{y:30,opacity:0,duration:.7,stagger:.08,ease:'power3.out',delay:.15});
 }
 
 function renderAnnual(){
@@ -473,74 +540,75 @@ function renderAnnual(){
   let tI=0,tE=0,tInv=0,tSav=0;ym.forEach(k=>{const d=S.months[k];tI+=d.income;tE+=totE(d);tInv+=(d.expenses.invest||0);tSav+=(d.expenses.savings||0)});
   const net=tI-tE,bMax=Math.max(...ym.map(k=>Math.max(S.months[k].income,totE(S.months[k]))),1);
   document.getElementById('v-annual').innerHTML=`
-  <div class="sticky top-0 z-10 px-8 mob-p py-5 bg-brand-900/80 backdrop-blur-3xl border-b border-white/[0.025]"><h2 class="text-[22px] font-extrabold tracking-[-0.5px]">סיכום שנתי — ${year}</h2></div>
+  <div class="sticky top-0 z-10 px-8 mob-p py-4 bg-brand-900/50 backdrop-blur-3xl border-b border-white/[0.03]"><h2 class="text-[20px] font-extrabold tracking-[-0.5px] bg-gradient-to-r from-neon-purple to-neon-cyan bg-clip-text text-transparent">דו״ח ציר זמן — ${year}</h2></div>
   <div class="px-8 mob-p pt-10 pb-16">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10 mob-1">
-      <div class="ca ${CC}"><div class="card-glow bg-gradient-to-r from-cyan-400/30 to-transparent"></div><div class="${LBL}">סה״כ הכנסות</div><div class="text-[28px] mob-text font-black tracking-[-1px] text-cyan-300/90">${fmt(tI)}</div><div class="text-[11px] text-slate-600 mt-2">${ym.length} חודשים</div></div>
-      <div class="ca ${CC}"><div class="card-glow bg-gradient-to-r from-amber-400/30 to-transparent"></div><div class="${LBL}">סה״כ הוצאות</div><div class="text-[28px] mob-text font-black tracking-[-1px] text-amber-300/90">${fmt(tE)}</div></div>
-      <div class="ca ${CC}"><div class="card-glow bg-gradient-to-r from-gold/40 to-transparent"></div><div class="${LBL}">הושקע</div><div class="text-[28px] mob-text font-black tracking-[-1px] text-gold">${fmt(tInv)}</div><div class="text-[11px] text-slate-500 mt-2"><span class="text-[9px] font-bold px-2 py-0.5 rounded-md bg-gold/8 text-gold/80">${((tInv/tI)*100).toFixed(1)}%</span> מההכנסות</div></div>
-      <div class="ca ${CC}"><div class="card-glow bg-gradient-to-r from-emerald-400/30 to-transparent"></div><div class="${LBL}">נחסך</div><div class="text-[28px] mob-text font-black tracking-[-1px] text-emerald-400/90">${fmt(tSav)}</div><div class="text-[11px] text-slate-500 mt-2"><span class="text-[9px] font-bold px-2 py-0.5 rounded-md bg-emerald-400/8 text-emerald-400/80">${((tSav/tI)*100).toFixed(1)}%</span> מההכנסות</div></div>
+      <div class="qc" style="--ambient:rgba(34,211,238,.08)"><div class="lbl">סה״כ כניסות</div><div class="text-[26px] mob-text font-black tracking-[-1px] text-neon-cyan/90">${fmt(tI)}</div><div class="text-[10px] text-slate-600 mt-2">${ym.length} מחזורים</div></div>
+      <div class="qc" style="--ambient:rgba(248,113,113,.06)"><div class="lbl">סה״כ יציאות</div><div class="text-[26px] mob-text font-black tracking-[-1px] text-amber-300/90">${fmt(tE)}</div></div>
+      <div class="qc" style="--ambient:rgba(201,168,76,.08)"><div class="lbl">הוזרם להשקעה</div><div class="text-[26px] mob-text font-black tracking-[-1px] text-gold">${fmt(tInv)}</div><div class="text-[10px] text-slate-600 mt-2"><span class="text-[9px] font-bold px-2 py-0.5 rounded-md bg-gold/8 text-gold/80">${((tInv/tI)*100).toFixed(1)}%</span> מהכניסות</div></div>
+      <div class="qc" style="--ambient:rgba(52,211,153,.08)"><div class="lbl">נצבר ברזרבה</div><div class="text-[26px] mob-text font-black tracking-[-1px] text-emerald-400/90">${fmt(tSav)}</div><div class="text-[10px] text-slate-600 mt-2"><span class="text-[9px] font-bold px-2 py-0.5 rounded-md bg-emerald-400/8 text-emerald-400/80">${((tSav/tI)*100).toFixed(1)}%</span> מהכניסות</div></div>
     </div>
-    <div class="max-w-[340px] mb-10"><div class="ca ${CC}"><div class="card-glow bg-gradient-to-r from-${net>=0?'emerald':'red'}-400/30 to-transparent"></div><div class="${LBL}">מאזן נקי</div><div class="text-[28px] font-black tracking-[-1px] ${net>=0?'text-emerald-400/90':'text-red-400/90'}">${net>=0?'+':''}${fmt(net)}</div><div class="text-[11px] text-slate-600 mt-2">הכנסות בניכוי כלל ההוצאות</div></div></div>
+    <div class="max-w-[340px] mb-10"><div class="qc" style="--ambient:rgba(${net>=0?'52,211,153':'248,113,113'},.08)"><div class="lbl">דלתא מצרפית</div><div class="text-[26px] font-black tracking-[-1px] ${net>=0?'text-emerald-400/90':'text-red-400/90'}">${net>=0?'+':''}${fmt(net)}</div><div class="text-[10px] text-slate-600 mt-2">סה״כ כניסות בניכוי כלל היציאות</div></div></div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="pa ${PP}"><div class="text-[10px] uppercase tracking-[0.2em] text-slate-500/70 font-semibold mb-7 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-cyan-400/70"></span>פירוט חודשי</div>
-        <div class="flex items-end gap-4 h-[180px]" dir="ltr">${ym.map(m=>{const inc=S.months[m].income,exp=totE(S.months[m]);return`<div class="flex-1 flex flex-col items-center gap-1.5"><div class="flex gap-1 items-end h-[150px]"><div class="bar w-[20px] rounded-t-[5px] bg-gradient-to-t from-emerald-600/40 to-emerald-400/90 relative group cursor-pointer" style="height:${Math.max((inc/bMax)*140,4)}px"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-bold text-emerald-400/80 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-500 bg-brand-800/95 px-1.5 py-0.5 rounded-md">${fmtK(inc)}</span></div><div class="bar w-[20px] rounded-t-[5px] bg-gradient-to-t from-red-600/30 to-red-400/70 relative group cursor-pointer" style="height:${Math.max((exp/bMax)*140,4)}px"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-bold text-red-400/80 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-500 bg-brand-800/95 px-1.5 py-0.5 rounded-md">${fmtK(exp)}</span></div></div><div class="text-[9px] text-slate-600 font-medium">${heMonthS(m)}</div></div>`}).join('')}</div>
+      <div class="qp"><div class="text-[9px] uppercase tracking-[0.2em] text-neon-cyan/50 font-semibold mb-7 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-neon-cyan/70 shadow-[0_0_6px_rgba(34,211,238,.3)]"></span>מפת מחזורים</div>
+        <div class="flex items-end gap-4 h-[180px]" dir="ltr">${ym.map(m=>{const inc=S.months[m].income,exp=totE(S.months[m]);return`<div class="flex-1 flex flex-col items-center gap-1.5"><div class="flex gap-1 items-end h-[150px]"><div class="bar w-[18px] rounded-t-[4px] bg-gradient-to-t from-emerald-600/40 to-emerald-400/90 relative group cursor-pointer shadow-[0_0_10px_-3px_rgba(52,211,153,.15)]" style="height:${Math.max((inc/bMax)*140,4)}px"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-bold text-emerald-400/80 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-500 bg-brand-900/95 px-1.5 py-0.5 rounded-md border border-emerald-400/10">${fmtK(inc)}</span></div><div class="bar w-[18px] rounded-t-[4px] bg-gradient-to-t from-red-600/30 to-red-400/70 relative group cursor-pointer shadow-[0_0_10px_-3px_rgba(248,113,113,.1)]" style="height:${Math.max((exp/bMax)*140,4)}px"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-bold text-red-400/80 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-500 bg-brand-900/95 px-1.5 py-0.5 rounded-md border border-red-400/10">${fmtK(exp)}</span></div></div><div class="text-[9px] text-slate-600 font-medium">${heMonthS(m)}</div></div>`}).join('')}</div>
       </div>
-      <div class="pa ${PP}"><div class="text-[10px] uppercase tracking-[0.2em] text-slate-500/70 font-semibold mb-6 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-amber-400/70"></span>סה״כ לפי קטגוריה</div>
-        <table class="w-full"><tr><th class="text-left text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">קטגוריה</th><th class="text-right text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">סה״כ</th><th class="text-right text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">%</th></tr>
-          ${CATS.map(c=>{let ct=0;ym.forEach(k=>ct+=(S.months[k].expenses[c.key]||0));return`<tr class="hover:bg-white/[0.01] transition-all duration-500"><td class="py-3.5 text-[12px] text-slate-400 border-b border-white/[0.02]"><span class="inline-block w-[6px] h-[6px] rounded-[2px] mr-3" style="background:${c.color}"></span>${c.he}</td><td class="py-3.5 text-right text-[12px] text-slate-300 border-b border-white/[0.02]">${fmt(ct)}</td><td class="py-3.5 text-right text-[12px] text-slate-600 border-b border-white/[0.02]">${((ct/tE)*100).toFixed(1)}%</td></tr>`}).join('')}
-          <tr class="font-bold border-t-2 border-white/[0.05]"><td class="py-4 text-[12px]">סה״כ</td><td class="py-4 text-right text-[13px]">${fmt(tE)}</td><td class="py-4 text-right text-[12px]">100%</td></tr></table>
+      <div class="qp"><div class="text-[9px] uppercase tracking-[0.2em] text-neon-purple/50 font-semibold mb-6 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-neon-purple/70 shadow-[0_0_6px_rgba(168,85,247,.3)]"></span>מפת ערוצים</div>
+        <table class="w-full"><tr><th class="text-left text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">ערוץ</th><th class="text-right text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">סה״כ</th><th class="text-right text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">%</th></tr>
+          ${CATS.map(c=>{let ct=0;ym.forEach(k=>ct+=(S.months[k].expenses[c.key]||0));return`<tr class="hover:bg-white/[0.015] transition-all duration-500"><td class="py-3 text-[11px] text-slate-400 border-b border-white/[0.02]"><span class="inline-block w-[6px] h-[6px] rounded-full mr-3 shadow-[0_0_4px_var(--c)]" style="background:${c.color};--c:${c.color}80"></span>${c.he}</td><td class="py-3 text-right text-[11px] text-slate-300 border-b border-white/[0.02]">${fmt(ct)}</td><td class="py-3 text-right text-[11px] text-slate-600 border-b border-white/[0.02]">${((ct/tE)*100).toFixed(1)}%</td></tr>`}).join('')}
+          <tr class="font-bold border-t-2 border-neon-purple/10"><td class="py-4 text-[11px]">סה״כ</td><td class="py-4 text-right text-[12px]">${fmt(tE)}</td><td class="py-4 text-right text-[11px]">100%</td></tr></table>
       </div>
     </div>
   </div>`;
+  if(typeof gsap!=='undefined')gsap.from('.qc,.qp',{y:30,opacity:0,duration:.7,stagger:.08,ease:'power3.out',delay:.15});
 }
 
 function renderSettings(){
   document.getElementById('v-settings').innerHTML=`
-  <div class="sticky top-0 z-10 px-8 mob-p py-5 bg-brand-900/80 backdrop-blur-3xl border-b border-white/[0.025]"><h2 class="text-[22px] font-extrabold tracking-[-0.5px]">הגדרות</h2></div>
+  <div class="sticky top-0 z-10 px-8 mob-p py-4 bg-brand-900/50 backdrop-blur-3xl border-b border-white/[0.03]"><h2 class="text-[20px] font-extrabold tracking-[-0.5px] bg-gradient-to-r from-neon-purple to-neon-cyan bg-clip-text text-transparent">תצורת מערכת</h2></div>
   <div class="px-8 mob-p pt-10 pb-16 max-w-[640px]">
     <div class="mb-12">
-      <label class="${LBL}">Google Apps Script URL</label>
-      <input class="${INP}" type="text" id="sGas" value="${GAS||''}" placeholder="https://script.google.com/macros/s/.../exec" dir="ltr">
-      <div class="text-[11px] text-slate-700 mt-2.5 leading-[1.8]">הנתונים מסתנכרנים אוטומטית לגיליון Google שלך.</div>
-      <div class="flex gap-3 mt-5"><button class="${BTNG}" id="sSaveGas">שמור וסנכרן</button></div>
+      <label class="lbl">Google Apps Script URL</label>
+      <input class="ff ff-gold" type="text" id="sGas" value="${GAS||''}" placeholder="https://script.google.com/macros/s/.../exec" dir="ltr">
+      <div class="text-[10px] text-slate-700 mt-2.5 leading-[1.8]">הנתונים מסתנכרנים אוטומטית לגיליון Google שלך.</div>
+      <div class="flex gap-3 mt-5"><button class="btn-neon" id="sSaveGas">סנכרן לענן</button></div>
     </div>
-    <div class="h-px bg-gradient-to-r from-white/[0.03] via-white/[0.05] to-white/[0.03] my-10"></div>
+    <div class="h-px bg-gradient-to-r from-neon-purple/10 via-neon-cyan/10 to-neon-purple/10 my-10"></div>
     <div class="mb-10">
-      <label class="${LBL}">קטגוריות הוצאה</label>
-      <div class="text-[11px] text-slate-600 mb-6 leading-[1.8]">התאם אישית את קטגוריות ההוצאה. השינויים יחולו על כל התצוגות.</div>
+      <label class="lbl">ערוצי זרימה</label>
+      <div class="text-[10px] text-slate-600 mb-6 leading-[1.8]">התאם אישית את ערוצי הזרימה. השינויים יחולו על כל התצוגות.</div>
       <div class="flex flex-col gap-2.5" id="catList">
-        ${CATS.map((c,i)=>`<div class="cat-row flex items-center gap-3 py-3.5 px-4 bg-white/[0.015] border border-white/[0.03] rounded-xl transition-all duration-500 hover:bg-white/[0.03] hover:border-white/[0.05]" data-i="${i}">
+        ${CATS.map((c,i)=>`<div class="cat-row flex items-center gap-3 py-3 px-4 bg-white/[0.015] border border-white/[0.03] rounded-xl transition-all duration-500 hover:bg-white/[0.03] hover:border-neon-purple/10" data-i="${i}">
           <input type="color" value="${c.color}" data-ci="${i}" class="cc w-7 h-7 rounded-lg cursor-pointer border-none bg-transparent p-0">
-          <input type="text" value="${c.name}" data-ni="${i}" class="cn flex-1 bg-transparent border-none text-[13px] text-slate-300 outline-none placeholder-slate-700" placeholder="שם קטגוריה">
-          <input type="text" value="${c.he||''}" data-hi="${i}" class="ch w-[90px] bg-transparent border-none text-[12px] text-slate-500 outline-none text-center placeholder-slate-700" placeholder="עברית">
-          <button class="cat-del w-7 h-7 rounded-lg border border-red-400/10 bg-transparent text-red-400/50 cursor-pointer flex items-center justify-center text-sm transition-all duration-500 hover:bg-red-500 hover:text-white hover:border-red-500" data-di="${i}">&times;</button>
+          <input type="text" value="${c.name}" data-ni="${i}" class="cn flex-1 bg-transparent border-none text-[12px] text-slate-300 outline-none placeholder-slate-700" placeholder="שם ערוץ">
+          <input type="text" value="${c.he||''}" data-hi="${i}" class="ch w-[90px] bg-transparent border-none text-[11px] text-slate-500 outline-none text-center placeholder-slate-700" placeholder="עברית">
+          <button class="cat-del w-7 h-7 rounded-lg border border-red-400/10 bg-transparent text-red-400/50 cursor-pointer flex items-center justify-center text-sm transition-all duration-500 hover:bg-red-500 hover:text-white hover:border-red-500 hover:shadow-[0_0_16px_-4px_rgba(248,113,113,.3)]" data-di="${i}">&times;</button>
         </div>`).join('')}
       </div>
-      <button class="w-full py-3.5 rounded-xl border border-dashed border-white/[0.05] bg-transparent text-slate-600 text-[11px] font-medium cursor-pointer transition-all duration-500 hover:border-gold/20 hover:text-gold/80 hover:bg-gold/[0.015] mt-3" id="addCat">+ קטגוריה חדשה</button>
-      <div class="flex gap-3 mt-6"><button class="${BTNG}" id="sSaveCats">שמור קטגוריות</button></div>
+      <button class="w-full py-3 rounded-xl border border-dashed border-white/[0.05] bg-transparent text-slate-600 text-[10px] font-medium cursor-pointer transition-all duration-500 hover:border-neon-purple/20 hover:text-neon-purple/80 hover:bg-neon-purple/[0.02] mt-3" id="addCat">+ ערוץ חדש</button>
+      <div class="flex gap-3 mt-6"><button class="btn-neon" id="sSaveCats">עדכן ערוצים</button></div>
     </div>
-    <div class="h-px bg-gradient-to-r from-white/[0.03] via-white/[0.05] to-white/[0.03] my-10"></div>
-    <div><label class="${LBL}">ניהול נתונים</label>
+    <div class="h-px bg-gradient-to-r from-neon-purple/10 via-neon-cyan/10 to-neon-purple/10 my-10"></div>
+    <div><label class="lbl">ניהול מטריצה</label>
       <div class="flex gap-3 flex-wrap mt-4">
-        <button class="bg-white/[0.03] border border-white/[0.04] text-slate-400 text-sm font-medium rounded-xl px-6 py-3 transition-all duration-500 hover:bg-white/[0.06] hover:text-slate-200 hover:border-white/[0.08] hover:-translate-y-[1px]" id="sExport">ייצוא נתונים</button>
-        <button class="bg-red-500/[0.06] border border-red-400/10 text-red-400/70 text-sm font-medium rounded-xl px-6 py-3 transition-all duration-500 hover:bg-red-500 hover:text-white hover:border-red-500 hover:-translate-y-[1px]" id="sReset">איפוס לברירת מחדל</button>
+        <button class="btn-neon" id="sExport">ייצוא מטריצה</button>
+        <button class="bg-red-500/[0.06] border border-red-400/10 text-red-400/70 text-sm font-medium rounded-xl px-6 py-3 transition-all duration-500 hover:bg-red-500 hover:text-white hover:border-red-500 hover:shadow-[0_0_20px_-4px_rgba(248,113,113,.3)]" id="sReset">איפוס קוונטי</button>
       </div>
     </div>
   </div>`;
-  document.getElementById('sSaveGas').onclick=async()=>{GAS=document.getElementById('sGas').value.trim();ls('lh_gas',GAS);if(GAS){await loadCloud()}toast('ההגדרות נשמרו')};
-  document.getElementById('addCat').onclick=()=>{const key='cat_'+Date.now();CATS.push({key,name:'New Category',he:'קטגוריה חדשה',color:'#94A3B8'});saveCats();renderSettings()};
-  document.getElementById('sSaveCats').onclick=()=>{document.querySelectorAll('.cat-row').forEach((row,i)=>{if(CATS[i]){const oldKey=CATS[i].key;CATS[i].color=row.querySelector('.cc').value;const newName=row.querySelector('.cn').value.trim();CATS[i].name=newName||CATS[i].name;CATS[i].he=row.querySelector('.ch').value.trim();const newKey=newName.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').slice(0,20)||oldKey;if(newKey!==oldKey){Object.values(S.months).forEach(m=>{if(m.expenses[oldKey]!==undefined){m.expenses[newKey]=m.expenses[oldKey];delete m.expenses[oldKey]}});CATS[i].key=newKey;save()}}});saveCats();toast('הקטגוריות נשמרו');renderSettings()};
-  document.querySelectorAll('.cat-del').forEach(btn=>btn.onclick=()=>{const i=+btn.dataset.di;if(CATS.length<=1)return toast('נדרשת לפחות קטגוריה אחת');const key=CATS[i].key;CATS.splice(i,1);Object.values(S.months).forEach(m=>delete m.expenses[key]);saveCats();save();renderSettings()});
-  document.getElementById('sExport').onclick=()=>{const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ledgerhouse-backup.json';a.click();toast('הנתונים יוצאו בהצלחה')};
-  document.getElementById('sReset').onclick=()=>{if(confirm('לאפס את כל הנתונים לברירת מחדל?')){S=JSON.parse(JSON.stringify(DEFAULT_DATA));CATS=JSON.parse(JSON.stringify(DEFAULT_CATS));save();saveCats();syncCloud();renderAll();toast('הנתונים אופסו')}};
+  document.getElementById('sSaveGas').onclick=async()=>{GAS=document.getElementById('sGas').value.trim();ls('lh_gas',GAS);if(GAS){await loadCloud()}toast('התצורה עודכנה')};
+  document.getElementById('addCat').onclick=()=>{const key='cat_'+Date.now();CATS.push({key,name:'New Channel',he:'ערוץ חדש',color:'#94A3B8'});saveCats();renderSettings()};
+  document.getElementById('sSaveCats').onclick=()=>{document.querySelectorAll('.cat-row').forEach((row,i)=>{if(CATS[i]){const oldKey=CATS[i].key;CATS[i].color=row.querySelector('.cc').value;const newName=row.querySelector('.cn').value.trim();CATS[i].name=newName||CATS[i].name;CATS[i].he=row.querySelector('.ch').value.trim();const newKey=newName.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').slice(0,20)||oldKey;if(newKey!==oldKey){Object.values(S.months).forEach(m=>{if(m.expenses[oldKey]!==undefined){m.expenses[newKey]=m.expenses[oldKey];delete m.expenses[oldKey]}});CATS[i].key=newKey;save()}}});saveCats();toast('הערוצים עודכנו');renderSettings()};
+  document.querySelectorAll('.cat-del').forEach(btn=>btn.onclick=()=>{const i=+btn.dataset.di;if(CATS.length<=1)return toast('נדרש לפחות ערוץ אחד');const key=CATS[i].key;CATS.splice(i,1);Object.values(S.months).forEach(m=>delete m.expenses[key]);saveCats();save();renderSettings()});
+  document.getElementById('sExport').onclick=()=>{const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ledgerhouse-backup.json';a.click();toast('המטריצה יוצאה')};
+  document.getElementById('sReset').onclick=()=>{if(confirm('לאפס את כל המטריצה לברירת מחדל?')){S=JSON.parse(JSON.stringify(DEFAULT_DATA));CATS=JSON.parse(JSON.stringify(DEFAULT_CATS));save();saveCats();syncCloud();renderAll();toast('המערכת אופסה')}};
 }
 
 window.openAddMonth=function(){
   const modal=document.getElementById('addMonthModal'),sel=document.getElementById('amMonth');
   const now=new Date();sel.innerHTML='';
   for(let i=-3;i<=6;i++){const d=new Date(now.getFullYear(),now.getMonth()+i,1);const l=MO[d.getMonth()]+' '+d.getFullYear();sel.innerHTML+='<option value="'+l+'"'+(i===0?' selected':'')+'>'+heMonth(l)+'</option>'}
-  document.getElementById('amCatFields').innerHTML='<div class="grid grid-cols-2 gap-4 mb-5">'+CATS.map(c=>'<div><label class="'+LBL+'">'+c.he+'</label><input type="number" id="am_'+c.key+'" placeholder="0" class="'+INP+'" dir="ltr"></div>').join('')+'</div>';
+  document.getElementById('amCatFields').innerHTML='<div class="grid grid-cols-2 gap-4 mb-5">'+CATS.map(c=>'<div><label class="lbl">'+c.he+'</label><input type="number" id="am_'+c.key+'" placeholder="0" class="ff ff-gold" dir="ltr"></div>').join('')+'</div>';
   fillAddMonth();modal.style.display='flex';sel.onchange=fillAddMonth;
 };
 function fillAddMonth(){
@@ -550,25 +618,20 @@ function fillAddMonth(){
   const nw=S.netWorth.find(n=>n.month===document.getElementById('amMonth').value.split(' ')[0]);
   document.getElementById('amNetWorth').value=nw?nw.value:(S.netWorth[S.netWorth.length-1]?.value||0);document.getElementById('amLiquid').value=S.liquidSavings;
 }
-document.getElementById('amSave').onclick=()=>{const s=document.getElementById('amMonth').value;const expenses={};CATS.forEach(c=>{const el=document.getElementById('am_'+c.key);expenses[c.key]=+(el?.value)||0});S.months[s]={income:+document.getElementById('amIncome').value||0,expenses};const ms2=s.split(' ')[0],nwV=+document.getElementById('amNetWorth').value||0;const nwI=S.netWorth.findIndex(n=>n.month===ms2);if(nwI>=0)S.netWorth[nwI].value=nwV;else S.netWorth.push({month:ms2,value:nwV});S.liquidSavings=+document.getElementById('amLiquid').value||S.liquidSavings;sortMonths();save();syncCloud();closeModal('addMonthModal');toast('נשמר: '+heMonth(s));renderAll()};
+document.getElementById('amSave').onclick=()=>{const s=document.getElementById('amMonth').value;const expenses={};CATS.forEach(c=>{const el=document.getElementById('am_'+c.key);expenses[c.key]=+(el?.value)||0});S.months[s]={income:+document.getElementById('amIncome').value||0,expenses};const ms2=s.split(' ')[0],nwV=+document.getElementById('amNetWorth').value||0;const nwI=S.netWorth.findIndex(n=>n.month===ms2);if(nwI>=0)S.netWorth[nwI].value=nwV;else S.netWorth.push({month:ms2,value:nwV});S.liquidSavings=+document.getElementById('amLiquid').value||S.liquidSavings;sortMonths();save();syncCloud();closeModal('addMonthModal');toast('המטריצה עודכנה: '+heMonth(s));renderAll()};
 window.closeModal=function(id){document.getElementById(id).style.display='none'};
 document.getElementById('addMonthModal').onclick=e=>{if(e.target.id==='addMonthModal')closeModal('addMonthModal')};
 
-function ringArcs(data,r,w,cx,cy){const total=CATS.reduce((a,c)=>a+(data[c.key]||0),0);if(!total)return'';let ang=-90,paths='';CATS.forEach(cat=>{const val=data[cat.key]||0,pct=val/total,sweep=pct*360,gap=3;if(sweep>gap){const sA=(ang+gap/2)*Math.PI/180,eA=(ang+sweep-gap/2)*Math.PI/180;const x1=cx+r*Math.cos(sA),y1=cy+r*Math.sin(sA),x2=cx+r*Math.cos(eA),y2=cy+r*Math.sin(eA),large=sweep-gap>180?1:0;paths+=`<path d="M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}" fill="none" stroke="${cat.color}" stroke-width="${w}" stroke-linecap="round" opacity="0.8"/>`}ang+=sweep});return paths}
-function animVal(el,s,e,dur,pre,suf){if(!el)return;const range=e-s;let t0=null;function step(ts){if(!t0)t0=ts;const p=Math.min((ts-t0)/dur,1),ease=1-Math.pow(1-p,3);el.textContent=(pre||'')+Math.round(s+range*ease).toLocaleString('en-IL')+(suf||'');if(p<1)requestAnimationFrame(step)}requestAnimationFrame(step)}
+function animVal(el,s,e,dur,pre,suf){if(!el)return;const range=e-s;let t0=null;
+  function step(ts){if(!t0)t0=ts;const p=Math.min((ts-t0)/dur,1),ease=1-Math.pow(1-p,3);el.textContent=(pre||'')+Math.round(s+range*ease).toLocaleString('en-IL')+(suf||'');if(p<1)requestAnimationFrame(step)}requestAnimationFrame(step)}
 function updateClock(){const el=document.getElementById('clock');if(el)el.textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
 setInterval(updateClock,1000);
 
-function drawZoneCanvases(){drawGrid('zc0');drawCandlesticks('zc1');drawCoins('zc2');const main=document.getElementById('mainScroll');main.addEventListener('scroll',()=>{document.querySelectorAll('.zone-canvas').forEach(c=>{const r=c.parentElement.getBoundingClientRect();c.style.transform='translateY('+(r.top*-.06)+'px)'})},{passive:true});observeZones()}
 function observeZones(){const root=document.getElementById('mainScroll');function check(){document.querySelectorAll('.zone:not(.visible)').forEach(z=>{const r=z.getBoundingClientRect();if(r.top<window.innerHeight+100)z.classList.add('visible')})}setTimeout(()=>{document.querySelector('.zone')?.classList.add('visible');check()},120);root.addEventListener('scroll',check,{passive:true})}
-function sizeCanvas(id){const c=document.getElementById(id);if(!c)return null;const p=c.parentElement;c.width=p.offsetWidth;c.height=p.offsetHeight;return c}
-function drawGrid(id){const c=sizeCanvas(id);if(!c)return;const ctx=c.getContext('2d');ctx.strokeStyle='rgba(201,168,76,.01)';ctx.lineWidth=.5;for(let x=0;x<c.width;x+=65){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,c.height);ctx.stroke()}for(let y=0;y<c.height;y+=45){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(c.width,y);ctx.stroke()}}
-function drawCandlesticks(id){const c=sizeCanvas(id);if(!c)return;const ctx=c.getContext('2d');const count=Math.floor(c.width/15);let price=100+Math.random()*50;for(let i=0;i<count;i++){const open=price;price+=(Math.random()-.47)*7;const close=price;const high=Math.max(open,close)+Math.random()*5,low=Math.min(open,close)-Math.random()*5;const bull=close>open,x=i*15+7,bw=5,scale=c.height/80,base=c.height*.1;const oY=c.height-base-(open-60)*scale,cY=c.height-base-(close-60)*scale,hY=c.height-base-(high-60)*scale,lY=c.height-base-(low-60)*scale;ctx.strokeStyle=bull?'rgba(52,211,153,.1)':'rgba(248,113,113,.06)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,hY);ctx.lineTo(x,lY);ctx.stroke();ctx.fillStyle=bull?'rgba(52,211,153,.03)':'rgba(248,113,113,.02)';ctx.fillRect(x-bw/2,Math.min(oY,cY),bw,Math.abs(cY-oY)||1)}}
-function drawCoins(id){const c=sizeCanvas(id);if(!c)return;const ctx=c.getContext('2d');for(let i=0;i<14;i++){const x=Math.random()*c.width,y=Math.random()*c.height,r=5+Math.random()*14;ctx.save();ctx.globalAlpha=.015+Math.random()*.015;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);const cg=ctx.createRadialGradient(x-r*.3,y-r*.3,r*.1,x,y,r);cg.addColorStop(0,'#C9A84C');cg.addColorStop(1,'#6E5B26');ctx.fillStyle=cg;ctx.fill();ctx.restore()}}
 
 const halo=document.getElementById('halo');let hx=-100,hy=-100,cx2=-100,cy2=-100;
 document.addEventListener('mousemove',e=>{hx=e.clientX;hy=e.clientY});
-function animHalo(){cx2+=(hx-cx2)*.08;cy2+=(hy-cy2)*.08;halo.style.left=cx2+'px';halo.style.top=cy2+'px';requestAnimationFrame(animHalo)}
+function animHalo(){cx2+=(hx-cx2)*.06;cy2+=(hy-cy2)*.06;halo.style.left=cx2+'px';halo.style.top=cy2+'px';requestAnimationFrame(animHalo)}
 animHalo();document.addEventListener('mouseleave',()=>halo.style.opacity='0');document.addEventListener('mouseenter',()=>halo.style.opacity='1');
 document.querySelectorAll('.sb-item').forEach(item=>item.onclick=()=>switchView(item.dataset.view));
 function renderAll(){if(curView==='dashboard')renderDashboard();else if(curView==='monthly')renderMonthly();else if(curView==='annual')renderAnnual();else renderSettings()}

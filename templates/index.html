@@ -16,6 +16,7 @@ tailwind.config={theme:{extend:{
 }}}
 </script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -176,6 +177,30 @@ input[type="number"]{-moz-appearance:textfield}
   </div>
 </div>
 
+<div class="fixed inset-0 bg-black/70 backdrop-blur-2xl z-[100] items-center justify-center p-5" id="importModal" style="display:none">
+  <div class="bg-brand-800/90 backdrop-blur-3xl border border-neon-purple/10 rounded-3xl p-8 w-full max-w-3xl relative shadow-[0_32px_80px_-12px_rgba(168,85,247,.15)] max-h-[85vh] overflow-y-auto" style="animation:modalIn .4s cubic-bezier(.16,1,.3,1)">
+    <button class="absolute top-5 right-5 w-8 h-8 rounded-lg bg-white/[0.03] border border-white/[0.05] text-slate-500 hover:text-white hover:bg-neon-purple/10 transition-all duration-500 flex items-center justify-center text-lg" onclick="closeModal('importModal')">&times;</button>
+    <h3 class="text-lg font-bold mb-7 tracking-tight bg-gradient-to-r from-neon-purple to-neon-cyan bg-clip-text text-transparent">ייבוא דוח ישראכרט</h3>
+    <div id="importArea">
+      <label class="block w-full py-12 border-2 border-dashed border-white/[0.08] rounded-2xl cursor-pointer text-center transition-all duration-500 hover:border-neon-purple/30 hover:bg-neon-purple/[0.02]" id="importDropZone">
+        <input type="file" accept=".pdf" id="pdfInput" class="hidden">
+        <div class="text-3xl mb-3">📄</div>
+        <div class="text-[12px] text-slate-400 font-medium">לחץ לבחירת קובץ PDF של ישראכרט</div>
+        <div class="text-[10px] text-slate-600 mt-1">או גרור קובץ לכאן</div>
+      </label>
+    </div>
+    <div id="importLoading" style="display:none" class="text-center py-12">
+      <div class="text-2xl mb-3" style="animation:pulse 1.5s infinite">⚡</div>
+      <div class="text-[12px] text-neon-purple/80 font-medium">מפענח את הדוח...</div>
+    </div>
+    <div id="importPreview" style="display:none"></div>
+    <div id="importActions" style="display:none" class="flex gap-3 mt-6">
+      <button class="btn-gold" id="confirmImport">אשר ייבוא</button>
+      <button class="btn-neon" onclick="closeModal('importModal')">בטל</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast fixed bottom-6 left-1/2 bg-brand-800/95 border border-neon-purple/20 rounded-2xl px-7 py-4 text-[13px] font-medium text-neon-purple z-[200] shadow-[0_0_40px_-8px_rgba(168,85,247,.2)] backdrop-blur-3xl" id="toast"></div>
 <div class="halo" id="halo"></div>
 <canvas id="particleOverlay"></canvas>
@@ -262,6 +287,9 @@ function renderDashboard(){
         <span id="clock">--:--:--</span>
       </div>
       <div class="sync-badge flex items-center gap-2 text-[10px] px-3 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.04] text-slate-600"><span class="w-[4px] h-[4px] rounded-full bg-current"></span><span class="st">${GAS?'מערכת פעילה':'לא מקושר'}</span></div>
+      <button onclick="openImportModal()" title="ייבוא מישראכרט" class="w-9 h-9 rounded-xl bg-gold/[0.08] border border-gold/15 text-gold flex items-center justify-center transition-all duration-500 hover:shadow-[0_0_24px_-4px_rgba(201,168,76,.2)] hover:scale-105">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </button>
       <button onclick="openAddMonth()" title="עריכת מחזור" class="w-9 h-9 rounded-xl bg-neon-purple/[0.08] border border-neon-purple/15 text-neon-purple flex items-center justify-center transition-all duration-500 hover:shadow-[0_0_24px_-4px_rgba(168,85,247,.2)] hover:scale-105">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
@@ -589,6 +617,12 @@ function renderSettings(){
       <div class="flex gap-3 mt-6"><button class="btn-neon" id="sSaveCats">עדכן ערוצים</button></div>
     </div>
     <div class="h-px bg-gradient-to-r from-neon-purple/10 via-neon-cyan/10 to-neon-purple/10 my-10"></div>
+    <div class="mb-10">
+      <label class="lbl">ייבוא נתונים</label>
+      <div class="text-[10px] text-slate-600 mb-4 leading-[1.8]">ייבוא עסקאות מדוח PDF של ישראכרט ישירות למערכת.</div>
+      <button class="btn-gold" onclick="openImportModal()">ייבוא מישראכרט</button>
+    </div>
+    <div class="h-px bg-gradient-to-r from-neon-purple/10 via-neon-cyan/10 to-neon-purple/10 my-10"></div>
     <div><label class="lbl">ניהול מטריצה</label>
       <div class="flex gap-3 flex-wrap mt-4">
         <button class="btn-neon" id="sExport">ייצוא מטריצה</button>
@@ -637,6 +671,140 @@ document.querySelectorAll('.sb-item').forEach(item=>item.onclick=()=>switchView(
 function renderAll(){if(curView==='dashboard')renderDashboard();else if(curView==='monthly')renderMonthly();else if(curView==='annual')renderAnnual();else renderSettings()}
 document.getElementById('app').style.display='block';renderAll();
 if(GAS)loadCloud().then(()=>renderAll());
+
+// --- Isracard PDF Import ---
+if(typeof pdfjsLib!=='undefined')pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const IC_MAP={'מכולת/סופר':'food','מעדניות':'food','מסעדות/קפה':'food','דלק':'car','רכב שירותי':'car',
+  'תקשורת':'telecom','מחשבים':'telecom',"אינט' קניה":'telecom','הלבשה':'housing','ביטוח':'housing',
+  'בניה/שיפוץ':'housing','רהיטים':'housing','ספר בתי':'housing','פנאי/ספורט':'savings','תרבות':'savings','שונות':'housing'};
+const IC_CATS=Object.keys(IC_MAP);
+
+window.openImportModal=function(){
+  document.getElementById('importModal').style.display='flex';
+  document.getElementById('importArea').style.display='block';
+  document.getElementById('importLoading').style.display='none';
+  document.getElementById('importPreview').style.display='none';
+  document.getElementById('importActions').style.display='none';
+  document.getElementById('pdfInput').value='';
+};
+document.getElementById('importModal').onclick=e=>{if(e.target.id==='importModal')closeModal('importModal')};
+
+const dropZone=document.getElementById('importDropZone');
+if(dropZone){
+  ['dragenter','dragover'].forEach(ev=>dropZone.addEventListener(ev,e=>{e.preventDefault();dropZone.style.borderColor='rgba(168,85,247,.4)';dropZone.style.background='rgba(168,85,247,.04)'}));
+  ['dragleave','drop'].forEach(ev=>dropZone.addEventListener(ev,e=>{e.preventDefault();dropZone.style.borderColor='';dropZone.style.background=''}));
+  dropZone.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf')processPDF(f)});
+}
+document.getElementById('pdfInput').onchange=e=>{const f=e.target.files[0];if(f)processPDF(f)};
+
+async function processPDF(file){
+  document.getElementById('importArea').style.display='none';
+  document.getElementById('importLoading').style.display='block';
+  try{
+    const buf=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise;
+    let fullText='';
+    for(let p=1;p<=pdf.numPages;p++){
+      const page=await pdf.getPage(p);
+      const content=await page.getTextContent();
+      const lineMap={};
+      content.items.forEach(item=>{
+        const y=Math.round(item.transform[5]/3)*3;
+        if(!lineMap[y])lineMap[y]=[];
+        lineMap[y].push({x:item.transform[4],str:item.str});
+      });
+      Object.keys(lineMap).map(Number).sort((a,b)=>b-a).forEach(y=>{
+        fullText+=lineMap[y].sort((a,b)=>a.x-b.x).map(i=>i.str).join(' ')+'\n';
+      });
+    }
+    const txns=extractTxns(fullText);
+    if(!txns.length){
+      document.getElementById('importLoading').style.display='none';
+      document.getElementById('importArea').style.display='block';
+      return toast('לא נמצאו עסקאות בקובץ');
+    }
+    showImportPreview(txns);
+  }catch(err){
+    console.error('PDF parse error:',err);
+    document.getElementById('importLoading').style.display='none';
+    document.getElementById('importArea').style.display='block';
+    toast('שגיאה בקריאת הקובץ');
+  }
+}
+
+function extractTxns(text){
+  const txns=[],lines=text.split('\n'),dateRe=/(\d{2})\/(\d{2})\/(\d{2})/;
+  for(const line of lines){
+    const dm=line.match(dateRe);
+    if(!dm)continue;
+    if(line.includes('תאריך')||line.includes('מועד חיוב')||line.includes('פירוט'))continue;
+    const amounts=[];
+    let m,ar=/([\d,]+\.\d{2})/g;
+    while((m=ar.exec(line))!==null)amounts.push(parseFloat(m[1].replace(/,/g,'')));
+    if(!amounts.length)continue;
+    const amt=amounts[amounts.length-1];
+    if(amt<=0)continue;
+    let ic='שונות',lc='housing';
+    for(const c of IC_CATS){if(line.includes(c)){ic=c;lc=IC_MAP[c];break}}
+    let biz=line.replace(dateRe,'').replace(/([\d,]+\.\d{2})/g,'').replace(/הוצג לא|נייד\.תש|קבע\.ה/g,'');
+    for(const c of IC_CATS)biz=biz.replace(c,'');
+    biz=biz.replace(/\s+/g,' ').trim();
+    if(biz.length>35)biz=biz.substring(0,35)+'…';
+    const mo=parseInt(dm[2])-1,yr='20'+dm[3],moKey=MO[mo]+' '+yr;
+    txns.push({date:dm[0],biz,ic,lc,amt,moKey});
+  }
+  return txns;
+}
+
+function showImportPreview(txns){
+  let total=0;txns.forEach(t=>total+=t.amt);
+  const byMonth={};txns.forEach(t=>{if(!byMonth[t.moKey])byMonth[t.moKey]=[];byMonth[t.moKey].push(t)});
+  let h=`<div class="text-[10px] uppercase tracking-[0.2em] text-emerald-400/60 font-semibold mb-4 flex items-center gap-3">
+    <span class="w-[5px] h-[5px] rounded-full bg-emerald-400/70 shadow-[0_0_6px_rgba(52,211,153,.4)]"></span>נמצאו ${txns.length} עסקאות</div>`;
+  h+='<div class="max-h-[45vh] overflow-y-auto rounded-xl border border-white/[0.04]"><table class="w-full text-[11px]">';
+  h+='<thead class="sticky top-0 bg-brand-800/95 backdrop-blur-xl z-10"><tr>';
+  h+='<th class="text-right p-3 text-[9px] uppercase tracking-wider text-slate-600 font-semibold">תאריך</th>';
+  h+='<th class="text-right p-3 text-[9px] uppercase tracking-wider text-slate-600 font-semibold">בית עסק</th>';
+  h+='<th class="text-right p-3 text-[9px] uppercase tracking-wider text-slate-600 font-semibold">ענף</th>';
+  h+='<th class="text-right p-3 text-[9px] uppercase tracking-wider text-slate-600 font-semibold">ערוץ</th>';
+  h+='<th class="text-left p-3 text-[9px] uppercase tracking-wider text-slate-600 font-semibold">סכום</th>';
+  h+='</tr></thead><tbody>';
+  txns.forEach((t,i)=>{
+    h+=`<tr class="border-t border-white/[0.03] hover:bg-white/[0.015] transition-all">
+      <td class="p-3 text-slate-500 font-mono text-[10px]">${t.date}</td>
+      <td class="p-3 text-slate-400">${t.biz}</td>
+      <td class="p-3 text-slate-600 text-[10px]">${t.ic}</td>
+      <td class="p-3"><select class="ic-sel bg-transparent border border-white/[0.06] rounded-lg px-2 py-1 text-[10px] text-slate-300 outline-none cursor-pointer" data-i="${i}">
+        ${CATS.map(c=>`<option value="${c.key}" ${c.key===t.lc?'selected':''}>${c.he}</option>`).join('')}
+      </select></td>
+      <td class="p-3 text-left font-bold text-slate-300">${fmt(t.amt)}</td></tr>`;
+  });
+  h+=`<tr class="border-t-2 border-neon-purple/15 font-bold"><td colspan="4" class="p-3 text-slate-400">סה״כ</td><td class="p-3 text-left text-gold">${fmt(total)}</td></tr>`;
+  h+='</tbody></table></div>';
+  h+='<div class="mt-4 flex flex-wrap gap-2">';
+  Object.keys(byMonth).forEach(mk=>{h+=`<span class="text-[10px] px-3 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.04] text-slate-500">${heMonth(mk)}: ${byMonth[mk].length} עסקאות</span>`});
+  h+='</div>';
+  document.getElementById('importPreview').innerHTML=h;
+  document.getElementById('importLoading').style.display='none';
+  document.getElementById('importPreview').style.display='block';
+  document.getElementById('importActions').style.display='flex';
+  window._iTxns=txns;
+  document.querySelectorAll('.ic-sel').forEach(sel=>{sel.onchange=()=>{window._iTxns[+sel.dataset.i].lc=sel.value}});
+}
+
+document.getElementById('confirmImport').onclick=()=>{
+  const txns=window._iTxns;
+  if(!txns||!txns.length)return;
+  txns.forEach(t=>{
+    if(!S.months[t.moKey]){S.months[t.moKey]={income:0,expenses:{}};CATS.forEach(c=>S.months[t.moKey].expenses[c.key]=0)}
+    S.months[t.moKey].expenses[t.lc]=(S.months[t.moKey].expenses[t.lc]||0)+Math.round(t.amt);
+    S.manualEntries.push({type:'expense',cat:t.lc,amount:Math.round(t.amt),note:'ישראכרט: '+t.biz,month:t.moKey,ts:Date.now()});
+  });
+  sortMonths();save();syncCloud();closeModal('importModal');
+  toast('יובאו '+txns.length+' עסקאות מישראכרט');
+  renderAll();
+};
 })();
 </script>
 </body>

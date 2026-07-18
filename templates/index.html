@@ -47,8 +47,7 @@ body{font-family:'Heebo',sans-serif;font-variant-numeric:tabular-nums;background
 @keyframes modalIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
 @keyframes glowPulse{0%,100%{box-shadow:0 0 20px -5px var(--glow)}50%{box-shadow:0 0 35px -3px var(--glow)}}
 
-.zone .zone-inner{opacity:0;transform:translateY(30px)}
-.zone.visible .zone-inner{opacity:1;transform:none;transition:all 1.2s cubic-bezier(.16,1,.3,1)}
+.zone .zone-inner{opacity:1}
 
 .qc{position:relative;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);background:rgba(255,255,255,.02);
   border:1px solid rgba(255,255,255,.04);border-radius:20px;padding:24px;overflow:hidden;
@@ -382,7 +381,7 @@ function renderDashboard(){
 
   setTimeout(()=>{
     if(typeof gsap!=='undefined'){
-      gsap.from('#overviewCards .qc',{y:40,opacity:0,duration:.8,stagger:.1,ease:'power3.out',delay:.2});
+      gsap.fromTo('#overviewCards .qc',{y:40,opacity:0},{y:0,opacity:1,duration:.8,stagger:.1,ease:'power3.out',delay:.2});
     }
     animVal(document.getElementById('a-cfr'),0,+cfr,1400,'','%');
     animVal(document.getElementById('a-nw'),0,nwC,1400,'₪','');
@@ -532,7 +531,7 @@ function renderMonthly(){
   document.getElementById('mPrev').onclick=()=>{curMonthIdx--;renderMonthly()};
   document.getElementById('mNext').onclick=()=>{curMonthIdx++;renderMonthly()};
   document.getElementById('mSave').onclick=()=>{const key2=mKeys()[curMonthIdx];S.months[key2].income=+(document.querySelector('[data-field="income"]').value)||0;document.querySelectorAll('[data-cat]').forEach(inp=>{S.months[key2].expenses[inp.dataset.cat]=+inp.value||0});save();syncCloud();toast('המטריצה עודכנה: '+heMonth(key2));renderMonthly()};
-  if(typeof gsap!=='undefined')gsap.from('.qc,.qp',{y:30,opacity:0,duration:.7,stagger:.08,ease:'power3.out',delay:.15});
+  if(typeof gsap!=='undefined')gsap.fromTo('.qc,.qp',{y:30,opacity:0},{y:0,opacity:1,duration:.7,stagger:.08,ease:'power3.out',delay:.15});
 }
 
 function renderAnnual(){
@@ -560,7 +559,7 @@ function renderAnnual(){
       </div>
     </div>
   </div>`;
-  if(typeof gsap!=='undefined')gsap.from('.qc,.qp',{y:30,opacity:0,duration:.7,stagger:.08,ease:'power3.out',delay:.15});
+  if(typeof gsap!=='undefined')gsap.fromTo('.qc,.qp',{y:30,opacity:0},{y:0,opacity:1,duration:.7,stagger:.08,ease:'power3.out',delay:.15});
 }
 
 function renderSettings(){

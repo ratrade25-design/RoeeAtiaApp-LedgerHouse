@@ -224,19 +224,13 @@ function heMonth(k){const p=k.split(' ');return MO_HE[MO.indexOf(p[0])]+' '+p[1]
 function heMonthS(k){return MO_HE_S[MO.indexOf(k.split(' ')[0])]}
 
 const DEFAULT_DATA={
-  months:{
-    'Jan 2026':{income:20000,expenses:{food:3000,housing:6200,invest:3500,savings:3000,car:2000,telecom:480}},
-    'Feb 2026':{income:20500,expenses:{food:3100,housing:6300,invest:3600,savings:3100,car:1900,telecom:460}},
-    'Mar 2026':{income:21000,expenses:{food:2900,housing:6400,invest:3800,savings:3200,car:2200,telecom:440}},
-    'Apr 2026':{income:21200,expenses:{food:3050,housing:6450,invest:3900,savings:3300,car:2050,telecom:430}},
-    'May 2026':{income:21500,expenses:{food:3200,housing:6500,invest:4000,savings:3500,car:2100,telecom:450}},
-    'Jun 2026':{income:22000,expenses:{food:2800,housing:6800,invest:4500,savings:3200,car:1900,telecom:420}},
-    'Jul 2026':{income:22800,expenses:{food:2950,housing:6700,invest:5000,savings:3800,car:2300,telecom:380}}
-  },
-  netWorth:[{month:'Jan',value:235000},{month:'Feb',value:242000},{month:'Mar',value:248000},{month:'Apr',value:252000},{month:'May',value:258000},{month:'Jun',value:265000},{month:'Jul',value:273000}],
-  liquidSavings:95000,manualEntries:[]
+  months:{},
+  netWorth:[],
+  liquidSavings:0,manualEntries:[]
 };
 
+const _freshReset=!ls('lh_v2');
+if(_freshReset){localStorage.removeItem('lh_state');ls('lh_v2','1')}
 let S=loadLocal()||JSON.parse(JSON.stringify(DEFAULT_DATA));
 if(!S.manualEntries)S.manualEntries=[];
 let GAS=ls('lh_gas')||'https://script.google.com/macros/s/AKfycbwMDQpxmLCiXM62_imOz6p63DwQvT6A7kyJ_59qps8SwrELidbQ4KZQDicUDn1qZlzd/exec';
@@ -268,15 +262,44 @@ function switchView(v){
 }
 
 function renderDashboard(){
-  const mk=mKeys(),cur=S.months[mk[mk.length-1]],prev=S.months[mk[mk.length-2]];
-  const curM=mk[mk.length-1],prevM=mk[mk.length-2];
-  const cT=totE(cur),pT=totE(prev),cfr=((cur.income/cT)*100).toFixed(1);
-  const nwC=S.netWorth[S.netWorth.length-1].value,nwP=S.netWorth[S.netWorth.length-2].value,nwD=((nwC-nwP)/nwP*100).toFixed(1);
-  const avgE=Math.round(mk.reduce((a,k)=>a+totE(S.months[k]),0)/mk.length);
-  const rw=(S.liquidSavings/avgE).toFixed(1),surplus=cur.income-cT;
-  const barMax=Math.max(...mk.map(k=>Math.max(S.months[k].income,totE(S.months[k]))));
+  const mk=mKeys();
+  if(mk.length<1){
+    document.getElementById('v-dashboard').innerHTML=`
+    <div class="sticky top-0 z-10 px-8 mob-p py-4 flex items-center gap-4 flex-wrap bg-brand-900/50 backdrop-blur-3xl border-b border-white/[0.03]">
+      <h2 class="text-[20px] font-extrabold tracking-[-0.5px] bg-gradient-to-r from-neon-purple via-neon-cyan to-gold bg-clip-text text-transparent">מרכז פיקוד</h2>
+      <div class="ml-auto flex items-center gap-3">
+        <div class="flex items-center gap-2 text-[10px] text-neon-cyan/60 font-mono px-3 py-1.5 rounded-lg bg-neon-cyan/[0.03] border border-neon-cyan/10">
+          <span class="w-[5px] h-[5px] rounded-full bg-neon-cyan/80 shadow-[0_0_8px_rgba(34,211,238,.5)]" style="animation:pulse 2.5s ease-in-out infinite"></span>
+          <span id="clock">--:--:--</span>
+        </div>
+        <button onclick="openImportModal()" title="ייבוא מישראכרט" class="w-9 h-9 rounded-xl bg-gold/[0.08] border border-gold/15 text-gold flex items-center justify-center transition-all duration-500 hover:shadow-[0_0_24px_-4px_rgba(201,168,76,.2)] hover:scale-105">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
+        <button onclick="openAddMonth()" title="עריכת מחזור" class="w-9 h-9 rounded-xl bg-neon-purple/[0.08] border border-neon-purple/15 text-neon-purple flex items-center justify-center transition-all duration-500 hover:shadow-[0_0_24px_-4px_rgba(168,85,247,.2)] hover:scale-105">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="flex flex-col items-center justify-center py-32 px-8 text-center">
+      <div class="text-5xl mb-6">📡</div>
+      <h3 class="text-xl font-bold mb-3 bg-gradient-to-r from-neon-purple to-neon-cyan bg-clip-text text-transparent">המערכת מוכנה לקליטה</h3>
+      <p class="text-[13px] text-slate-500 mb-8 max-w-md leading-relaxed">עדיין אין נתונים במערכת. ייבא דוח ישראכרט או הוסף מחזור ידנית כדי להתחיל.</p>
+      <div class="flex gap-4">
+        <button onclick="openImportModal()" class="btn-gold px-8 py-3">ייבוא מישראכרט</button>
+        <button onclick="openAddMonth()" class="btn-neon px-8 py-3">הוסף מחזור</button>
+      </div>
+    </div>`;
+    updateClock();return;
+  }
+  const cur=S.months[mk[mk.length-1]],prev=S.months[mk[Math.max(mk.length-2,0)]];
+  const curM=mk[mk.length-1],prevM=mk[Math.max(mk.length-2,0)];
+  const cT=totE(cur),pT=totE(prev)||1,cfr=cT?((cur.income/cT)*100).toFixed(1):'0';
+  const nwC=S.netWorth.length?S.netWorth[S.netWorth.length-1].value:0,nwP=S.netWorth.length>1?S.netWorth[S.netWorth.length-2].value:nwC||1,nwD=nwP?((nwC-nwP)/nwP*100).toFixed(1):'0';
+  const avgE=mk.length?Math.round(mk.reduce((a,k)=>a+totE(S.months[k]),0)/mk.length):1;
+  const rw=(S.liquidSavings/(avgE||1)).toFixed(1),surplus=cur.income-cT;
+  const barMax=Math.max(...mk.map(k=>Math.max(S.months[k].income,totE(S.months[k]))),1);
   const last6=mk.slice(-6);
-  const expD=((cT-pT)/pT*100).toFixed(1);
+  const expD=pT?((cT-pT)/pT*100).toFixed(1):'0';
 
   document.getElementById('v-dashboard').innerHTML=`
   <div class="sticky top-0 z-10 px-8 mob-p py-4 flex items-center gap-4 flex-wrap bg-brand-900/50 backdrop-blur-3xl border-b border-white/[0.03]">
@@ -526,9 +549,11 @@ function bindDashboardEvents(){
 }
 
 function renderMonthly(){
-  const mk=mKeys();if(curMonthIdx<0)curMonthIdx=mk.length-1;
+  const mk=mKeys();
+  if(!mk.length){document.getElementById('v-monthly').innerHTML='<div class="flex flex-col items-center justify-center py-32 text-center"><div class="text-4xl mb-4">📊</div><p class="text-slate-500 text-[13px]">אין מחזורים עדיין. ייבא דוח או הוסף מחזור ידנית.</p><div class="flex gap-4 mt-6"><button onclick="openImportModal()" class="btn-gold px-6 py-2.5">ייבוא מישראכרט</button><button onclick="openAddMonth()" class="btn-neon px-6 py-2.5">הוסף מחזור</button></div></div>';return}
+  if(curMonthIdx<0)curMonthIdx=mk.length-1;
   curMonthIdx=Math.max(0,Math.min(mk.length-1,curMonthIdx));
-  const key=mk[curMonthIdx],d=S.months[key],tot=totE(d),surp=d.income-tot,savRate=((surp/d.income)*100).toFixed(1);
+  const key=mk[curMonthIdx],d=S.months[key],tot=totE(d),surp=d.income-tot,savRate=d.income?((surp/d.income)*100).toFixed(1):'0';
   document.getElementById('v-monthly').innerHTML=`
   <div class="sticky top-0 z-10 px-8 mob-p py-4 bg-brand-900/50 backdrop-blur-3xl border-b border-white/[0.03]"><h2 class="text-[20px] font-extrabold tracking-[-0.5px] bg-gradient-to-r from-neon-purple to-neon-cyan bg-clip-text text-transparent">ניתוח מחזורי</h2></div>
   <div class="flex items-center gap-5 mx-8 mob-p mt-8 mb-10">
@@ -564,7 +589,9 @@ function renderMonthly(){
 }
 
 function renderAnnual(){
-  const mk=mKeys(),year=new Date().getFullYear();const ym=mk.filter(k=>k.endsWith(' '+year));
+  const mk=mKeys();
+  if(!mk.length){document.getElementById('v-annual').innerHTML='<div class="flex flex-col items-center justify-center py-32 text-center"><div class="text-4xl mb-4">📈</div><p class="text-slate-500 text-[13px]">אין נתונים שנתיים עדיין.</p><div class="flex gap-4 mt-6"><button onclick="openImportModal()" class="btn-gold px-6 py-2.5">ייבוא מישראכרט</button><button onclick="openAddMonth()" class="btn-neon px-6 py-2.5">הוסף מחזור</button></div></div>';return}
+  const year=new Date().getFullYear();const ym=mk.filter(k=>k.endsWith(' '+year));
   let tI=0,tE=0,tInv=0,tSav=0;ym.forEach(k=>{const d=S.months[k];tI+=d.income;tE+=totE(d);tInv+=(d.expenses.invest||0);tSav+=(d.expenses.savings||0)});
   const net=tI-tE,bMax=Math.max(...ym.map(k=>Math.max(S.months[k].income,totE(S.months[k]))),1);
   document.getElementById('v-annual').innerHTML=`
@@ -670,7 +697,8 @@ animHalo();document.addEventListener('mouseleave',()=>halo.style.opacity='0');do
 document.querySelectorAll('.sb-item').forEach(item=>item.onclick=()=>switchView(item.dataset.view));
 function renderAll(){if(curView==='dashboard')renderDashboard();else if(curView==='monthly')renderMonthly();else if(curView==='annual')renderAnnual();else renderSettings()}
 document.getElementById('app').style.display='block';renderAll();
-if(GAS)loadCloud().then(()=>renderAll());
+if(_freshReset&&GAS){save();syncCloud().then(()=>renderAll())}
+else if(GAS)loadCloud().then(()=>renderAll());
 
 // --- Isracard PDF Import ---
 if(typeof pdfjsLib!=='undefined')pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -757,45 +785,96 @@ function extractTxns(text){
   return txns;
 }
 
+function isDuplicate(t){
+  return S.manualEntries.some(e=>{
+    if(Math.abs(e.amount-Math.round(t.amt))>1)return false;
+    const n=(e.note||'').replace('ישראכרט: ','');
+    if(n&&t.biz&&(n.includes(t.biz.replace('…',''))||t.biz.replace('…','').includes(n)))return true;
+    if(e.month===t.moKey&&e.cat===t.lc&&Math.abs(e.amount-Math.round(t.amt))===0)return true;
+    return false;
+  });
+}
+
+function findSelfDuplicates(txns){
+  const dupes=new Set();
+  for(let i=0;i<txns.length;i++){
+    for(let j=i+1;j<txns.length;j++){
+      if(txns[i].date===txns[j].date&&Math.abs(txns[i].amt-txns[j].amt)<0.01&&txns[i].biz===txns[j].biz){
+        dupes.add(j);
+      }
+    }
+  }
+  return dupes;
+}
+
 function showImportPreview(txns){
-  let total=0;txns.forEach(t=>total+=t.amt);
+  let total=0;
+  const selfDupes=findSelfDuplicates(txns);
+  txns.forEach((t,i)=>{
+    t.dup=isDuplicate(t);
+    t.selfDup=selfDupes.has(i);
+    t.include=!t.dup&&!t.selfDup;
+    if(t.include)total+=t.amt;
+  });
+  const dupCount=txns.filter(t=>t.dup||t.selfDup).length;
   const byMonth={};txns.forEach(t=>{if(!byMonth[t.moKey])byMonth[t.moKey]=[];byMonth[t.moKey].push(t)});
-  let h=`<div class="text-[10px] uppercase tracking-[0.2em] text-emerald-400/60 font-semibold mb-4 flex items-center gap-3">
-    <span class="w-[5px] h-[5px] rounded-full bg-emerald-400/70 shadow-[0_0_6px_rgba(52,211,153,.4)]"></span>נמצאו ${txns.length} עסקאות</div>`;
+
+  let h=`<div class="flex items-center gap-4 mb-4 flex-wrap">
+    <div class="text-[10px] uppercase tracking-[0.2em] text-emerald-400/60 font-semibold flex items-center gap-3">
+      <span class="w-[5px] h-[5px] rounded-full bg-emerald-400/70 shadow-[0_0_6px_rgba(52,211,153,.4)]"></span>נמצאו ${txns.length} עסקאות</div>`;
+  if(dupCount>0)h+=`<div class="text-[10px] px-3 py-1.5 rounded-lg bg-amber-400/[0.06] border border-amber-400/15 text-amber-400/80 font-bold">⚠ ${dupCount} חשודות ככפילות</div>`;
+  h+=`</div>`;
+
   h+='<div class="max-h-[45vh] overflow-y-auto rounded-xl border border-white/[0.04]"><table class="w-full text-[11px]">';
   h+='<thead class="sticky top-0 bg-brand-800/95 backdrop-blur-xl z-10"><tr>';
+  h+='<th class="p-3 text-center w-8"><input type="checkbox" id="icAll" checked class="cursor-pointer accent-neon-purple"></th>';
   h+='<th class="text-right p-3 text-[9px] uppercase tracking-wider text-slate-600 font-semibold">תאריך</th>';
   h+='<th class="text-right p-3 text-[9px] uppercase tracking-wider text-slate-600 font-semibold">בית עסק</th>';
   h+='<th class="text-right p-3 text-[9px] uppercase tracking-wider text-slate-600 font-semibold">ענף</th>';
   h+='<th class="text-right p-3 text-[9px] uppercase tracking-wider text-slate-600 font-semibold">ערוץ</th>';
   h+='<th class="text-left p-3 text-[9px] uppercase tracking-wider text-slate-600 font-semibold">סכום</th>';
+  h+='<th class="p-3 w-6"></th>';
   h+='</tr></thead><tbody>';
   txns.forEach((t,i)=>{
-    h+=`<tr class="border-t border-white/[0.03] hover:bg-white/[0.015] transition-all">
+    const warn=t.dup||t.selfDup;
+    const rowCls=warn?'border-t border-amber-400/10 bg-amber-400/[0.02]':'border-t border-white/[0.03] hover:bg-white/[0.015]';
+    h+=`<tr class="${rowCls} transition-all ic-row" data-i="${i}">
+      <td class="p-3 text-center"><input type="checkbox" class="ic-chk cursor-pointer accent-neon-purple" data-i="${i}" ${t.include?'checked':''}></td>
       <td class="p-3 text-slate-500 font-mono text-[10px]">${t.date}</td>
       <td class="p-3 text-slate-400">${t.biz}</td>
       <td class="p-3 text-slate-600 text-[10px]">${t.ic}</td>
       <td class="p-3"><select class="ic-sel bg-transparent border border-white/[0.06] rounded-lg px-2 py-1 text-[10px] text-slate-300 outline-none cursor-pointer" data-i="${i}">
         ${CATS.map(c=>`<option value="${c.key}" ${c.key===t.lc?'selected':''}>${c.he}</option>`).join('')}
       </select></td>
-      <td class="p-3 text-left font-bold text-slate-300">${fmt(t.amt)}</td></tr>`;
+      <td class="p-3 text-left font-bold text-slate-300">${fmt(t.amt)}</td>
+      <td class="p-3 text-center">${warn?(t.dup?'<span class="text-amber-400 text-[9px] font-bold" title="כבר קיימת במערכת">כפול</span>':'<span class="text-amber-400 text-[9px] font-bold" title="עסקה זהה בדוח">כפול?</span>'):''}</td></tr>`;
   });
-  h+=`<tr class="border-t-2 border-neon-purple/15 font-bold"><td colspan="4" class="p-3 text-slate-400">סה״כ</td><td class="p-3 text-left text-gold">${fmt(total)}</td></tr>`;
+  h+=`<tr class="border-t-2 border-neon-purple/15 font-bold"><td class="p-3"></td><td colspan="4" class="p-3 text-slate-400">סה״כ לייבוא</td><td class="p-3 text-left text-gold" id="impTotal">${fmt(total)}</td><td></td></tr>`;
   h+='</tbody></table></div>';
   h+='<div class="mt-4 flex flex-wrap gap-2">';
   Object.keys(byMonth).forEach(mk=>{h+=`<span class="text-[10px] px-3 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.04] text-slate-500">${heMonth(mk)}: ${byMonth[mk].length} עסקאות</span>`});
   h+='</div>';
+
   document.getElementById('importPreview').innerHTML=h;
   document.getElementById('importLoading').style.display='none';
   document.getElementById('importPreview').style.display='block';
   document.getElementById('importActions').style.display='flex';
   window._iTxns=txns;
+
+  function updateTotal(){
+    let t=0;window._iTxns.forEach(x=>{if(x.include)t+=x.amt});
+    const el=document.getElementById('impTotal');if(el)el.textContent=fmt(t);
+  }
   document.querySelectorAll('.ic-sel').forEach(sel=>{sel.onchange=()=>{window._iTxns[+sel.dataset.i].lc=sel.value}});
+  document.querySelectorAll('.ic-chk').forEach(chk=>{chk.onchange=()=>{window._iTxns[+chk.dataset.i].include=chk.checked;updateTotal();
+    const allEl=document.getElementById('icAll');if(allEl)allEl.checked=window._iTxns.every(x=>x.include)}});
+  const allChk=document.getElementById('icAll');
+  if(allChk)allChk.onchange=()=>{const v=allChk.checked;window._iTxns.forEach(x=>x.include=v);document.querySelectorAll('.ic-chk').forEach(c=>c.checked=v);updateTotal()};
 }
 
 document.getElementById('confirmImport').onclick=()=>{
-  const txns=window._iTxns;
-  if(!txns||!txns.length)return;
+  const txns=(window._iTxns||[]).filter(t=>t.include);
+  if(!txns.length)return toast('לא נבחרו עסקאות לייבוא');
   txns.forEach(t=>{
     if(!S.months[t.moKey]){S.months[t.moKey]={income:0,expenses:{}};CATS.forEach(c=>S.months[t.moKey].expenses[c.key]=0)}
     S.months[t.moKey].expenses[t.lc]=(S.months[t.moKey].expenses[t.lc]||0)+Math.round(t.amt);

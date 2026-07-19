@@ -3,7 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#F5F2EB">
+<meta name="theme-color" content="#2E5E4E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LedgerHouse">
 <title>LedgerHouse — ניהול הוצאות</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -99,6 +104,7 @@ select{font-family:inherit}
     </div>
   </nav>
   <div class="flex items-center gap-2">
+    <input type="text" id="gSearch" placeholder="חיפוש בכל העסקאות..." class="ff !w-[170px] !py-1.5 !text-[11px] mob-hide">
     <div class="sync-badge flex items-center gap-1.5 text-[10px] px-2.5 py-1.5 rounded-lg mob-hide" style="color:var(--text4);background:var(--surface2);border:1px solid var(--border)">
       <span class="w-[5px] h-[5px] rounded-full" style="background:currentColor"></span><span class="st">מקומי</span>
     </div>
@@ -259,6 +265,7 @@ function monthIncome(mo){return S.txns.filter(t=>t.month===mo&&t.type==='income'
 function monthExpTotal(mo){return monthExpenses(mo).reduce((a,t)=>a+t.amount,0)}
 function catTotal(mo,ck){return monthExpenses(mo).filter(t=>t.cat===ck).reduce((a,t)=>a+t.amount,0)}
 function fixedTotal(){return(S.fixed||[]).reduce((a,f)=>a+(+f.amount||0),0)}
+function fixedIncTotal(){return(S.fixed||[]).filter(f=>f.included!==false).reduce((a,f)=>a+(+f.amount||0),0)}
 function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function fpOf(t){return(t.date||'')+'|'+Math.round(Math.abs(t.amount)*100)+'|'+(t.biz||'').replace(/\s/g,'').slice(0,20)}
 function existingFps(){return new Set(S.txns.filter(t=>t.src==='isracard').map(fpOf))}
@@ -288,9 +295,10 @@ function render(){if(curView==='summary')renderSummary();else if(curView==='annu
 function renderSummary(){
   const months=txMonths();
   let mi=months.indexOf(sumMonth);if(mi<0){sumMonth=months[months.length-1];mi=months.length-1}
-  const inc=monthIncome(sumMonth),exp=monthExpTotal(sumMonth),delta=inc-exp;
+  const inc=monthIncome(sumMonth),exp=monthExpTotal(sumMonth);
   const totalBudget=CATS.reduce((a,c)=>a+(+S.budgets[c.key]||0),0);
-  const fx=fixedTotal();
+  const fx=fixedIncTotal();
+  const delta=inc-exp-fx;
   const expT=monthExpenses(sumMonth);
   const refunds=expT.filter(t=>t.amount<0).reduce((a,t)=>a-t.amount,0);
 
@@ -308,11 +316,14 @@ function renderSummary(){
       </div>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 mob-1">
+    <div class="grid grid-cols-1 sm:grid-cols-${fx>0?'4':'3'} gap-3 mb-6 mob-1">
       <div class="card"><div class="lbl">הכנסות</div><div class="text-[26px] font-black tracking-tight" style="color:var(--income)">${fmt(inc)}</div></div>
       <div class="card"><div class="lbl">הוצאות</div><div class="text-[26px] font-black tracking-tight" style="color:var(--expense)">${fmt(exp)}</div>
         ${refunds>0?`<div class="text-[10px] mt-1.5" style="color:var(--income)">כולל החזרים: +${fmt(refunds)}</div>`:''}</div>
+      ${fx>0?`<div class="card"><div class="lbl">קבועות</div><div class="text-[26px] font-black tracking-tight" style="color:var(--copper)">${fmt(fx)}</div>
+        <div class="text-[10px] mt-1.5" style="color:var(--text4)">משכנתא, ביטוחים, מנויים</div></div>`:''}
       <div class="card"><div class="lbl">נשאר</div><div class="text-[26px] font-black tracking-tight" style="color:${delta>=0?'var(--income)':'var(--expense)'}">${fmtS(delta)}</div>
+        ${fx>0?`<div class="text-[10px] mt-1.5" style="color:var(--text4)">אחרי ניכוי קבועות</div>`:''}
         ${S.savingsTarget>0?`<div class="text-[10px] mt-1.5" style="color:var(--text4)">יעד חיסכון: ${fmt(S.savingsTarget)} ${delta>=S.savingsTarget?'✓':`(חסר ${fmt(S.savingsTarget-delta)})`}</div>`:''}</div>
     </div>
 
@@ -441,11 +452,35 @@ function renderAnnual(){
         <span class="text-left" style="color:${tNet>=0?'var(--income)':'var(--expense)'}">${fmtS(tNet)}</span>
       </div>`:''}
     </div>
+
+    ${(function(){
+      const yearTxns=S.txns.filter(t=>t.month.endsWith(' '+curYear)&&t.type==='expense');
+      if(!yearTxns.length)return'';
+      const catRows=CATS.map(c=>{
+        const rows=yearTxns.filter(t=>t.cat===c.key);
+        return{c,total:rows.reduce((a,t)=>a+t.amount,0),cnt:rows.length};
+      }).filter(r=>r.cnt).sort((a,b)=>b.total-a.total);
+      const maxC=Math.max(1,...catRows.map(r=>r.total));
+      return`<div class="card mt-6" style="padding:0;overflow:hidden">
+        <div class="px-5 pt-5 pb-3 text-[12px] font-bold" style="color:var(--text2)">הוצאות שנתיות לפי קטגוריה</div>
+        ${catRows.map(r=>`<div class="cat-chip flex items-center gap-3 px-5 py-3" style="border-top:1px solid var(--border2)" onclick="gotoCatYear('${r.c.key}',${curYear})">
+          <span class="w-[8px] h-[8px] rounded-full flex-shrink-0" style="background:${r.c.color}"></span>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[12px] font-semibold">${r.c.he} <span class="font-normal text-[10px]" style="color:var(--text5)">· ${r.cnt} עסקאות</span></span>
+              <span class="text-[12px] font-bold">${fmt(r.total)} <span class="font-normal text-[10px]" style="color:var(--text4)">${tE?Math.round(r.total/tE*100):0}%</span></span>
+            </div>
+            <div class="h-[4px] rounded-full overflow-hidden" style="background:var(--border2)"><div class="h-full rounded-full" style="width:${Math.round(r.total/maxC*100)}%;background:${r.c.color}"></div></div>
+          </div>
+        </div>`).join('')}
+      </div>`;
+    })()}
   </div>`;
   const p=document.getElementById('yPrev');if(p)p.onclick=()=>{curYear=years[yi-1];renderAnnual()};
   const n=document.getElementById('yNext');if(n)n.onclick=()=>{curYear=years[yi+1];renderAnnual()};
 }
 window.gotoMonthSummary=function(key){sumMonth=key;switchView('summary')};
+window.gotoCatYear=function(ck,yr){txFilter={q:'',month:'all',cat:ck,type:'all'};switchView('txns',true)};
 
 // ---- Transactions ----
 function renderTxns(){
@@ -546,11 +581,12 @@ function renderSettings(){
 
     <div class="card mb-5">
       <div class="text-[12px] font-bold mb-1" style="color:var(--text2)">התחייבויות קבועות</div>
-      <div class="text-[10px] mb-4" style="color:var(--text5)">משכנתא, ביטוחים, מנויים — הוצאות קבועות ארוכות טווח.</div>
+      <div class="text-[10px] mb-4" style="color:var(--text5)">משכנתא, ביטוחים, מנויים. ✓ "נספר" = מנוכה מ"נשאר" בסיכום החודשי (בטל אם ההוצאה כבר נרשמת כעסקה).</div>
       <div class="flex flex-col gap-2" id="fixedList">
         ${(S.fixed||[]).map((f,i)=>`<div class="flex items-center gap-3 py-2.5 px-3 rounded-xl" style="background:var(--surface2);border:1px solid var(--border2)">
           <input type="text" value="${f.name}" data-fn="${i}" class="flex-1 bg-transparent border-none text-[12px] outline-none" style="color:var(--text)" placeholder="שם">
           <input type="number" value="${f.amount}" data-fa="${i}" class="w-[100px] bg-transparent text-[12px] outline-none text-left rounded-lg px-2 py-1" style="border:1px solid var(--border);color:var(--text2)" dir="ltr">
+          <label class="flex items-center gap-1.5 text-[10px] cursor-pointer" style="color:var(--text4)"><input type="checkbox" data-fc="${i}" ${f.included!==false?'checked':''} class="cursor-pointer">נספר</label>
           <button class="fx-del w-7 h-7 rounded-lg flex items-center justify-center text-sm cursor-pointer" style="border:1px solid var(--border);background:transparent;color:var(--text5)" data-fi="${i}">&times;</button>
         </div>`).join('')}
       </div>
@@ -570,6 +606,8 @@ function renderSettings(){
       <div class="text-[10px] mb-4" style="color:var(--text5)">${dupeCount()>0?'נמצאו '+dupeCount()+' עסקאות כפולות.':'אין עסקאות כפולות.'}</div>
       <div class="flex gap-3 flex-wrap">
         <button class="btn-secondary" id="sExport">ייצוא גיבוי</button>
+        <button class="btn-secondary" id="sImportBk">שחזור מגיבוי</button>
+        <input type="file" accept=".json" id="bkFile" class="hidden">
         ${dupeCount()>0?'<button class="btn-secondary" id="sDedup" style="color:var(--warn);border-color:var(--warn)">נקה כפילויות ('+dupeCount()+')</button>':''}
         <button class="px-5 py-2 rounded-xl text-[12px] font-medium cursor-pointer" id="sReset" style="background:var(--expense-bg);border:1px solid rgba(201,93,79,.15);color:var(--expense)">איפוס מערכת</button>
       </div>
@@ -594,10 +632,24 @@ function renderSettings(){
   document.getElementById('sSaveFixed').onclick=()=>{
     document.querySelectorAll('[data-fn]').forEach(inp=>{S.fixed[+inp.dataset.fn].name=inp.value.trim()});
     document.querySelectorAll('[data-fa]').forEach(inp=>{S.fixed[+inp.dataset.fa].amount=+inp.value||0});
+    document.querySelectorAll('[data-fc]').forEach(inp=>{S.fixed[+inp.dataset.fc].included=inp.checked});
     S.fixed=S.fixed.filter(f=>f.name||f.amount);save();syncCloud();toast('נשמר');renderSettings()};
   document.querySelectorAll('.fx-del').forEach(b=>b.onclick=()=>{S.fixed.splice(+b.dataset.fi,1);save();renderSettings()});
   document.getElementById('sSaveGas').onclick=async()=>{GAS=document.getElementById('sGas').value.trim();ls('lh_gas',GAS);if(GAS)await syncCloud();toast('נשמר')};
   document.getElementById('sExport').onclick=()=>{const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ledgerhouse-backup.json';a.click()};
+  document.getElementById('sImportBk').onclick=()=>document.getElementById('bkFile').click();
+  document.getElementById('bkFile').onchange=e=>{
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=()=>{try{
+      const d=JSON.parse(r.result);
+      const m=normalize(migrate(d));
+      if(!m||!Array.isArray(m.txns))throw new Error('bad');
+      if(!confirm('לשחזר מהגיבוי? '+m.txns.length+' עסקאות יחליפו את הנתונים הנוכחיים ('+S.txns.length+' עסקאות).'))return;
+      S=m;CATS=S.cats;save();syncCloud();render();toast('שוחזר: '+S.txns.length+' עסקאות');
+    }catch(err){toast('קובץ גיבוי לא תקין')}};
+    r.readAsText(f);
+  };
   const dd=document.getElementById('sDedup');if(dd)dd.onclick=openDupModal;
   document.getElementById('sReset').onclick=()=>{if(confirm('למחוק את כל הנתונים? הפעולה לא הפיכה.')){S=JSON.parse(JSON.stringify(EMPTY));CATS=S.cats;save();syncCloud();render();toast('המערכת אופסה')}};
 }
@@ -708,7 +760,10 @@ document.getElementById('tmSave').onclick=()=>{
     biz,amount:tmType==='refund'?-amt:amt,
     src:'manual'
   };
-  if(tmEditId){const i=S.txns.findIndex(t=>t.id===tmEditId);if(i>=0){txn.src=S.txns[i].src;S.txns[i]=txn}}
+  if(tmEditId){const i=S.txns.findIndex(t=>t.id===tmEditId);if(i>=0){
+    // learn from category corrections on imported transactions
+    if(txn.type==='expense'&&S.txns[i].cat!==txn.cat)learnCat(txn.biz,txn.cat);
+    txn.src=S.txns[i].src;S.txns[i]=txn}}
   else S.txns.push(txn);
   save();syncCloud();closeModal('txnModal');
   toast(tmEditId?'העסקה עודכנה':'העסקה נוספה');render();
@@ -812,28 +867,43 @@ function parseAmounts(line){
   return out;
 }
 
+// Learned business->category map: normalized biz name -> cat key
+function normBiz(b){return(b||'').replace(/[\s.\-*'"׳״]/g,'').replace(/…/g,'').slice(0,14)}
+function learnCat(biz,cat){if(!biz||!cat)return;S.catMap=S.catMap||{};S.catMap[normBiz(biz)]=cat}
+function learnedCat(biz){return(S.catMap||{})[normBiz(biz)]||null}
+
 function extractTxns(text){
   const txns=[],lines=text.split('\n'),dateRe=/(\d{2})\/(\d{2})\/(\d{2,4})/;
   for(const line of lines){
     const dm=line.match(dateRe);
     if(!dm)continue;
-    if(line.includes('תאריך')||line.includes('מועד חיוב')||line.includes('פירוט')||line.includes('סה"כ')||line.includes('סה״כ'))continue;
+    if(line.includes('תאריך')||line.includes('מועד חיוב')||line.includes('פירוט')||line.includes('סה"כ')||line.includes('סה״כ')||line.includes('יתרה'))continue;
     const amounts=parseAmounts(line);
     if(!amounts.length)continue;
     // Last amount on the line = billed amount. Negative = refund/credit.
-    const amt=amounts[amounts.length-1];
+    let amt=amounts[amounts.length-1];
     if(amt===0)continue;
+    // "זיכוי" anywhere on the line = credit, force refund sign
+    const isCredit=line.includes('זיכוי');
+    if(isCredit&&amt>0)amt=-amt;
+    // Flag uncertain rows for manual review: foreign currency or installments
+    const isFX=/[$€£]|USD|EUR/.test(line);
+    const isInstallment=/תשלום|תשלומים|מתוך/.test(line);
+    const uncertain=(isFX&&amounts.length>1)||isInstallment;
     let ic='שונות',lc='other';
     for(const c of IC_CATS){if(line.includes(c)){ic=c;lc=IC_MAP[c];break}}
     let biz=line.replace(dateRe,'').replace(/(-?)([\d,]+\.\d{2})(-?)/g,'').replace(/הוצג לא|נייד\.תש|קבע\.ה|זיכוי/g,'');
     for(const c of IC_CATS)biz=biz.replace(c,'');
     biz=biz.replace(/\s+/g,' ').trim();
     if(biz.length>40)biz=biz.substring(0,40)+'…';
+    // learned category from user's past corrections wins over the Isracard sector guess
+    const lrn=learnedCat(biz);
+    if(lrn&&CATS.some(c=>c.key===lrn))lc=lrn;
     const dd=dm[1],mo=parseInt(dm[2])-1;
     let yr=dm[3];if(yr.length===2)yr='20'+yr;
     const iso=yr+'-'+String(mo+1).padStart(2,'0')+'-'+dd;
     const moKey=MO[mo]+' '+yr;
-    txns.push({date:iso,dateDisp:dd+'/'+dm[2]+'/'+yr.slice(2),biz,ic,lc,amt,moKey});
+    txns.push({date:iso,dateDisp:dd+'/'+dm[2]+'/'+yr.slice(2),biz,ic,lc,amt,moKey,uncertain,learned:!!lrn});
   }
   return txns;
 }
@@ -860,10 +930,14 @@ function showImportPreview(txns){
   });
   const dupCount=txns.filter(t=>t.dup||t.selfDup).length;
   const refundCount=txns.filter(t=>t.amt<0).length;
+  const uncCount=txns.filter(t=>t.uncertain).length;
+  const lrnCount=txns.filter(t=>t.learned).length;
 
   let h=`<div class="flex items-center gap-2 mb-4 flex-wrap">
     <div class="text-[11px] font-bold px-3 py-1.5 rounded-lg" style="background:var(--income-bg);color:var(--income)">נמצאו ${txns.length} עסקאות</div>`;
   if(refundCount)h+=`<div class="text-[11px] font-bold px-3 py-1.5 rounded-lg" style="background:var(--income-bg);color:var(--income)">${refundCount} החזרים</div>`;
+  if(lrnCount)h+=`<div class="text-[11px] font-bold px-3 py-1.5 rounded-lg" style="background:var(--sage-bg);color:var(--sage)">🎯 ${lrnCount} תויגו מהלמידה</div>`;
+  if(uncCount)h+=`<div class="text-[11px] font-bold px-3 py-1.5 rounded-lg" style="background:var(--warn-bg);color:var(--warn)">✋ ${uncCount} לבדיקה (מט״ח/תשלומים)</div>`;
   if(dupCount)h+=`<div class="text-[11px] font-bold px-3 py-1.5 rounded-lg" style="background:var(--warn-bg);color:var(--warn)">⚠ ${dupCount} כבר יובאו בעבר</div>`;
   h+=`<button onclick="showRawDebug()" class="text-[11px] font-bold px-3 py-1.5 rounded-lg mr-auto cursor-pointer" style="background:var(--surface2);color:var(--text4);border:1px solid var(--border)">טקסט גולמי</button>`;
   h+=`</div>`;
@@ -889,6 +963,7 @@ function showImportPreview(txns){
       <td class="p-2.5 text-left font-bold" style="color:${refund?'var(--income)':'var(--text)'}">${refund?'+':''}${fmt(t.amt)}</td>
       <td class="p-2.5 text-center">
         ${refund?'<span class="text-[9px] font-bold px-1.5 py-0.5 rounded" style="background:var(--income-bg);color:var(--income)">החזר</span>':''}
+        ${t.uncertain?'<span class="text-[9px] font-bold" style="color:var(--warn)" title="מט״ח או תשלומים — בדוק את הסכום">לבדיקה</span>':''}
         ${warn?'<span class="text-[9px] font-bold" style="color:var(--warn)" title="'+(t.dup?'יובאה בעבר':'כפולה בדוח')+'">כפול</span>':''}
       </td></tr>`;
   });
@@ -905,7 +980,7 @@ function showImportPreview(txns){
     let t=0;window._iTxns.forEach(x=>{if(x.include)t+=x.amt});
     const el=document.getElementById('impTotal');if(el)el.textContent=fmt(t);
   }
-  document.querySelectorAll('.ic-sel').forEach(sel=>{sel.onchange=()=>{window._iTxns[+sel.dataset.i].lc=sel.value}});
+  document.querySelectorAll('.ic-sel').forEach(sel=>{sel.onchange=()=>{const t=window._iTxns[+sel.dataset.i];t.lc=sel.value;learnCat(t.biz,sel.value)}});
   document.querySelectorAll('.ic-chk').forEach(chk=>{chk.onchange=()=>{window._iTxns[+chk.dataset.i].include=chk.checked;updateTotal();
     const allEl=document.getElementById('icAll');if(allEl)allEl.checked=window._iTxns.every(x=>x.include)}});
   const allChk=document.getElementById('icAll');
@@ -924,8 +999,15 @@ document.getElementById('confirmImport').onclick=()=>{
 
 // ===== Init =====
 document.querySelectorAll('.nav-item').forEach(item=>item.onclick=()=>switchView(item.dataset.view));
+const gS=document.getElementById('gSearch');
+gS.addEventListener('input',()=>{
+  txFilter={q:gS.value,month:'all',cat:'all',type:'all'};
+  if(curView!=='txns')switchView('txns',true);else renderTxns();
+});
+gS.addEventListener('keydown',e=>{if(e.key==='Escape'){gS.value='';txFilter.q='';renderTxns()}});
 render();
 if(GAS)loadCloud().then(()=>{CATS=S.cats;render()});
+if('serviceWorker'in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 })();
 </script>
 </body>

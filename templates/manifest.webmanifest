@@ -1,0 +1,20 @@
+{
+  "name": "LedgerHouse — ניהול הוצאות",
+  "short_name": "LedgerHouse",
+  "description": "מעקב הוצאות, תקציב וחיסכון",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F5F2EB",
+  "theme_color": "#2E5E4E",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

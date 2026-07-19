@@ -85,6 +85,10 @@ select{font-family:inherit}
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       <span>סיכום</span>
     </div>
+    <div class="nav-item" data-view="annual">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>שנתי</span>
+    </div>
     <div class="nav-item" data-view="txns">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
       <span>עסקאות</span>
@@ -104,6 +108,7 @@ select{font-family:inherit}
 
 <div class="main flex-1" id="mainScroll">
   <div class="view active" id="v-summary"></div>
+  <div class="view" id="v-annual"></div>
   <div class="view" id="v-txns"></div>
   <div class="view" id="v-settings"></div>
 </div>
@@ -194,6 +199,7 @@ const DEFAULT_CATS=[
 ];
 const MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const MO_HE=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+const MO_HE_S=['ינו׳','פבר׳','מרץ','אפר׳','מאי','יוני','יולי','אוג׳','ספט׳','אוק׳','נוב׳','דצמ׳'];
 function heMonth(k){const p=k.split(' ');return MO_HE[MO.indexOf(p[0])]+' '+p[1]}
 function moKeyFromDate(iso){const d=new Date(iso);return MO[d.getMonth()]+' '+d.getFullYear()}
 function curMoKey(){const d=new Date();return MO[d.getMonth()]+' '+d.getFullYear()}
@@ -231,7 +237,7 @@ function loadLocal(){try{return JSON.parse(ls('lh_state'))}catch(e){return null}
 function save(){ls('lh_state',JSON.stringify(S))}
 let CATS=S.cats;
 let GAS=ls('lh_gas')||'https://script.google.com/macros/s/AKfycbwMDQpxmLCiXM62_imOz6p63DwQvT6A7kyJ_59qps8SwrELidbQ4KZQDicUDn1qZlzd/exec';
-let curView='summary',sumMonth=latestDataMonth(),txFilter={q:'',month:'all',cat:'all',type:'all'};
+let curView='summary',sumMonth=latestDataMonth(),curYear=+sumMonth.split(' ')[1]||new Date().getFullYear(),txFilter={q:'',month:'all',cat:'all',type:'all'};
 function latestDataMonth(){
   if(!S.txns.length)return curMoKey();
   // pick the month with the most transactions; break ties by most recent month
@@ -276,7 +282,7 @@ function switchView(v,keepFilter){
   window.scrollTo(0,0);
   render();
 }
-function render(){if(curView==='summary')renderSummary();else if(curView==='txns')renderTxns();else renderSettings()}
+function render(){if(curView==='summary')renderSummary();else if(curView==='annual')renderAnnual();else if(curView==='txns')renderTxns();else renderSettings()}
 
 // ---- Summary ----
 function renderSummary(){
@@ -310,29 +316,41 @@ function renderSummary(){
         ${S.savingsTarget>0?`<div class="text-[10px] mt-1.5" style="color:var(--text4)">יעד חיסכון: ${fmt(S.savingsTarget)} ${delta>=S.savingsTarget?'✓':`(חסר ${fmt(S.savingsTarget-delta)})`}</div>`:''}</div>
     </div>
 
-    <div class="card mb-6" style="padding:0;overflow:hidden">
-      <div class="flex items-center justify-between px-5 pt-5 pb-3">
-        <div class="text-[12px] font-bold" style="color:var(--text2)">הוצאות לפי קטגוריה</div>
-        ${totalBudget>0?`<div class="text-[10px]" style="color:var(--text4)">תקציב כולל: ${fmt(totalBudget)}</div>`:''}
-      </div>
+    <div class="flex items-center justify-between mb-3 px-1">
+      <div class="text-[12px] font-bold" style="color:var(--text2)">הוצאות לפי קטגוריה</div>
+      ${totalBudget>0?`<div class="text-[10px]" style="color:var(--text4)">תקציב כולל: ${fmt(totalBudget)}</div>`:''}
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-6">
       ${CATS.map(c=>{
-        const spent=catTotal(sumMonth,c.key);
-        const cnt=expT.filter(t=>t.cat===c.key).length;
-        if(!cnt&&!(+S.budgets[c.key]))return'';
+        const rows=expT.filter(t=>t.cat===c.key).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+        const spent=rows.reduce((a,t)=>a+t.amount,0);
+        if(!rows.length&&!(+S.budgets[c.key]))return'';
         const bud=+S.budgets[c.key]||0;
         const pct=bud?Math.min(spent/bud*100,100):0;
         const over=bud&&spent>bud;
-        return`<div class="cat-chip flex items-center gap-3 px-5 py-3.5" style="border-top:1px solid var(--border2)" onclick="gotoCat('${c.key}')">
-          <span class="w-[8px] h-[8px] rounded-full flex-shrink-0" style="background:${c.color}"></span>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-[12px] font-semibold">${c.he} <span class="font-normal text-[10px]" style="color:var(--text5)">· ${cnt} עסקאות</span></span>
-              <span class="text-[12px] font-bold">${fmt(spent)}${bud?`<span class="font-normal text-[10px]" style="color:${over?'var(--expense)':'var(--text4)'}"> / ${fmt(bud)}</span>`:''}</span>
+        return`<div class="card" style="padding:0;overflow:hidden">
+          <div class="px-4 pt-4 pb-3" style="border-bottom:1px solid var(--border2)">
+            <div class="flex items-center gap-2.5 mb-2">
+              <span class="w-[10px] h-[10px] rounded-full flex-shrink-0" style="background:${c.color}"></span>
+              <span class="text-[13px] font-bold flex-1">${c.he}</span>
+              <span class="text-[10px]" style="color:var(--text5)">${rows.length} עסקאות</span>
             </div>
-            ${bud?`<div class="h-[4px] rounded-full overflow-hidden" style="background:var(--border2)"><div class="h-full rounded-full" style="width:${pct}%;background:${over?'var(--expense)':c.color}"></div></div>`:''}
+            <div class="flex items-baseline gap-2">
+              <span class="text-[20px] font-black tracking-tight" style="color:${over?'var(--expense)':'var(--text)'}">${fmt(spent)}</span>
+              ${bud?`<span class="text-[11px]" style="color:var(--text4)">מתוך ${fmt(bud)}</span>`:''}
+            </div>
+            ${bud?`<div class="h-[4px] rounded-full overflow-hidden mt-2" style="background:var(--border2)"><div class="h-full rounded-full" style="width:${pct}%;background:${over?'var(--expense)':c.color}"></div></div>`:''}
           </div>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--text5)"><polyline points="15 18 9 12 15 6"/></svg>
-        </div>`}).join('')||'<div class="px-5 py-8 text-center text-[12px]" style="color:var(--text4)">אין הוצאות החודש עדיין</div>'}
+          <div style="max-height:220px;overflow-y:auto">
+            ${rows.length?rows.map(t=>{const refund=t.amount<0;return`<div class="cat-chip flex items-center gap-2.5 px-4 py-2.5" style="border-bottom:1px solid var(--border2)" onclick="editTxn('${t.id}')">
+              <div class="flex-1 min-w-0">
+                <div class="text-[11px] font-medium truncate">${t.biz||'ללא שם'}${refund?' <span class="text-[8px] font-bold px-1 py-0.5 rounded" style="background:var(--income-bg);color:var(--income)">החזר</span>':''}</div>
+                <div class="text-[9px]" style="color:var(--text5)">${t.date?t.date.split('-').reverse().join('/'):heMonth(t.month)}</div>
+              </div>
+              <span class="text-[12px] font-bold" style="color:${refund?'var(--income)':'var(--text)'}">${refund?'+':''}${fmt(t.amount)}</span>
+            </div>`}).join(''):'<div class="px-4 py-6 text-center text-[11px]" style="color:var(--text5)">אין עסקאות</div>'}
+          </div>
+        </div>`}).join('')||'<div class="card text-center text-[12px] col-span-full" style="color:var(--text4)">אין הוצאות החודש עדיין</div>'}
     </div>
 
     ${(S.fixed||[]).length?`
@@ -352,6 +370,82 @@ function renderSummary(){
   const n=document.getElementById('sNext');if(n)n.onclick=()=>{sumMonth=months[mi+1];renderSummary()};
 }
 window.gotoCat=function(ck){txFilter={q:'',month:sumMonth,cat:ck,type:'all'};switchView('txns',true)};
+window.editTxn=function(id){const t=S.txns.find(x=>x.id===id);if(t)openTxnModal(t)};
+
+// ---- Annual ----
+function renderAnnual(){
+  const years=[...new Set(S.txns.map(t=>+t.month.split(' ')[1]))].sort((a,b)=>a-b);
+  if(!years.length)years.push(curYear);
+  if(years.indexOf(curYear)<0)curYear=years[years.length-1];
+  const yi=years.indexOf(curYear);
+  // build 12 months
+  const rows=MO.map((m,idx)=>{
+    const key=m+' '+curYear;
+    const inc=monthIncome(key),exp=monthExpTotal(key);
+    return{idx,key,inc,exp,net:inc-exp,has:S.txns.some(t=>t.month===key)};
+  });
+  const tI=rows.reduce((a,r)=>a+r.inc,0),tE=rows.reduce((a,r)=>a+r.exp,0),tNet=tI-tE;
+  const maxV=Math.max(1,...rows.map(r=>Math.max(r.inc,r.exp)));
+  const activeRows=rows.filter(r=>r.has);
+  const avgExp=activeRows.length?Math.round(tE/activeRows.length):0;
+
+  document.getElementById('v-annual').innerHTML=`
+  <div class="max-w-[980px] mx-auto px-5 mob-p pb-16">
+    <div class="flex items-center gap-3 py-5">
+      <button class="w-8 h-8 rounded-lg flex items-center justify-center transition-all disabled:opacity-20" id="yPrev" ${yi<=0?'disabled':''} style="background:var(--surface);border:1px solid var(--border);color:var(--text3)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+      <h2 class="text-[19px] font-extrabold tracking-tight min-w-[90px] text-center">${curYear}</h2>
+      <button class="w-8 h-8 rounded-lg flex items-center justify-center transition-all disabled:opacity-20" id="yNext" ${yi>=years.length-1?'disabled':''} style="background:var(--surface);border:1px solid var(--border);color:var(--text3)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-6 mob-1">
+      <div class="card"><div class="lbl">סה״כ הכנסות</div><div class="text-[22px] font-black tracking-tight" style="color:var(--income)">${fmt(tI)}</div></div>
+      <div class="card"><div class="lbl">סה״כ הוצאות</div><div class="text-[22px] font-black tracking-tight" style="color:var(--expense)">${fmt(tE)}</div></div>
+      <div class="card"><div class="lbl">מאזן שנתי</div><div class="text-[22px] font-black tracking-tight" style="color:${tNet>=0?'var(--income)':'var(--expense)'}">${fmtS(tNet)}</div></div>
+      <div class="card"><div class="lbl">ממוצע הוצאה חודשי</div><div class="text-[22px] font-black tracking-tight">${fmt(avgExp)}</div></div>
+    </div>
+
+    <div class="card mb-6" style="padding:0;overflow:hidden">
+      <div class="px-5 pt-5 pb-3 text-[12px] font-bold" style="color:var(--text2)">הכנסות מול הוצאות לפי חודש</div>
+      <div class="flex items-end justify-between gap-1.5 px-5 pt-2 pb-5" style="height:180px" dir="ltr">
+        ${rows.map(r=>{
+          const ih=Math.round(r.inc/maxV*130),eh=Math.round(r.exp/maxV*130);
+          const dim=r.has?'1':'.35';
+          return`<div class="flex-1 flex flex-col items-center justify-end gap-1 group cursor-pointer" style="opacity:${dim}" onclick="${r.has?`gotoMonthSummary('${r.key}')`:''}">
+            <div class="w-full flex items-end justify-center gap-[3px]" style="height:135px">
+              <div class="rounded-t" style="width:42%;height:${ih}px;background:var(--income)" title="הכנסות ${fmt(r.inc)}"></div>
+              <div class="rounded-t" style="width:42%;height:${eh}px;background:var(--expense)" title="הוצאות ${fmt(r.exp)}"></div>
+            </div>
+            <span class="text-[9px] font-medium" style="color:var(--text4)">${MO_HE_S[r.idx]}</span>
+          </div>`}).join('')}
+      </div>
+      <div class="flex gap-4 px-5 pb-4 text-[10px]" style="color:var(--text4)">
+        <span class="flex items-center gap-1.5"><span class="w-[8px] h-[8px] rounded-sm" style="background:var(--income)"></span>הכנסות</span>
+        <span class="flex items-center gap-1.5"><span class="w-[8px] h-[8px] rounded-sm" style="background:var(--expense)"></span>הוצאות</span>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="grid grid-cols-4 gap-2 px-5 py-2.5 text-[10px] font-bold" style="color:var(--text5);border-bottom:1px solid var(--border2)">
+        <span>חודש</span><span class="text-left">הכנסות</span><span class="text-left">הוצאות</span><span class="text-left">מאזן</span>
+      </div>
+      ${activeRows.length?activeRows.map(r=>`<div class="cat-chip grid grid-cols-4 gap-2 px-5 py-3 text-[12px]" style="border-bottom:1px solid var(--border2)" onclick="gotoMonthSummary('${r.key}')">
+        <span class="font-semibold">${MO_HE[r.idx]}</span>
+        <span class="text-left font-bold" style="color:var(--income)">${fmt(r.inc)}</span>
+        <span class="text-left font-bold" style="color:var(--expense)">${fmt(r.exp)}</span>
+        <span class="text-left font-bold" style="color:${r.net>=0?'var(--income)':'var(--expense)'}">${fmtS(r.net)}</span>
+      </div>`).join(''):'<div class="px-5 py-8 text-center text-[12px]" style="color:var(--text4)">אין נתונים לשנה זו</div>'}
+      ${activeRows.length?`<div class="grid grid-cols-4 gap-2 px-5 py-3 text-[12px] font-black" style="background:var(--surface2)">
+        <span>סה״כ</span>
+        <span class="text-left" style="color:var(--income)">${fmt(tI)}</span>
+        <span class="text-left" style="color:var(--expense)">${fmt(tE)}</span>
+        <span class="text-left" style="color:${tNet>=0?'var(--income)':'var(--expense)'}">${fmtS(tNet)}</span>
+      </div>`:''}
+    </div>
+  </div>`;
+  const p=document.getElementById('yPrev');if(p)p.onclick=()=>{curYear=years[yi-1];renderAnnual()};
+  const n=document.getElementById('yNext');if(n)n.onclick=()=>{curYear=years[yi+1];renderAnnual()};
+}
+window.gotoMonthSummary=function(key){sumMonth=key;switchView('summary')};
 
 // ---- Transactions ----
 function renderTxns(){

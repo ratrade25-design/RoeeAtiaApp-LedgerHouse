@@ -1,21 +1,13 @@
 <!DOCTYPE html>
-<html lang="he" dir="ltr">
+<html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#F5F2EB">
-<title>LedgerHouse — מרכז פיננסי</title>
+<title>LedgerHouse — ניהול הוצאות</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-tailwind.config={theme:{extend:{
-  fontFamily:{heebo:['Heebo','sans-serif']},
-  colors:{
-    sand:{50:'#FAF8F3',100:'#F5F2EB',200:'#EBE6DA',300:'#E2DED4',400:'#C4BFB2',500:'#8E9490',600:'#6B706C',700:'#4A4F4B',800:'#2C3630',900:'#1A1F1C',950:'#111513'},
-    sage:{DEFAULT:'#2E5E4E',light:'#4A8A72',dark:'#1E3F35',50:'#EEFAF4',100:'#D0F0E0',200:'#A3E0C2',400:'#4A8A72',500:'#2E5E4E',600:'#1E3F35',700:'#162E27'},
-    copper:{DEFAULT:'#C8956C',light:'#DDB892',dark:'#A67548',50:'#FDF6EF',100:'#F9E8D6'},
-    warmWhite:'#FFFFFF',
-  }
-}}}
+tailwind.config={theme:{extend:{fontFamily:{heebo:['Heebo','sans-serif']}}}}
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,661 +17,526 @@ tailwind.config={theme:{extend:{
 :root{
   --bg:#F5F2EB;--surface:#FFFFFF;--surface2:#FAF8F3;--border:#E2DED4;--border2:#EBE6DA;
   --text:#2C3630;--text2:#4A4F4B;--text3:#6B706C;--text4:#8E9490;--text5:#C4BFB2;
-  --sage:#2E5E4E;--sage-light:#4A8A72;--sage-bg:rgba(46,94,78,.06);--sage-border:rgba(46,94,78,.12);
-  --copper:#C8956C;--copper-bg:rgba(200,149,108,.08);--copper-border:rgba(200,149,108,.15);
-  --income:#3B8C5C;--income-bg:rgba(59,140,92,.06);--expense:#C95D4F;--expense-bg:rgba(201,93,79,.06);
-  --shadow-sm:0 1px 3px rgba(44,54,48,.04),0 1px 2px rgba(44,54,48,.03);
-  --shadow:0 4px 16px rgba(44,54,48,.06),0 1px 3px rgba(44,54,48,.04);
-  --shadow-lg:0 12px 40px rgba(44,54,48,.08),0 4px 12px rgba(44,54,48,.04);
-  --radius:14px;--radius-sm:10px;--radius-lg:20px;
+  --sage:#2E5E4E;--sage-bg:rgba(46,94,78,.07);--sage-border:rgba(46,94,78,.14);
+  --copper:#C8956C;--copper-bg:rgba(200,149,108,.09);--copper-border:rgba(200,149,108,.18);
+  --income:#3B8C5C;--income-bg:rgba(59,140,92,.08);--expense:#C95D4F;--expense-bg:rgba(201,93,79,.08);
+  --warn:#D97706;--warn-bg:rgba(217,119,6,.08);
+  --shadow-sm:0 1px 3px rgba(44,54,48,.05);
+  --shadow:0 4px 16px rgba(44,54,48,.07);
+  --shadow-lg:0 12px 40px rgba(44,54,48,.1);
 }
 @media(prefers-color-scheme:dark){:root{
   --bg:#111513;--surface:#1A1F1C;--surface2:#1E2420;--border:#2A302C;--border2:#232A26;
   --text:#E8E4DD;--text2:#C4C0B8;--text3:#8E9490;--text4:#6B706C;--text5:#4A4F4B;
-  --sage:#4A8A72;--sage-light:#6AB894;--sage-bg:rgba(74,138,114,.1);--sage-border:rgba(74,138,114,.2);
-  --copper:#DDB892;--copper-bg:rgba(221,184,146,.08);--copper-border:rgba(221,184,146,.15);
-  --income:#5CB87A;--income-bg:rgba(92,184,122,.08);--expense:#E07A5F;--expense-bg:rgba(224,122,95,.08);
-  --shadow-sm:0 1px 3px rgba(0,0,0,.2);--shadow:0 4px 16px rgba(0,0,0,.25);--shadow-lg:0 12px 40px rgba(0,0,0,.35);
+  --sage:#4A8A72;--sage-bg:rgba(74,138,114,.12);--sage-border:rgba(74,138,114,.22);
+  --copper:#DDB892;--copper-bg:rgba(221,184,146,.1);--copper-border:rgba(221,184,146,.18);
+  --income:#5CB87A;--income-bg:rgba(92,184,122,.1);--expense:#E07A5F;--expense-bg:rgba(224,122,95,.1);
+  --warn:#F59E0B;--warn-bg:rgba(245,158,11,.1);
+  --shadow-sm:0 1px 3px rgba(0,0,0,.25);--shadow:0 4px 16px rgba(0,0,0,.3);--shadow-lg:0 12px 40px rgba(0,0,0,.4);
 }}
-:root[data-theme="dark"]{
-  --bg:#111513;--surface:#1A1F1C;--surface2:#1E2420;--border:#2A302C;--border2:#232A26;
-  --text:#E8E4DD;--text2:#C4C0B8;--text3:#8E9490;--text4:#6B706C;--text5:#4A4F4B;
-  --sage:#4A8A72;--sage-light:#6AB894;--sage-bg:rgba(74,138,114,.1);--sage-border:rgba(74,138,114,.2);
-  --copper:#DDB892;--copper-bg:rgba(221,184,146,.08);--copper-border:rgba(221,184,146,.15);
-  --income:#5CB87A;--income-bg:rgba(92,184,122,.08);--expense:#E07A5F;--expense-bg:rgba(224,122,95,.08);
-  --shadow-sm:0 1px 3px rgba(0,0,0,.2);--shadow:0 4px 16px rgba(0,0,0,.25);--shadow-lg:0 12px 40px rgba(0,0,0,.35);
-}
-:root[data-theme="light"]{
-  --bg:#F5F2EB;--surface:#FFFFFF;--surface2:#FAF8F3;--border:#E2DED4;--border2:#EBE6DA;
-  --text:#2C3630;--text2:#4A4F4B;--text3:#6B706C;--text4:#8E9490;--text5:#C4BFB2;
-  --sage:#2E5E4E;--sage-light:#4A8A72;--sage-bg:rgba(46,94,78,.06);--sage-border:rgba(46,94,78,.12);
-  --copper:#C8956C;--copper-bg:rgba(200,149,108,.08);--copper-border:rgba(200,149,108,.15);
-  --income:#3B8C5C;--income-bg:rgba(59,140,92,.06);--expense:#C95D4F;--expense-bg:rgba(201,93,79,.06);
-  --shadow-sm:0 1px 3px rgba(44,54,48,.04),0 1px 2px rgba(44,54,48,.03);
-  --shadow:0 4px 16px rgba(44,54,48,.06),0 1px 3px rgba(44,54,48,.04);
-  --shadow-lg:0 12px 40px rgba(44,54,48,.08),0 4px 12px rgba(44,54,48,.04);
-}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Heebo',sans-serif;font-variant-numeric:tabular-nums;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;overflow:hidden}
-
+body{font-family:'Heebo',sans-serif;font-variant-numeric:tabular-nums;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
 .main::-webkit-scrollbar{width:4px}
-.main::-webkit-scrollbar-track{background:transparent}
 .main::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.main::-webkit-scrollbar-thumb:hover{background:var(--text5)}
-
-.view{display:none;min-height:100%}.view.active{display:block}
-
-@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-@keyframes modalIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+.view{display:none}.view.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes modalIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;
-  box-shadow:var(--shadow-sm);transition:all .3s ease}
-.card:hover{box-shadow:var(--shadow)}
-.card-lg{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;box-shadow:var(--shadow-sm)}
-
-.ff{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
-  padding:10px 14px;color:var(--text);outline:none;font-size:13px;transition:all .25s;width:100%;font-family:inherit}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;box-shadow:var(--shadow-sm)}
+.ff{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--text);outline:none;font-size:13px;transition:border-color .2s,box-shadow .2s;width:100%;font-family:inherit}
 .ff:focus{border-color:var(--sage);box-shadow:0 0 0 3px var(--sage-bg)}
 .ff::placeholder{color:var(--text5)}
-.ff-copper:focus{border-color:var(--copper);box-shadow:0 0 0 3px var(--copper-bg)}
-
-.btn-primary{background:var(--sage);color:#fff;font-weight:700;border:none;
-  border-radius:var(--radius-sm);padding:10px 24px;cursor:pointer;font-size:12px;
-  transition:all .25s;font-family:inherit}
-.btn-primary:hover{opacity:.9;transform:translateY(-1px);box-shadow:var(--shadow)}
-.btn-primary:active{transform:scale(.98)}
-
-.btn-secondary{background:var(--surface2);color:var(--text2);font-weight:600;border:1px solid var(--border);
-  border-radius:var(--radius-sm);padding:10px 24px;cursor:pointer;font-size:12px;
-  transition:all .25s;font-family:inherit}
-.btn-secondary:hover{background:var(--surface);border-color:var(--sage-border);color:var(--sage);box-shadow:var(--shadow-sm)}
-.btn-secondary:active{transform:scale(.98)}
-
-.btn-copper{background:var(--copper);color:#fff;font-weight:700;border:none;
-  border-radius:var(--radius-sm);padding:10px 24px;cursor:pointer;font-size:12px;transition:all .25s;font-family:inherit}
-.btn-copper:hover{opacity:.9;transform:translateY(-1px);box-shadow:var(--shadow)}
-
-.lbl{display:block;font-size:10px;font-weight:700;letter-spacing:.12em;margin-bottom:6px;color:var(--text4);text-transform:uppercase}
-
-.bar{transition:height .8s cubic-bezier(.16,1,.3,1)}
-.toast{transform:translateX(-50%) translateY(100px);transition:transform .4s cubic-bezier(.16,1,.3,1)}
-.toast.show{transform:translateX(-50%) translateY(0)}
-
-.nav-item{position:relative;display:flex;align-items:center;justify-content:center;width:42px;height:42px;
-  border-radius:var(--radius-sm);color:var(--text4);cursor:pointer;transition:all .25s}
+.btn-primary{background:var(--sage);color:#fff;font-weight:700;border:none;border-radius:10px;padding:9px 22px;cursor:pointer;font-size:12px;transition:all .2s;font-family:inherit}
+.btn-primary:hover{opacity:.9}
+.btn-secondary{background:var(--surface2);color:var(--text2);font-weight:600;border:1px solid var(--border);border-radius:10px;padding:9px 22px;cursor:pointer;font-size:12px;transition:all .2s;font-family:inherit}
+.btn-secondary:hover{border-color:var(--sage-border);color:var(--sage)}
+.btn-copper{background:var(--copper);color:#fff;font-weight:700;border:none;border-radius:10px;padding:9px 22px;cursor:pointer;font-size:12px;transition:all .2s;font-family:inherit}
+.btn-copper:hover{opacity:.9}
+.lbl{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;margin-bottom:5px;color:var(--text4)}
+.toast{transform:translateX(50%) translateY(100px);transition:transform .35s cubic-bezier(.16,1,.3,1)}
+.toast.show{transform:translateX(50%) translateY(0)}
+.nav-item{display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:10px;color:var(--text4);cursor:pointer;transition:all .2s;font-size:13px;font-weight:600}
 .nav-item:hover{background:var(--sage-bg);color:var(--sage)}
 .nav-item.active{color:var(--sage);background:var(--sage-bg)}
-.nav-item.active::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);
-  width:16px;height:2px;border-radius:1px;background:var(--sage)}
-
-.stat-badge{font-size:9px;font-weight:700;padding:3px 8px;border-radius:6px;letter-spacing:.03em}
-.stat-up{background:var(--income-bg);color:var(--income)}
-.stat-down{background:var(--expense-bg);color:var(--expense)}
-
 input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none}
 input[type="number"]{-moz-appearance:textfield}
 select{font-family:inherit}
-
+.cat-chip{cursor:pointer;transition:all .2s}
+.cat-chip:hover{border-color:var(--sage)!important;box-shadow:var(--shadow-sm)}
 @media(max-width:768px){
   .mob-1{grid-template-columns:1fr!important}
-  .mob-p{padding-left:16px!important;padding-right:16px!important}
-  .mob-text{font-size:22px!important}
-  .mob-ring{flex-direction:column!important}
-  .mob-ring>div:first-child{width:180px!important;height:180px!important;margin:0 auto!important}
+  .mob-p{padding-left:14px!important;padding-right:14px!important}
+  .mob-hide{display:none!important}
+  .nav-item span{display:none}
 }
 </style>
 </head>
-<body class="font-heebo antialiased overflow-hidden h-screen">
+<body class="font-heebo antialiased">
 
-<div id="app" class="h-screen overflow-hidden relative">
-<div class="flex flex-col h-full">
+<div id="app" class="min-h-screen flex flex-col">
 
-<header class="flex-shrink-0 h-[56px] flex items-center px-6 mob-p border-b" style="border-color:var(--border);background:var(--surface)">
-  <div class="flex items-center gap-2.5 mr-auto">
+<header class="sticky top-0 z-40 h-[54px] flex items-center px-5 mob-p border-b" style="border-color:var(--border);background:var(--surface)">
+  <div class="flex items-center gap-2.5">
     <div class="w-8 h-8 rounded-lg flex items-center justify-center font-black text-[11px] text-white" style="background:var(--sage)">LH</div>
-    <span class="text-[15px] font-extrabold tracking-tight" style="color:var(--text)">LedgerHouse</span>
+    <span class="text-[15px] font-extrabold tracking-tight mob-hide">LedgerHouse</span>
   </div>
   <nav class="flex items-center gap-1 mx-auto">
-    <div class="nav-item active" data-view="dashboard" title="דשבורד">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <div class="nav-item active" data-view="summary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>סיכום</span>
     </div>
-    <div class="nav-item" data-view="monthly" title="חודשי">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <div class="nav-item" data-view="txns">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span>עסקאות</span>
     </div>
-    <div class="nav-item" data-view="annual" title="שנתי">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-    </div>
-    <div class="nav-item" data-view="settings" title="הגדרות">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <div class="nav-item" data-view="settings">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>הגדרות</span>
     </div>
   </nav>
-  <div class="flex items-center gap-2 ml-auto">
-    <div class="flex items-center gap-1.5 text-[10px] font-mono px-2.5 py-1.5 rounded-lg" style="color:var(--text4);background:var(--surface2);border:1px solid var(--border)">
-      <span class="w-[5px] h-[5px] rounded-full" style="background:var(--sage);animation:pulse 2.5s ease-in-out infinite"></span>
-      <span id="clock">--:--</span>
+  <div class="flex items-center gap-2">
+    <div class="sync-badge flex items-center gap-1.5 text-[10px] px-2.5 py-1.5 rounded-lg mob-hide" style="color:var(--text4);background:var(--surface2);border:1px solid var(--border)">
+      <span class="w-[5px] h-[5px] rounded-full" style="background:currentColor"></span><span class="st">מקומי</span>
     </div>
+    <button onclick="openImportModal()" class="btn-copper !py-2 !px-4 text-[11px]">ייבוא דוח</button>
   </div>
 </header>
 
-<div class="main flex-1 overflow-y-auto overflow-x-hidden scroll-smooth" id="mainScroll" style="background:var(--bg)">
-  <div class="view active" id="v-dashboard"></div>
-  <div class="view" id="v-monthly"></div>
-  <div class="view" id="v-annual"></div>
+<div class="main flex-1" id="mainScroll">
+  <div class="view active" id="v-summary"></div>
+  <div class="view" id="v-txns"></div>
   <div class="view" id="v-settings"></div>
 </div>
 </div>
-</div>
 
-<div class="fixed inset-0 z-[100] items-center justify-center p-5" id="addMonthModal" style="display:none;background:rgba(0,0,0,.4);backdrop-filter:blur(8px)">
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;width:100%;max-width:500px;box-shadow:var(--shadow-lg);animation:modalIn .3s ease-out">
-    <div class="flex items-center justify-between mb-6">
-      <h3 class="text-lg font-bold" style="color:var(--text)">עריכת מחזור</h3>
-      <button class="w-8 h-8 rounded-lg flex items-center justify-center text-lg transition-all" style="background:var(--surface2);border:1px solid var(--border);color:var(--text4)" onclick="closeModal('addMonthModal')" onmouseover="this.style.color='var(--expense)'" onmouseout="this.style.color='var(--text4)'">&times;</button>
+<!-- Add/Edit transaction modal -->
+<div class="fixed inset-0 z-[100] items-center justify-center p-5" id="txnModal" style="display:none;background:rgba(0,0,0,.4);backdrop-filter:blur(6px)">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:28px;width:100%;max-width:440px;box-shadow:var(--shadow-lg);animation:modalIn .25s ease-out">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="text-lg font-bold" id="txnModalTitle">עסקה חדשה</h3>
+      <button class="w-8 h-8 rounded-lg flex items-center justify-center text-lg" style="background:var(--surface2);border:1px solid var(--border);color:var(--text4)" onclick="closeModal('txnModal')">&times;</button>
     </div>
-    <div class="mb-4"><label class="lbl">מחזור</label><select id="amMonth" class="ff ff-copper w-full"></select></div>
-    <div class="mb-4"><label class="lbl">כניסות (₪)</label><input type="number" id="amIncome" placeholder="0" class="ff ff-copper" dir="ltr"></div>
-    <div id="amCatFields"></div>
-    <div class="grid grid-cols-2 gap-4 mb-6">
-      <div><label class="lbl">שווי נטו</label><input type="number" id="amNetWorth" placeholder="0" class="ff ff-copper" dir="ltr"></div>
-      <div><label class="lbl">רזרבה נזילה</label><input type="number" id="amLiquid" placeholder="0" class="ff ff-copper" dir="ltr"></div>
+    <div class="flex gap-1 mb-5 p-1 rounded-xl" style="background:var(--surface2);border:1px solid var(--border2)">
+      <button class="tm-type flex-1 py-2 rounded-lg text-[11px] font-bold transition-all" data-type="expense" style="background:var(--expense);color:#fff">הוצאה</button>
+      <button class="tm-type flex-1 py-2 rounded-lg text-[11px] font-bold transition-all" data-type="income" style="color:var(--text4)">הכנסה</button>
+      <button class="tm-type flex-1 py-2 rounded-lg text-[11px] font-bold transition-all" data-type="refund" style="color:var(--text4)">החזר</button>
     </div>
-    <div class="flex gap-3"><button class="btn-primary" id="amSave">אשר</button><button class="btn-secondary" onclick="closeModal('addMonthModal')">בטל</button></div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div><label class="lbl">תאריך</label><input type="date" id="tmDate" class="ff" dir="ltr"></div>
+      <div><label class="lbl">סכום (₪)</label><input type="number" id="tmAmt" placeholder="0" class="ff" dir="ltr" step="0.01" min="0"></div>
+    </div>
+    <div class="mb-3"><label class="lbl">בית עסק / תיאור</label><input type="text" id="tmBiz" placeholder="למשל: סופר" class="ff"></div>
+    <div class="mb-6" id="tmCatWrap"><label class="lbl">קטגוריה</label><select id="tmCat" class="ff"></select></div>
+    <div class="flex gap-3"><button class="btn-primary flex-1" id="tmSave">שמור</button><button class="btn-secondary" onclick="closeModal('txnModal')">בטל</button></div>
   </div>
 </div>
 
-<div class="fixed inset-0 z-[100] items-center justify-center p-5" id="importModal" style="display:none;background:rgba(0,0,0,.4);backdrop-filter:blur(8px)">
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;width:100%;max-width:780px;box-shadow:var(--shadow-lg);max-height:85vh;overflow-y:auto;animation:modalIn .3s ease-out">
-    <div class="flex items-center justify-between mb-6">
-      <h3 class="text-lg font-bold" style="color:var(--text)">ייבוא דוח ישראכרט</h3>
-      <button class="w-8 h-8 rounded-lg flex items-center justify-center text-lg transition-all" style="background:var(--surface2);border:1px solid var(--border);color:var(--text4)" onclick="closeModal('importModal')" onmouseover="this.style.color='var(--expense)'" onmouseout="this.style.color='var(--text4)'">&times;</button>
+<!-- Import modal -->
+<div class="fixed inset-0 z-[100] items-center justify-center p-5" id="importModal" style="display:none;background:rgba(0,0,0,.4);backdrop-filter:blur(6px)">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:28px;width:100%;max-width:820px;box-shadow:var(--shadow-lg);max-height:88vh;overflow-y:auto;animation:modalIn .25s ease-out">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="text-lg font-bold">ייבוא דוח ישראכרט</h3>
+      <button class="w-8 h-8 rounded-lg flex items-center justify-center text-lg" style="background:var(--surface2);border:1px solid var(--border);color:var(--text4)" onclick="closeModal('importModal')">&times;</button>
     </div>
     <div id="importArea">
-      <label class="block w-full py-14 border-2 border-dashed rounded-2xl cursor-pointer text-center transition-all" id="importDropZone" style="border-color:var(--border);background:var(--surface2)" onmouseover="this.style.borderColor='var(--sage)';this.style.background='var(--sage-bg)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface2)'">
+      <label class="block w-full py-12 border-2 border-dashed rounded-2xl cursor-pointer text-center transition-all" id="importDropZone" style="border-color:var(--border);background:var(--surface2)">
         <input type="file" accept=".pdf" id="pdfInput" class="hidden">
         <div class="text-3xl mb-3">📄</div>
         <div class="text-[12px] font-medium" style="color:var(--text3)">לחץ לבחירת קובץ PDF של ישראכרט</div>
-        <div class="text-[10px] mt-1" style="color:var(--text5)">או גרור קובץ לכאן</div>
+        <div class="text-[10px] mt-1" style="color:var(--text5)">או גרור קובץ לכאן · עסקאות שכבר יובאו יסומנו אוטומטית</div>
       </label>
     </div>
-    <div id="importLoading" style="display:none" class="text-center py-14">
+    <div id="importLoading" style="display:none" class="text-center py-12">
       <div class="text-2xl mb-3" style="animation:pulse 1.5s infinite">📊</div>
       <div class="text-[12px] font-medium" style="color:var(--sage)">מפענח את הדוח...</div>
     </div>
     <div id="importPreview" style="display:none"></div>
-    <div id="importActions" style="display:none" class="flex gap-3 mt-6">
+    <div id="importActions" style="display:none" class="flex gap-3 mt-5">
       <button class="btn-primary" id="confirmImport">אשר ייבוא</button>
       <button class="btn-secondary" onclick="closeModal('importModal')">בטל</button>
     </div>
   </div>
 </div>
 
-<div class="toast fixed bottom-6 left-1/2 rounded-xl px-6 py-3.5 text-[13px] font-semibold z-[200]" id="toast" style="background:var(--sage);color:#fff;box-shadow:var(--shadow-lg)"></div>
+<div class="toast fixed bottom-6 right-1/2 rounded-xl px-6 py-3 text-[13px] font-semibold z-[200]" id="toast" style="background:var(--sage);color:#fff;box-shadow:var(--shadow-lg)"></div>
 
 <script>
 (function(){
+'use strict';
+// ===== Constants =====
 const DEFAULT_CATS=[
-  {key:'food',name:'Food & Groceries',he:'מזון ומכולת',color:'#3B8C5C'},
-  {key:'housing',name:'Housing & Utilities',he:'דיור ושירותים',color:'#6366F1'},
-  {key:'invest',name:'Investments',he:'השקעות',color:'#C8956C'},
-  {key:'savings',name:'Savings',he:'חיסכון',color:'#0EA5E9'},
-  {key:'car',name:'Car & Transport',he:'רכב ותחבורה',color:'#F59E0B'},
-  {key:'telecom',name:'Telecom',he:'תקשורת',color:'#8B5CF6'},
+  {key:'food',he:'מזון וסופר',color:'#3B8C5C'},
+  {key:'restaurants',he:'מסעדות וקפה',color:'#F59E0B'},
+  {key:'housing',he:'דיור וחשבונות',color:'#6366F1'},
+  {key:'car',he:'רכב ותחבורה',color:'#0EA5E9'},
+  {key:'shopping',he:'קניות',color:'#EC4899'},
+  {key:'health',he:'בריאות',color:'#14B8A6'},
+  {key:'telecom',he:'תקשורת ודיגיטל',color:'#8B5CF6'},
+  {key:'leisure',he:'פנאי ובילויים',color:'#EF4444'},
+  {key:'other',he:'שונות',color:'#94A3B8'},
 ];
-let CATS=JSON.parse(localStorage.getItem('lh_cats')||'null')||JSON.parse(JSON.stringify(DEFAULT_CATS));
-function saveCats(){localStorage.setItem('lh_cats',JSON.stringify(CATS))}
 const MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const MO_HE=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
-const MO_HE_S=['ינו׳','פבר׳','מרץ','אפר׳','מאי','יוני','יולי','אוג׳','ספט׳','אוק׳','נוב׳','דצמ׳'];
 function heMonth(k){const p=k.split(' ');return MO_HE[MO.indexOf(p[0])]+' '+p[1]}
-function heMonthS(k){return MO_HE_S[MO.indexOf(k.split(' ')[0])]}
+function moKeyFromDate(iso){const d=new Date(iso);return MO[d.getMonth()]+' '+d.getFullYear()}
+function curMoKey(){const d=new Date();return MO[d.getMonth()]+' '+d.getFullYear()}
+function moKeyToNum(k){const p=k.split(' ');return(+p[1])*12+MO.indexOf(p[0])}
 
-const DEFAULT_DATA={months:{},netWorth:[],liquidSavings:0,manualEntries:[]};
-
-const _freshReset=!ls('lh_v2');
-if(_freshReset){localStorage.removeItem('lh_state');ls('lh_v2','1')}
-let S=loadLocal()||JSON.parse(JSON.stringify(DEFAULT_DATA));
-if(!S.manualEntries)S.manualEntries=[];
-let GAS=ls('lh_gas')||'https://script.google.com/macros/s/AKfycbwMDQpxmLCiXM62_imOz6p63DwQvT6A7kyJ_59qps8SwrELidbQ4KZQDicUDn1qZlzd/exec';
-let curView='dashboard',curMonthIdx=-1;
-
+// ===== State =====
 function ls(k,v){if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}
+const EMPTY={v:3,txns:[],cats:JSON.parse(JSON.stringify(DEFAULT_CATS)),budgets:{},savingsTarget:0,fixed:[],liquidSavings:0};
+
+function migrate(d){
+  if(!d)return null;
+  if(d.v===3&&Array.isArray(d.txns))return d;
+  // old shape (months + manualEntries) -> v3
+  const out=JSON.parse(JSON.stringify(EMPTY));
+  const oldCats=JSON.parse(ls('lh_cats')||'null');
+  if(oldCats)out.cats=oldCats.map(c=>({key:c.key,he:c.he||c.name,color:c.color}));
+  (d.manualEntries||[]).forEach((e,i)=>{
+    out.txns.push({id:'m'+(e.ts||Date.now())+'_'+i,date:null,month:e.month||curMoKey(),
+      type:e.type==='income'?'income':'expense',cat:e.cat||'other',
+      biz:(e.note||e.source||'').replace('ישראכרט: ',''),amount:e.amount,src:e.note&&e.note.startsWith('ישראכרט')?'isracard':'manual'});
+  });
+  if(d.liquidSavings)out.liquidSavings=d.liquidSavings;
+  return out;
+}
+
+function normalize(d){
+  if(!d)return d;
+  const valid=new Set((d.cats||[]).map(c=>c.key));
+  d.txns.forEach(t=>{if(t.type==='expense'&&(!t.cat||!valid.has(t.cat)))t.cat='other'});
+  if(!valid.has('other'))d.cats.push({key:'other',he:'שונות',color:'#94A3B8'});
+  return d;
+}
+let S=normalize(migrate(loadLocal()))||JSON.parse(JSON.stringify(EMPTY));
 function loadLocal(){try{return JSON.parse(ls('lh_state'))}catch(e){return null}}
 function save(){ls('lh_state',JSON.stringify(S))}
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
-const fmt=n=>'₪'+n.toLocaleString('en-IL');
-const fmtK=n=>n>=1e3?'₪'+(n/1e3).toFixed(0)+'K':fmt(n);
-function totE(d){return CATS.reduce((a,c)=>a+(d.expenses[c.key]||0),0)}
-function mKeys(){return Object.keys(S.months)}
-function sortMonths(){const sorted=Object.entries(S.months).sort((a,b)=>{const[mA,yA]=a[0].split(' '),[mB,yB]=b[0].split(' ');return(+yA-+yB)||(MO.indexOf(mA)-MO.indexOf(mB))});S.months=Object.fromEntries(sorted)}
+let CATS=S.cats;
+let GAS=ls('lh_gas')||'https://script.google.com/macros/s/AKfycbwMDQpxmLCiXM62_imOz6p63DwQvT6A7kyJ_59qps8SwrELidbQ4KZQDicUDn1qZlzd/exec';
+let curView='summary',sumMonth=curMoKey(),txFilter={q:'',month:'all',cat:'all',type:'all'};
 
-async function syncCloud(){if(!GAS)return;try{await fetch(GAS+'?action=save',{method:'POST',body:JSON.stringify(S),headers:{'Content-Type':'text/plain'}});setSyncBadge('ok','מסונכרן')}catch(e){setSyncBadge('err','ניתוק')}}
-async function loadCloud(){if(!GAS)return;try{const r=await fetch(GAS+'?action=get');const d=await r.json();if(d&&d.months){S=d;if(!S.manualEntries)S.manualEntries=[];save();setSyncBadge('ok','נטען')}}catch(e){setSyncBadge('err','שגיאה')}}
-function setSyncBadge(s,t){document.querySelectorAll('.sync-badge').forEach(b=>{
-  b.style.color=s==='ok'?'var(--income)':'var(--expense)';
-  b.style.background=s==='ok'?'var(--income-bg)':'var(--expense-bg)';
-  b.querySelector('.st').textContent=t})}
+// ===== Helpers =====
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
+const fmt=n=>'₪'+Math.abs(Math.round(n)).toLocaleString('en-IL');
+const fmtS=n=>(n<0?'-':'')+fmt(n);
+function catOf(k){return CATS.find(c=>c.key===k)||{key:k,he:k,color:'#94A3B8'}}
+function txMonths(){const s=new Set(S.txns.map(t=>t.month));s.add(curMoKey());return[...s].sort((a,b)=>moKeyToNum(a)-moKeyToNum(b))}
+// expense txns store amount: positive = charge, negative = refund
+function monthExpenses(mo){return S.txns.filter(t=>t.month===mo&&t.type==='expense')}
+function monthIncome(mo){return S.txns.filter(t=>t.month===mo&&t.type==='income').reduce((a,t)=>a+t.amount,0)}
+function monthExpTotal(mo){return monthExpenses(mo).reduce((a,t)=>a+t.amount,0)}
+function catTotal(mo,ck){return monthExpenses(mo).filter(t=>t.cat===ck).reduce((a,t)=>a+t.amount,0)}
+function fixedTotal(){return(S.fixed||[]).reduce((a,f)=>a+(+f.amount||0),0)}
+function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function fpOf(t){return(t.date||'')+'|'+Math.round(Math.abs(t.amount)*100)+'|'+(t.biz||'').replace(/\s/g,'').slice(0,20)}
+function existingFps(){return new Set(S.txns.filter(t=>t.src==='isracard').map(fpOf))}
 
-function deltaStyle(pct){const up=pct>0;return up?'color:var(--expense)':'color:var(--income)'}
-function deltaBadge(pct){return`<span class="stat-badge ${+pct>=0?'stat-down':'stat-up'}">${+pct>=0?'+':''}${pct}%</span>`}
+// ===== Cloud sync =====
+async function syncCloud(){if(!GAS)return;try{await fetch(GAS+'?action=save',{method:'POST',body:JSON.stringify(S),headers:{'Content-Type':'text/plain'}});setSync('ok','מסונכרן')}catch(e){setSync('err','ניתוק')}}
+async function loadCloud(){if(!GAS)return;try{const r=await fetch(GAS+'?action=get');const d=await r.json();
+  if(d&&(d.v===3||d.months)){const m=normalize(migrate(d));
+    if(m&&m.txns.length>=S.txns.length){S=m;CATS=S.cats;save()}
+    else if(S.txns.length>m.txns.length){syncCloud()}
+    setSync('ok','מסונכרן')}}catch(e){setSync('err','שגיאה')}}
+function setSync(s,t){document.querySelectorAll('.sync-badge').forEach(b=>{
+  b.style.color=s==='ok'?'var(--income)':'var(--expense)';b.querySelector('.st').textContent=t})}
 
-function switchView(v){
+// ===== Views =====
+function switchView(v,keepFilter){
   curView=v;
-  document.querySelectorAll('.nav-item').forEach(i=>{i.classList.toggle('active',i.dataset.view===v)});
+  if(!keepFilter&&v==='txns'){/* keep last filter */}
+  document.querySelectorAll('.nav-item').forEach(i=>i.classList.toggle('active',i.dataset.view===v));
   document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='v-'+v));
-  document.getElementById('mainScroll').scrollTop=0;
-  if(v==='dashboard')renderDashboard();else if(v==='monthly')renderMonthly();else if(v==='annual')renderAnnual();else renderSettings();
+  window.scrollTo(0,0);
+  render();
 }
+function render(){if(curView==='summary')renderSummary();else if(curView==='txns')renderTxns();else renderSettings()}
 
-function renderDashboard(){
-  const mk=mKeys();
-  if(mk.length<1){
-    document.getElementById('v-dashboard').innerHTML=`
-    <div class="max-w-[900px] mx-auto px-6 mob-p">
-      <div class="flex items-center justify-between py-5">
-        <div>
-          <h2 class="text-[20px] font-extrabold tracking-tight" style="color:var(--text)">דשבורד</h2>
-          <p class="text-[11px] mt-0.5" style="color:var(--text4)">סקירה כללית</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <button onclick="openImportModal()" title="ייבוא מישראכרט" class="w-9 h-9 rounded-lg flex items-center justify-center transition-all" style="background:var(--copper-bg);border:1px solid var(--copper-border);color:var(--copper)">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          </button>
-          <button onclick="openAddMonth()" title="הוסף מחזור" class="w-9 h-9 rounded-lg flex items-center justify-center transition-all" style="background:var(--sage-bg);border:1px solid var(--sage-border);color:var(--sage)">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          </button>
-        </div>
-      </div>
-      <div class="flex flex-col items-center justify-center py-24 text-center">
-        <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl mb-6" style="background:var(--sage-bg);border:1px solid var(--sage-border)">📡</div>
-        <h3 class="text-xl font-bold mb-2" style="color:var(--text)">המערכת מוכנה</h3>
-        <p class="text-[13px] mb-8 max-w-sm leading-relaxed" style="color:var(--text4)">עדיין אין נתונים. ייבא דוח ישראכרט או הוסף מחזור ידנית כדי להתחיל.</p>
-        <div class="flex gap-3">
-          <button onclick="openImportModal()" class="btn-copper px-6 py-2.5">ייבוא מישראכרט</button>
-          <button onclick="openAddMonth()" class="btn-secondary px-6 py-2.5">הוסף מחזור</button>
-        </div>
-      </div>
-    </div>`;
-    updateClock();return;
-  }
-  const cur=S.months[mk[mk.length-1]],prev=S.months[mk[Math.max(mk.length-2,0)]];
-  const curM=mk[mk.length-1],prevM=mk[Math.max(mk.length-2,0)];
-  const cT=totE(cur),pT=totE(prev)||1,cfr=cT?((cur.income/cT)*100).toFixed(1):'0';
-  const nwC=S.netWorth.length?S.netWorth[S.netWorth.length-1].value:0,nwP=S.netWorth.length>1?S.netWorth[S.netWorth.length-2].value:nwC||1,nwD=nwP?((nwC-nwP)/nwP*100).toFixed(1):'0';
-  const avgE=mk.length?Math.round(mk.reduce((a,k)=>a+totE(S.months[k]),0)/mk.length):1;
-  const rw=(S.liquidSavings/(avgE||1)).toFixed(1),surplus=cur.income-cT;
-  const barMax=Math.max(...mk.map(k=>Math.max(S.months[k].income,totE(S.months[k]))),1);
-  const last6=mk.slice(-6);
-  const expD=pT?((cT-pT)/pT*100).toFixed(1):'0';
+// ---- Summary ----
+function renderSummary(){
+  const months=txMonths();
+  let mi=months.indexOf(sumMonth);if(mi<0){sumMonth=months[months.length-1];mi=months.length-1}
+  const inc=monthIncome(sumMonth),exp=monthExpTotal(sumMonth),delta=inc-exp;
+  const totalBudget=CATS.reduce((a,c)=>a+(+S.budgets[c.key]||0),0);
+  const fx=fixedTotal();
+  const expT=monthExpenses(sumMonth);
+  const refunds=expT.filter(t=>t.amount<0).reduce((a,t)=>a-t.amount,0);
 
-  document.getElementById('v-dashboard').innerHTML=`
-  <div class="max-w-[1100px] mx-auto px-6 mob-p">
-    <div class="flex items-center justify-between py-5">
-      <div>
-        <h2 class="text-[20px] font-extrabold tracking-tight" style="color:var(--text)">דשבורד</h2>
-        <p class="text-[11px] mt-0.5" style="color:var(--text4)">${heMonth(curM)}</p>
+  document.getElementById('v-summary').innerHTML=`
+  <div class="max-w-[980px] mx-auto px-5 mob-p pb-16">
+    <div class="flex items-center justify-between py-5 flex-wrap gap-3">
+      <div class="flex items-center gap-3">
+        <button class="w-8 h-8 rounded-lg flex items-center justify-center transition-all disabled:opacity-20" id="sPrev" ${mi<=0?'disabled':''} style="background:var(--surface);border:1px solid var(--border);color:var(--text3)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+        <h2 class="text-[19px] font-extrabold tracking-tight min-w-[130px] text-center">${heMonth(sumMonth)}</h2>
+        <button class="w-8 h-8 rounded-lg flex items-center justify-center transition-all disabled:opacity-20" id="sNext" ${mi>=months.length-1?'disabled':''} style="background:var(--surface);border:1px solid var(--border);color:var(--text3)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
       </div>
-      <div class="flex items-center gap-2">
-        <div class="sync-badge flex items-center gap-1.5 text-[10px] px-2.5 py-1.5 rounded-lg" style="color:var(--text4);background:var(--surface2);border:1px solid var(--border)"><span class="w-[4px] h-[4px] rounded-full" style="background:currentColor"></span><span class="st">${GAS?'פעיל':'לא מקושר'}</span></div>
-        <button onclick="openImportModal()" title="ייבוא" class="w-9 h-9 rounded-lg flex items-center justify-center transition-all" style="background:var(--copper-bg);border:1px solid var(--copper-border);color:var(--copper)">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        </button>
-        <button onclick="openAddMonth()" title="הוסף מחזור" class="w-9 h-9 rounded-lg flex items-center justify-center transition-all" style="background:var(--sage-bg);border:1px solid var(--sage-border);color:var(--sage)">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
-      </div>
+      <button class="btn-primary !py-2 !px-4 text-[11px]" onclick="openTxnModal()">+ עסקה חדשה</button>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 mob-1" id="overviewCards">
-      <div class="card">
-        <div class="lbl">יחס כיסוי</div>
-        <div class="text-[28px] mob-text font-black tracking-tight leading-none" style="color:${+cfr>=100?'var(--income)':'var(--expense)'}" id="a-cfr">0%</div>
-        <div class="text-[11px] mt-3 flex items-center gap-2" style="color:var(--text4)">כניסות/יציאות <span class="stat-badge ${+cfr>=100?'stat-up':'stat-down'}">${+cfr>=100?'יציב':'לתשומת לב'}</span></div>
-      </div>
-      <div class="card">
-        <div class="lbl">שווי נטו</div>
-        <div class="text-[28px] mob-text font-black tracking-tight leading-none" style="color:var(--copper)" id="a-nw">₪0</div>
-        <div class="text-[11px] mt-3 flex items-center gap-2" style="color:var(--text4)">${deltaBadge(nwD)} מהמחזור הקודם</div>
-      </div>
-      <div class="card">
-        <div class="lbl">יציאות</div>
-        <div class="text-[28px] mob-text font-black tracking-tight leading-none" style="color:var(--expense)" id="a-exp">₪0</div>
-        <div class="text-[11px] mt-3 flex items-center gap-2" style="color:var(--text4)">${deltaBadge(expD)} מ-${heMonth(prevM)}</div>
-      </div>
-      <div class="card">
-        <div class="lbl">כניסות</div>
-        <div class="text-[28px] mob-text font-black tracking-tight leading-none" style="color:var(--income)" id="a-inc">₪0</div>
-        <div class="text-[11px] mt-3" style="color:var(--text4)">דלתא: <strong style="color:${surplus>=0?'var(--income)':'var(--expense)'}">${fmt(surplus)}</strong></div>
-      </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 mob-1">
+      <div class="card"><div class="lbl">הכנסות</div><div class="text-[26px] font-black tracking-tight" style="color:var(--income)">${fmt(inc)}</div></div>
+      <div class="card"><div class="lbl">הוצאות</div><div class="text-[26px] font-black tracking-tight" style="color:var(--expense)">${fmt(exp)}</div>
+        ${refunds>0?`<div class="text-[10px] mt-1.5" style="color:var(--income)">כולל החזרים: +${fmt(refunds)}</div>`:''}</div>
+      <div class="card"><div class="lbl">נשאר</div><div class="text-[26px] font-black tracking-tight" style="color:${delta>=0?'var(--income)':'var(--expense)'}">${fmtS(delta)}</div>
+        ${S.savingsTarget>0?`<div class="text-[10px] mt-1.5" style="color:var(--text4)">יעד חיסכון: ${fmt(S.savingsTarget)} ${delta>=S.savingsTarget?'✓':`(חסר ${fmt(S.savingsTarget-delta)})`}</div>`:''}</div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-      <div class="card-lg">
-        <div class="text-[10px] uppercase tracking-widest font-bold mb-6 flex items-center gap-2" style="color:var(--text4)">
-          <span class="w-[5px] h-[5px] rounded-full" style="background:var(--income)"></span>תזרים — ${last6.length} מחזורים
-        </div>
-        <div class="flex items-end gap-4 h-[155px] pt-2" dir="ltr">
-          ${last6.map(m=>{const inc=S.months[m].income,exp=totE(S.months[m]);return`
-          <div class="flex-1 flex flex-col items-center gap-1.5">
-            <div class="flex gap-1 items-end h-[130px]">
-              <div class="bar w-[16px] rounded-t-md relative group cursor-pointer" data-v="${inc}" style="height:0;background:var(--income)"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity px-1.5 py-0.5 rounded-md" style="color:var(--income);background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-sm)">${fmtK(inc)}</span></div>
-              <div class="bar w-[16px] rounded-t-md relative group cursor-pointer" data-v="${exp}" style="height:0;background:var(--expense);opacity:.7"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity px-1.5 py-0.5 rounded-md" style="color:var(--expense);background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-sm)">${fmtK(exp)}</span></div>
+    <div class="card mb-6" style="padding:0;overflow:hidden">
+      <div class="flex items-center justify-between px-5 pt-5 pb-3">
+        <div class="text-[12px] font-bold" style="color:var(--text2)">הוצאות לפי קטגוריה</div>
+        ${totalBudget>0?`<div class="text-[10px]" style="color:var(--text4)">תקציב כולל: ${fmt(totalBudget)}</div>`:''}
+      </div>
+      ${CATS.map(c=>{
+        const spent=catTotal(sumMonth,c.key);
+        const cnt=expT.filter(t=>t.cat===c.key).length;
+        if(!cnt&&!(+S.budgets[c.key]))return'';
+        const bud=+S.budgets[c.key]||0;
+        const pct=bud?Math.min(spent/bud*100,100):0;
+        const over=bud&&spent>bud;
+        return`<div class="cat-chip flex items-center gap-3 px-5 py-3.5" style="border-top:1px solid var(--border2)" onclick="gotoCat('${c.key}')">
+          <span class="w-[8px] h-[8px] rounded-full flex-shrink-0" style="background:${c.color}"></span>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[12px] font-semibold">${c.he} <span class="font-normal text-[10px]" style="color:var(--text5)">· ${cnt} עסקאות</span></span>
+              <span class="text-[12px] font-bold">${fmt(spent)}${bud?`<span class="font-normal text-[10px]" style="color:${over?'var(--expense)':'var(--text4)'}"> / ${fmt(bud)}</span>`:''}</span>
             </div>
-            <div class="text-[9px] font-medium" style="color:var(--text5)">${heMonthS(m)}</div>
-          </div>`}).join('')}
-        </div>
-        <div class="flex gap-5 mt-5 text-[9px]" style="color:var(--text4)"><span class="flex items-center gap-1.5"><span class="w-[6px] h-[6px] rounded-sm" style="background:var(--income)"></span>כניסות</span><span class="flex items-center gap-1.5"><span class="w-[6px] h-[6px] rounded-sm" style="background:var(--expense);opacity:.7"></span>יציאות</span></div>
-      </div>
-      <div class="card-lg">
-        <div class="text-[10px] uppercase tracking-widest font-bold mb-6 flex items-center gap-2" style="color:var(--text4)">
-          <span class="w-[5px] h-[5px] rounded-full" style="background:var(--copper)"></span>כרית ביטחון
-        </div>
-        <div class="flex items-baseline gap-1.5">
-          <span class="text-[48px] font-black tracking-tight leading-none" id="a-rw" style="color:${+rw>6?'var(--income)':+rw>3?'var(--copper)':'var(--expense)'}">0</span>
-          <span class="text-[14px] font-medium" style="color:var(--text4)">חודשים</span>
-        </div>
-        <p class="text-[11px] mt-4 leading-relaxed" style="color:var(--text4)">הרזרבות הנזילות מספיקות ל-<strong style="color:var(--text2)">${rw} חודשי</strong> הוצאות ללא כניסות.</p>
-        <div class="h-[6px] rounded-full overflow-hidden mt-5 mb-2" style="background:var(--border2)"><div class="h-full rounded-full transition-all duration-1000 ease-out" id="rwBar" style="width:0;background:${+rw>6?'var(--income)':'var(--copper)'}"></div></div>
-        <div class="flex justify-between text-[9px] mb-4" style="color:var(--text5)"><span>0</span><span>3</span><span>6</span><span>12</span></div>
-        <div class="flex justify-between py-3 px-4 rounded-xl text-[11px] mb-1.5 transition-all" style="background:var(--surface2);border:1px solid var(--border2)"><span style="color:var(--text4)">רזרבה נזילה</span><span class="font-bold" style="color:var(--text)">${fmt(S.liquidSavings)}</span></div>
-        <div class="flex justify-between py-3 px-4 rounded-xl text-[11px] transition-all" style="background:var(--surface2);border:1px solid var(--border2)"><span style="color:var(--text4)">שריפה חודשית ממוצעת</span><span class="font-bold" style="color:var(--text)">${fmt(avgE)}</span></div>
-      </div>
+            ${bud?`<div class="h-[4px] rounded-full overflow-hidden" style="background:var(--border2)"><div class="h-full rounded-full" style="width:${pct}%;background:${over?'var(--expense)':c.color}"></div></div>`:''}
+          </div>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--text5)"><polyline points="15 18 9 12 15 6"/></svg>
+        </div>`}).join('')||'<div class="px-5 py-8 text-center text-[12px]" style="color:var(--text4)">אין הוצאות החודש עדיין</div>'}
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-12">
-      <div class="card-lg">
-        <div class="text-[10px] uppercase tracking-widest font-bold mb-6 flex items-center gap-2" style="color:var(--text4)">
-          <span class="w-[5px] h-[5px] rounded-full" style="background:var(--sage)"></span>התפלגות הוצאות
-        </div>
-        <div class="flex items-center gap-6 mob-ring">
-          <div class="relative w-[200px] h-[200px] flex-shrink-0"><canvas id="pieCanvas" width="400" height="400" style="width:200px;height:200px"></canvas></div>
-          <div class="flex-1 min-w-0 w-full">
-            ${CATS.map(c=>{const cv=cur.expenses[c.key]||0,pv=prev.expenses[c.key]||1,d=((cv-pv)/pv*100).toFixed(1);
-              return`<div class="flex items-center gap-3 py-2 px-2 rounded-lg transition-all text-[11px]" style="border-bottom:1px solid var(--border2)">
-                <span class="w-[6px] h-[6px] rounded-full flex-shrink-0" style="background:${c.color}"></span>
-                <span class="flex-1" style="color:var(--text3)">${c.he}</span>
-                <span class="font-bold" style="color:var(--text)">${fmt(cv)}</span>
-                <span class="text-[10px] font-bold" style="${deltaStyle(+d)}">${+d>0?'+':''}${d}%</span>
-              </div>`}).join('')}
-          </div>
-        </div>
+    ${(S.fixed||[]).length?`
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="flex items-center justify-between px-5 pt-5 pb-3">
+        <div class="text-[12px] font-bold" style="color:var(--text2)">התחייבויות קבועות</div>
+        <div class="text-[12px] font-bold" style="color:var(--copper)">${fmt(fx)} / חודש</div>
       </div>
-      <div class="card-lg">
-        <div class="text-[10px] uppercase tracking-widest font-bold mb-5 flex items-center gap-2" style="color:var(--text4)">
-          <span class="w-[5px] h-[5px] rounded-full" style="background:var(--copper)"></span>רישום מהיר
-        </div>
-        <div class="flex gap-1 mb-5 p-1 rounded-xl" style="background:var(--surface2);border:1px solid var(--border2)">
-          <button class="qe-tab active flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all" data-t="exp" style="background:var(--sage);color:#fff">יציאה</button>
-          <button class="qe-tab flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all" data-t="inc" style="color:var(--text4)">כניסה</button>
-        </div>
-        <div class="qe-form active" id="qf-exp">
-          <div class="flex gap-3 items-end mb-3">
-            <div class="flex-1"><label class="lbl">סכום (₪)</label><input type="number" id="qeAmt" placeholder="0" class="ff" dir="ltr"></div>
-            <div class="flex-1"><label class="lbl">קטגוריה</label><select id="qeCat" class="ff">${CATS.map(c=>'<option value="'+c.key+'">'+c.he+'</option>').join('')}</select></div>
-            <button class="btn-primary whitespace-nowrap h-[40px] text-[10px] px-4" id="qeAdd">הוסף</button>
+      ${S.fixed.map(f=>`<div class="flex items-center gap-3 px-5 py-3" style="border-top:1px solid var(--border2)">
+        <span class="w-[6px] h-[6px] rounded-full" style="background:var(--copper)"></span>
+        <span class="flex-1 text-[12px]" style="color:var(--text3)">${f.name}</span>
+        <span class="text-[12px] font-bold">${fmt(f.amount)}</span>
+      </div>`).join('')}
+    </div>`:''}
+  </div>`;
+  const p=document.getElementById('sPrev');if(p)p.onclick=()=>{sumMonth=months[mi-1];renderSummary()};
+  const n=document.getElementById('sNext');if(n)n.onclick=()=>{sumMonth=months[mi+1];renderSummary()};
+}
+window.gotoCat=function(ck){txFilter={q:'',month:sumMonth,cat:ck,type:'all'};switchView('txns',true)};
+
+// ---- Transactions ----
+function renderTxns(){
+  const months=txMonths();
+  let list=S.txns.slice();
+  if(txFilter.month!=='all')list=list.filter(t=>t.month===txFilter.month);
+  if(txFilter.cat!=='all')list=list.filter(t=>t.cat===txFilter.cat&&t.type==='expense');
+  if(txFilter.type!=='all')list=list.filter(t=>txFilter.type==='refund'?(t.type==='expense'&&t.amount<0):t.type===txFilter.type);
+  if(txFilter.q){const q=txFilter.q.toLowerCase();list=list.filter(t=>(t.biz||'').toLowerCase().includes(q))}
+  list.sort((a,b)=>{const d=(b.date||'').localeCompare(a.date||'');return d||((b.id>a.id)?1:-1)});
+  const tot=list.filter(t=>t.type==='expense').reduce((a,t)=>a+t.amount,0);
+
+  document.getElementById('v-txns').innerHTML=`
+  <div class="max-w-[980px] mx-auto px-5 mob-p pb-16">
+    <div class="flex items-center justify-between py-5 flex-wrap gap-3">
+      <h2 class="text-[19px] font-extrabold tracking-tight">עסקאות <span class="text-[12px] font-normal" style="color:var(--text4)">${list.length} רשומות · סה״כ ${fmt(tot)}</span></h2>
+      <button class="btn-primary !py-2 !px-4 text-[11px]" onclick="openTxnModal()">+ עסקה חדשה</button>
+    </div>
+    <div class="flex gap-2 mb-4 flex-wrap">
+      <input type="text" id="txQ" class="ff !w-[200px]" placeholder="חיפוש בית עסק..." value="${txFilter.q}">
+      <select id="txMo" class="ff !w-[140px]">
+        <option value="all">כל החודשים</option>
+        ${months.slice().reverse().map(m=>`<option value="${m}" ${txFilter.month===m?'selected':''}>${heMonth(m)}</option>`).join('')}
+      </select>
+      <select id="txCat" class="ff !w-[150px]">
+        <option value="all">כל הקטגוריות</option>
+        ${CATS.map(c=>`<option value="${c.key}" ${txFilter.cat===c.key?'selected':''}>${c.he}</option>`).join('')}
+      </select>
+      <select id="txType" class="ff !w-[120px]">
+        <option value="all">הכל</option>
+        <option value="expense" ${txFilter.type==='expense'?'selected':''}>הוצאות</option>
+        <option value="income" ${txFilter.type==='income'?'selected':''}>הכנסות</option>
+        <option value="refund" ${txFilter.type==='refund'?'selected':''}>החזרים</option>
+      </select>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      ${list.length?list.map(t=>{
+        const c=catOf(t.cat);
+        const isRefund=t.type==='expense'&&t.amount<0;
+        const isInc=t.type==='income';
+        return`<div class="flex items-center gap-3 px-5 py-3 group" style="border-bottom:1px solid var(--border2)">
+          <span class="w-[7px] h-[7px] rounded-full flex-shrink-0" style="background:${isInc?'var(--income)':c.color}"></span>
+          <div class="flex-1 min-w-0">
+            <div class="text-[12px] font-medium truncate">${t.biz||'ללא שם'}
+              ${isRefund?'<span class="text-[9px] font-bold px-1.5 py-0.5 rounded mx-1" style="background:var(--income-bg);color:var(--income)">החזר</span>':''}
+              ${t.src==='isracard'?'<span class="text-[9px] px-1.5 py-0.5 rounded mx-1" style="background:var(--surface2);color:var(--text5);border:1px solid var(--border2)">ישראכרט</span>':''}
+            </div>
+            <div class="text-[10px]" style="color:var(--text4)">${t.date?t.date.split('-').reverse().join('/'):heMonth(t.month)}${isInc?'':' · '+c.he}</div>
           </div>
-          <div><label class="lbl">הערה</label><input type="text" id="qeNote" placeholder="לא חובה" class="ff"></div>
-        </div>
-        <div class="qe-form" id="qf-inc" style="display:none">
-          <div class="flex gap-3 items-end">
-            <div class="flex-1"><label class="lbl">סכום (₪)</label><input type="number" id="qiAmt" placeholder="0" class="ff" dir="ltr"></div>
-            <div class="flex-1"><label class="lbl">מקור</label><input type="text" id="qiSrc" placeholder="למשל: משכורת" class="ff"></div>
-            <button class="btn-primary whitespace-nowrap h-[40px] text-[10px] px-4" id="qiAdd">הוסף</button>
+          <span class="text-[13px] font-bold" style="color:${isInc||isRefund?'var(--income)':'var(--text)'}">${isInc||isRefund?'+':''}${fmt(t.amount)}</span>
+          <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button class="tx-edit w-7 h-7 rounded-md flex items-center justify-center" style="background:var(--surface2);border:1px solid var(--border);color:var(--text4)" data-id="${t.id}" title="עריכה"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            <button class="tx-del w-7 h-7 rounded-md flex items-center justify-center" style="background:var(--surface2);border:1px solid var(--border);color:var(--text4)" data-id="${t.id}" title="מחיקה"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
           </div>
-        </div>
-        <div class="text-[10px] uppercase tracking-widest font-bold mt-6 mb-3" style="color:var(--text5)">אחרונים</div>
-        <div id="recentList">
-          ${(S.manualEntries||[]).slice(-5).reverse().map((e,ri)=>{const c=CATS.find(x=>x.key===e.cat);const idx=S.manualEntries.length-1-ri;
-            return`<div class="flex items-center gap-3 py-2.5 px-3 rounded-xl mb-1.5 text-[11px] transition-all group/row" style="background:var(--surface2);border:1px solid var(--border2)">
-              <span class="w-[5px] h-[5px] rounded-full flex-shrink-0" style="background:${c?c.color:'var(--income)'}"></span>
-              <span class="flex-1" style="color:var(--text3)">${e.note||e.source||(c?c.he:'כניסה')}</span>
-              <span class="font-bold" style="color:${e.type==='income'?'var(--income)':'var(--text)'}">${e.type==='income'?'+':'-'}${fmt(e.amount)}</span>
-              <button class="re-edit w-6 h-6 rounded-md flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-all" style="background:var(--surface);border:1px solid var(--border);color:var(--text4)" data-idx="${idx}" title="עריכה"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-              <button class="re-del w-6 h-6 rounded-md flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-all" style="background:var(--surface);border:1px solid var(--border);color:var(--text4)" data-idx="${idx}" title="מחיקה"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-            </div>`}).join('')||'<div class="text-[11px] py-2" style="color:var(--text5)">אין רשומות עדיין</div>'}
-        </div>
-      </div>
+        </div>`}).join(''):'<div class="px-5 py-10 text-center text-[12px]" style="color:var(--text4)">לא נמצאו עסקאות</div>'}
     </div>
   </div>`;
 
-  setTimeout(()=>{
-    animVal(document.getElementById('a-cfr'),0,+cfr,1200,'','%');
-    animVal(document.getElementById('a-nw'),0,nwC,1200,'₪','');
-    animVal(document.getElementById('a-exp'),0,cT,1200,'₪','');
-    animVal(document.getElementById('a-inc'),0,cur.income,1200,'₪','');
-    const rwEl=document.getElementById('a-rw');if(rwEl){let v=0;const tgt=+rw;const iv=setInterval(()=>{v+=.06;if(v>=tgt){v=tgt;clearInterval(iv)}rwEl.textContent=v.toFixed(1)},40)}
-    setTimeout(()=>{const rb=document.getElementById('rwBar');if(rb)rb.style.width=Math.min((+rw/12)*100,100)+'%'},400);
-    setTimeout(()=>{document.querySelectorAll('.bar[data-v]').forEach(b=>{b.style.height=Math.max((+b.dataset.v/barMax)*115,4)+'px'})},500);
-    drawPie(cur.expenses,curM);
-  },200);
-  updateClock();bindDashboardEvents();
+  document.getElementById('txQ').oninput=e=>{txFilter.q=e.target.value;renderTxns();const el=document.getElementById('txQ');el.focus();el.setSelectionRange(el.value.length,el.value.length)};
+  document.getElementById('txMo').onchange=e=>{txFilter.month=e.target.value;renderTxns()};
+  document.getElementById('txCat').onchange=e=>{txFilter.cat=e.target.value;renderTxns()};
+  document.getElementById('txType').onchange=e=>{txFilter.type=e.target.value;renderTxns()};
+  document.querySelectorAll('.tx-del').forEach(b=>b.onclick=()=>{
+    S.txns=S.txns.filter(t=>t.id!==b.dataset.id);save();syncCloud();toast('העסקה נמחקה');renderTxns()});
+  document.querySelectorAll('.tx-edit').forEach(b=>b.onclick=()=>{
+    const t=S.txns.find(x=>x.id===b.dataset.id);if(t)openTxnModal(t)});
 }
 
-function drawPie(expenses,curM){
-  const c=document.getElementById('pieCanvas');if(!c)return;
-  const ctx=c.getContext('2d'),w=c.width,h=c.height,cx=w/2,cy=h/2,r=160;
-  const total=CATS.reduce((a,cat)=>a+(expenses[cat.key]||0),0);
-  if(!total)return;
-  ctx.clearRect(0,0,w,h);
-  let ang=-Math.PI/2;
-  CATS.forEach(cat=>{
-    const val=expenses[cat.key]||0;if(!val)return;
-    const sweep=(val/total)*Math.PI*2;
-    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,ang,ang+sweep);ctx.closePath();
-    ctx.fillStyle=cat.color;ctx.fill();
-    ang+=sweep;
-  });
-  ctx.beginPath();ctx.arc(cx,cy,r*.6,0,Math.PI*2);
-  const cs=getComputedStyle(document.documentElement);
-  ctx.fillStyle=cs.getPropertyValue('--surface').trim()||'#FFFFFF';ctx.fill();
-  ctx.font='800 36px Heebo';ctx.fillStyle=cs.getPropertyValue('--text').trim()||'#2C3630';
-  ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText('₪'+total.toLocaleString('en-IL'),cx,cy-6);
-  ctx.font='400 16px Heebo';ctx.fillStyle=cs.getPropertyValue('--text4').trim()||'#8E9490';
-  ctx.fillText(heMonth(curM),cx,cy+18);
-}
-
-function bindDashboardEvents(){
-  document.querySelectorAll('.qe-tab').forEach(t=>t.onclick=()=>{
-    document.querySelectorAll('.qe-tab').forEach(x=>{x.classList.remove('active');x.style.background='transparent';x.style.color='var(--text4)'});
-    document.querySelectorAll('.qe-form').forEach(x=>x.style.display='none');
-    t.classList.add('active');t.style.background='var(--sage)';t.style.color='#fff';
-    document.getElementById('qf-'+t.dataset.t).style.display='block'});
-  const qeAdd=document.getElementById('qeAdd');if(qeAdd)qeAdd.onclick=()=>{
-    const a=+document.getElementById('qeAmt').value;if(!a||a<=0)return;
-    const cat=document.getElementById('qeCat').value,note=document.getElementById('qeNote').value,mk2=mKeys(),cm=mk2[mk2.length-1];
-    S.months[cm].expenses[cat]=(S.months[cm].expenses[cat]||0)+a;
-    S.manualEntries.push({type:'expense',cat,amount:a,note,month:cm,ts:Date.now()});save();syncCloud();
-    toast('יציאה נוספה: '+fmt(a));setTimeout(()=>renderDashboard(),300)};
-  const qiAdd=document.getElementById('qiAdd');if(qiAdd)qiAdd.onclick=()=>{
-    const a=+document.getElementById('qiAmt').value;if(!a||a<=0)return;
-    const src=document.getElementById('qiSrc').value,mk2=mKeys(),cm=mk2[mk2.length-1];
-    S.months[cm].income+=a;S.manualEntries.push({type:'income',amount:a,source:src,month:cm,ts:Date.now()});save();syncCloud();
-    toast('כניסה נוספה: +'+fmt(a));setTimeout(()=>renderDashboard(),300)};
-  document.querySelectorAll('.re-del').forEach(btn=>btn.onclick=()=>{
-    const i=+btn.dataset.idx,e=S.manualEntries[i];if(!e)return;
-    const m=e.month||mKeys()[mKeys().length-1];
-    if(S.months[m]){if(e.type==='expense'){S.months[m].expenses[e.cat]=Math.max(0,(S.months[m].expenses[e.cat]||0)-e.amount)}else{S.months[m].income=Math.max(0,S.months[m].income-e.amount)}}
-    S.manualEntries.splice(i,1);save();syncCloud();toast('הרשומה הוסרה');renderDashboard()});
-  document.querySelectorAll('.re-edit').forEach(btn=>btn.onclick=()=>{
-    const i=+btn.dataset.idx,e=S.manualEntries[i];if(!e)return;
-    const m=e.month||mKeys()[mKeys().length-1];
-    if(S.months[m]){if(e.type==='expense'){S.months[m].expenses[e.cat]=Math.max(0,(S.months[m].expenses[e.cat]||0)-e.amount)}else{S.months[m].income=Math.max(0,S.months[m].income-e.amount)}}
-    S.manualEntries.splice(i,1);save();renderDashboard();
-    setTimeout(()=>{
-      if(e.type==='expense'){
-        document.querySelectorAll('.qe-tab').forEach(x=>{x.classList.remove('active');x.style.background='transparent';x.style.color='var(--text4)'});
-        document.querySelectorAll('.qe-form').forEach(x=>x.style.display='none');
-        const expTab=document.querySelector('.qe-tab[data-t="exp"]');expTab.classList.add('active');expTab.style.background='var(--sage)';expTab.style.color='#fff';
-        document.getElementById('qf-exp').style.display='block';
-        document.getElementById('qeAmt').value=e.amount;document.getElementById('qeCat').value=e.cat;document.getElementById('qeNote').value=e.note||'';
-      }else{
-        document.querySelectorAll('.qe-tab').forEach(x=>{x.classList.remove('active');x.style.background='transparent';x.style.color='var(--text4)'});
-        document.querySelectorAll('.qe-form').forEach(x=>x.style.display='none');
-        const incTab=document.querySelector('.qe-tab[data-t="inc"]');incTab.classList.add('active');incTab.style.background='var(--sage)';incTab.style.color='#fff';
-        document.getElementById('qf-inc').style.display='block';
-        document.getElementById('qiAmt').value=e.amount;document.getElementById('qiSrc').value=e.source||'';
-      }
-      toast('ערוך ושלח מחדש');
-    },100)});
-}
-
-function renderMonthly(){
-  const mk=mKeys();
-  if(!mk.length){document.getElementById('v-monthly').innerHTML='<div class="flex flex-col items-center justify-center py-32 text-center"><div class="text-4xl mb-4">📊</div><p class="text-[13px]" style="color:var(--text4)">אין מחזורים עדיין.</p><div class="flex gap-3 mt-6"><button onclick="openImportModal()" class="btn-copper px-6 py-2.5">ייבוא מישראכרט</button><button onclick="openAddMonth()" class="btn-secondary px-6 py-2.5">הוסף מחזור</button></div></div>';return}
-  if(curMonthIdx<0)curMonthIdx=mk.length-1;
-  curMonthIdx=Math.max(0,Math.min(mk.length-1,curMonthIdx));
-  const key=mk[curMonthIdx],d=S.months[key],tot=totE(d),surp=d.income-tot,savRate=d.income?((surp/d.income)*100).toFixed(1):'0';
-  document.getElementById('v-monthly').innerHTML=`
-  <div class="max-w-[1000px] mx-auto px-6 mob-p">
-    <div class="py-5"><h2 class="text-[20px] font-extrabold tracking-tight" style="color:var(--text)">ניתוח חודשי</h2></div>
-    <div class="flex items-center gap-4 mb-8">
-      <button class="w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer transition-all disabled:opacity-20" id="mPrev" ${curMonthIdx<=0?'disabled':''} style="background:var(--surface);border:1px solid var(--border);color:var(--text3)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
-      <h2 class="text-xl font-extrabold tracking-tight min-w-[160px] text-center" style="color:var(--text)">${heMonth(key)}</h2>
-      <button class="w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer transition-all disabled:opacity-20" id="mNext" ${curMonthIdx>=mk.length-1?'disabled':''} style="background:var(--surface);border:1px solid var(--border);color:var(--text3)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
-    </div>
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 mob-1">
-      <div class="card"><div class="lbl">כניסות</div><div class="text-[24px] mob-text font-black tracking-tight" style="color:var(--income)">${fmt(d.income)}</div></div>
-      <div class="card"><div class="lbl">יציאות</div><div class="text-[24px] mob-text font-black tracking-tight" style="color:var(--expense)">${fmt(tot)}</div></div>
-      <div class="card"><div class="lbl">דלתא</div><div class="text-[24px] mob-text font-black tracking-tight" style="color:${surp>=0?'var(--income)':'var(--expense)'}">${fmt(surp)}</div><div class="text-[10px] mt-2" style="color:var(--text4)">חיסכון: <span class="stat-badge ${+savRate>=0?'stat-up':'stat-down'}">${savRate}%</span></div></div>
-    </div>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-12">
-      <div class="card-lg">
-        <div class="text-[10px] uppercase tracking-widest font-bold mb-5 flex items-center gap-2" style="color:var(--text4)"><span class="w-[5px] h-[5px] rounded-full" style="background:var(--income)"></span>כניסות</div>
-        <table class="w-full"><tr><th class="text-right text-[9px] uppercase tracking-wider font-semibold pb-3" style="color:var(--text5);border-bottom:1px solid var(--border2)">סוג</th><th class="text-left text-[9px] uppercase tracking-wider font-semibold pb-3" style="color:var(--text5);border-bottom:1px solid var(--border2)">סכום</th></tr>
-        <tr><td class="py-4 text-[12px]" style="color:var(--text3)">סה״כ כניסות</td><td class="py-4 text-left"><input class="ff !w-[130px] text-left" type="number" value="${d.income}" data-field="income" dir="ltr"></td></tr></table>
-      </div>
-      <div class="card-lg">
-        <div class="text-[10px] uppercase tracking-widest font-bold mb-5 flex items-center gap-2" style="color:var(--text4)"><span class="w-[5px] h-[5px] rounded-full" style="background:var(--expense)"></span>הוצאות</div>
-        <table class="w-full">
-          <tr><th class="text-right text-[9px] uppercase tracking-wider font-semibold pb-3" style="color:var(--text5);border-bottom:1px solid var(--border2)">קטגוריה</th><th class="text-left text-[9px] uppercase tracking-wider font-semibold pb-3" style="color:var(--text5);border-bottom:1px solid var(--border2)">סכום</th></tr>
-          ${CATS.map(c=>`<tr class="transition-all"><td class="py-3 text-[12px]" style="color:var(--text3);border-bottom:1px solid var(--border2)"><span class="inline-block w-[6px] h-[6px] rounded-full mr-3" style="background:${c.color}"></span>${c.he}</td><td class="py-3 text-left" style="border-bottom:1px solid var(--border2)"><input class="ff !w-[130px] text-left" type="number" value="${d.expenses[c.key]||0}" data-cat="${c.key}" dir="ltr"></td></tr>`).join('')}
-          <tr class="font-bold" style="border-top:2px solid var(--border)"><td class="py-4 text-[12px]">סה״כ</td><td class="py-4 text-left text-[14px]">${fmt(tot)}</td></tr>
-        </table>
-      </div>
-    </div>
-    <div class="flex gap-3 mb-8"><button class="btn-primary" id="mSave">עדכן</button></div>
-  </div>`;
-  document.getElementById('mPrev').onclick=()=>{curMonthIdx--;renderMonthly()};
-  document.getElementById('mNext').onclick=()=>{curMonthIdx++;renderMonthly()};
-  document.getElementById('mSave').onclick=()=>{const key2=mKeys()[curMonthIdx];S.months[key2].income=+(document.querySelector('[data-field="income"]').value)||0;document.querySelectorAll('[data-cat]').forEach(inp=>{S.months[key2].expenses[inp.dataset.cat]=+inp.value||0});save();syncCloud();toast('עודכן: '+heMonth(key2));renderMonthly()};
-  document.querySelectorAll('#v-monthly .card, #v-monthly .card-lg').forEach((el,i)=>{el.style.animation=`fadeUp .5s ${i*.06}s ease-out both`});
-}
-
-function renderAnnual(){
-  const mk=mKeys();
-  if(!mk.length){document.getElementById('v-annual').innerHTML='<div class="flex flex-col items-center justify-center py-32 text-center"><div class="text-4xl mb-4">📈</div><p class="text-[13px]" style="color:var(--text4)">אין נתונים שנתיים עדיין.</p><div class="flex gap-3 mt-6"><button onclick="openImportModal()" class="btn-copper px-6 py-2.5">ייבוא מישראכרט</button><button onclick="openAddMonth()" class="btn-secondary px-6 py-2.5">הוסף מחזור</button></div></div>';return}
-  const year=new Date().getFullYear();const ym=mk.filter(k=>k.endsWith(' '+year));
-  let tI=0,tE=0,tInv=0,tSav=0;ym.forEach(k=>{const d=S.months[k];tI+=d.income;tE+=totE(d);tInv+=(d.expenses.invest||0);tSav+=(d.expenses.savings||0)});
-  const net=tI-tE,bMax=Math.max(...ym.map(k=>Math.max(S.months[k].income,totE(S.months[k]))),1);
-  document.getElementById('v-annual').innerHTML=`
-  <div class="max-w-[1100px] mx-auto px-6 mob-p">
-    <div class="py-5"><h2 class="text-[20px] font-extrabold tracking-tight" style="color:var(--text)">סיכום שנתי — ${year}</h2></div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 mob-1">
-      <div class="card"><div class="lbl">סה״כ כניסות</div><div class="text-[24px] mob-text font-black tracking-tight" style="color:var(--income)">${fmt(tI)}</div><div class="text-[10px] mt-2" style="color:var(--text4)">${ym.length} חודשים</div></div>
-      <div class="card"><div class="lbl">סה״כ יציאות</div><div class="text-[24px] mob-text font-black tracking-tight" style="color:var(--expense)">${fmt(tE)}</div></div>
-      <div class="card"><div class="lbl">השקעות</div><div class="text-[24px] mob-text font-black tracking-tight" style="color:var(--copper)">${fmt(tInv)}</div><div class="text-[10px] mt-2" style="color:var(--text4)"><span class="stat-badge stat-up">${tI?((tInv/tI)*100).toFixed(1):'0'}%</span> מהכניסות</div></div>
-      <div class="card"><div class="lbl">חיסכון</div><div class="text-[24px] mob-text font-black tracking-tight" style="color:var(--income)">${fmt(tSav)}</div><div class="text-[10px] mt-2" style="color:var(--text4)"><span class="stat-badge stat-up">${tI?((tSav/tI)*100).toFixed(1):'0'}%</span> מהכניסות</div></div>
-    </div>
-    <div class="max-w-[320px] mb-6"><div class="card"><div class="lbl">דלתא מצרפית</div><div class="text-[24px] font-black tracking-tight" style="color:${net>=0?'var(--income)':'var(--expense)'}">${net>=0?'+':''}${fmt(net)}</div><div class="text-[10px] mt-2" style="color:var(--text4)">כניסות פחות כלל היציאות</div></div></div>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-12">
-      <div class="card-lg">
-        <div class="text-[10px] uppercase tracking-widest font-bold mb-6 flex items-center gap-2" style="color:var(--text4)"><span class="w-[5px] h-[5px] rounded-full" style="background:var(--income)"></span>תזרים חודשי</div>
-        <div class="flex items-end gap-4 h-[170px]" dir="ltr">${ym.map(m=>{const inc=S.months[m].income,exp=totE(S.months[m]);return`<div class="flex-1 flex flex-col items-center gap-1.5"><div class="flex gap-1 items-end h-[145px]"><div class="bar w-[16px] rounded-t-md relative group cursor-pointer" style="height:${Math.max((inc/bMax)*130,4)}px;background:var(--income)"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity px-1.5 py-0.5 rounded-md" style="color:var(--income);background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-sm)">${fmtK(inc)}</span></div><div class="bar w-[16px] rounded-t-md relative group cursor-pointer" style="height:${Math.max((exp/bMax)*130,4)}px;background:var(--expense);opacity:.7"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity px-1.5 py-0.5 rounded-md" style="color:var(--expense);background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-sm)">${fmtK(exp)}</span></div></div><div class="text-[9px] font-medium" style="color:var(--text5)">${heMonthS(m)}</div></div>`}).join('')}</div>
-      </div>
-      <div class="card-lg">
-        <div class="text-[10px] uppercase tracking-widest font-bold mb-5 flex items-center gap-2" style="color:var(--text4)"><span class="w-[5px] h-[5px] rounded-full" style="background:var(--sage)"></span>לפי קטגוריה</div>
-        <table class="w-full"><tr><th class="text-right text-[9px] uppercase tracking-wider font-semibold pb-3" style="color:var(--text5);border-bottom:1px solid var(--border2)">קטגוריה</th><th class="text-left text-[9px] uppercase tracking-wider font-semibold pb-3" style="color:var(--text5);border-bottom:1px solid var(--border2)">סה״כ</th><th class="text-left text-[9px] uppercase tracking-wider font-semibold pb-3" style="color:var(--text5);border-bottom:1px solid var(--border2)">%</th></tr>
-          ${CATS.map(c=>{let ct=0;ym.forEach(k=>ct+=(S.months[k].expenses[c.key]||0));return`<tr class="transition-all"><td class="py-3 text-[11px]" style="color:var(--text3);border-bottom:1px solid var(--border2)"><span class="inline-block w-[6px] h-[6px] rounded-full mr-3" style="background:${c.color}"></span>${c.he}</td><td class="py-3 text-left text-[11px]" style="color:var(--text);border-bottom:1px solid var(--border2)">${fmt(ct)}</td><td class="py-3 text-left text-[11px]" style="color:var(--text4);border-bottom:1px solid var(--border2)">${tE?((ct/tE)*100).toFixed(1):'0'}%</td></tr>`}).join('')}
-          <tr class="font-bold" style="border-top:2px solid var(--border)"><td class="py-4 text-[11px]">סה״כ</td><td class="py-4 text-left text-[12px]">${fmt(tE)}</td><td class="py-4 text-left text-[11px]">100%</td></tr></table>
-      </div>
-    </div>
-  </div>`;
-  document.querySelectorAll('#v-annual .card, #v-annual .card-lg').forEach((el,i)=>{el.style.animation=`fadeUp .5s ${i*.06}s ease-out both`});
-}
-
+// ---- Settings ----
 function renderSettings(){
   document.getElementById('v-settings').innerHTML=`
-  <div class="max-w-[600px] mx-auto px-6 mob-p">
-    <div class="py-5"><h2 class="text-[20px] font-extrabold tracking-tight" style="color:var(--text)">הגדרות</h2></div>
-    <div class="mb-10">
-      <label class="lbl">Google Apps Script URL</label>
-      <input class="ff" type="text" id="sGas" value="${GAS||''}" placeholder="https://script.google.com/macros/s/.../exec" dir="ltr">
-      <div class="text-[10px] mt-2 leading-relaxed" style="color:var(--text5)">סנכרון אוטומטי לגיליון Google.</div>
-      <div class="flex gap-3 mt-4"><button class="btn-secondary" id="sSaveGas">סנכרן לענן</button></div>
-    </div>
-    <div class="h-px my-8" style="background:var(--border2)"></div>
-    <div class="mb-10">
-      <label class="lbl">קטגוריות</label>
-      <div class="text-[10px] mb-5 leading-relaxed" style="color:var(--text5)">התאם קטגוריות לפי הצרכים שלך.</div>
+  <div class="max-w-[620px] mx-auto px-5 mob-p pb-16">
+    <div class="py-5"><h2 class="text-[19px] font-extrabold tracking-tight">הגדרות</h2></div>
+
+    <div class="card mb-5">
+      <div class="text-[12px] font-bold mb-4" style="color:var(--text2)">קטגוריות ותקציב חודשי</div>
       <div class="flex flex-col gap-2" id="catList">
-        ${CATS.map((c,i)=>`<div class="cat-row flex items-center gap-3 py-3 px-4 rounded-xl transition-all" data-i="${i}" style="background:var(--surface);border:1px solid var(--border)">
+        ${CATS.map((c,i)=>`<div class="cat-row flex items-center gap-3 py-2.5 px-3 rounded-xl" data-i="${i}" style="background:var(--surface2);border:1px solid var(--border2)">
           <input type="color" value="${c.color}" data-ci="${i}" class="cc w-7 h-7 rounded-lg cursor-pointer border-none bg-transparent p-0">
-          <input type="text" value="${c.name}" data-ni="${i}" class="cn flex-1 bg-transparent border-none text-[12px] outline-none" style="color:var(--text)" placeholder="שם">
-          <input type="text" value="${c.he||''}" data-hi="${i}" class="ch w-[90px] bg-transparent border-none text-[11px] outline-none text-center" style="color:var(--text3)" placeholder="עברית">
-          <button class="cat-del w-7 h-7 rounded-lg flex items-center justify-center text-sm cursor-pointer transition-all" style="border:1px solid var(--border);background:transparent;color:var(--text5)" data-di="${i}">&times;</button>
+          <input type="text" value="${c.he}" data-hi="${i}" class="ch flex-1 bg-transparent border-none text-[12px] outline-none" style="color:var(--text)" placeholder="שם קטגוריה">
+          <input type="number" value="${S.budgets[c.key]||''}" data-bi="${c.key}" class="cb w-[90px] bg-transparent text-[12px] outline-none text-left rounded-lg px-2 py-1" style="border:1px solid var(--border);color:var(--text2)" placeholder="תקציב ₪" dir="ltr">
+          <button class="cat-del w-7 h-7 rounded-lg flex items-center justify-center text-sm cursor-pointer" style="border:1px solid var(--border);background:transparent;color:var(--text5)" data-di="${i}">&times;</button>
         </div>`).join('')}
       </div>
-      <button class="w-full py-3 rounded-xl border border-dashed text-[10px] font-medium cursor-pointer transition-all mt-3" id="addCat" style="border-color:var(--border);color:var(--text4);background:transparent">+ קטגוריה חדשה</button>
-      <div class="flex gap-3 mt-5"><button class="btn-secondary" id="sSaveCats">שמור קטגוריות</button></div>
+      <button class="w-full py-2.5 rounded-xl border border-dashed text-[10px] font-medium cursor-pointer mt-3" id="addCat" style="border-color:var(--border);color:var(--text4);background:transparent">+ קטגוריה חדשה</button>
+      <div class="flex gap-3 mt-4"><button class="btn-primary" id="sSaveCats">שמור</button></div>
     </div>
-    <div class="h-px my-8" style="background:var(--border2)"></div>
-    <div class="mb-10">
-      <label class="lbl">ייבוא נתונים</label>
-      <div class="text-[10px] mb-4 leading-relaxed" style="color:var(--text5)">ייבוא עסקאות מדוח PDF של ישראכרט.</div>
-      <button class="btn-copper" onclick="openImportModal()">ייבוא מישראכרט</button>
+
+    <div class="card mb-5">
+      <div class="text-[12px] font-bold mb-4" style="color:var(--text2)">יעד חיסכון חודשי</div>
+      <input type="number" id="sSavTarget" class="ff !w-[160px]" value="${S.savingsTarget||''}" placeholder="0" dir="ltr">
+      <div class="text-[10px] mt-2" style="color:var(--text5)">כמה אתה רוצה שיישאר בסוף כל חודש.</div>
+      <div class="flex gap-3 mt-4"><button class="btn-primary" id="sSaveTarget">שמור</button></div>
     </div>
-    <div class="h-px my-8" style="background:var(--border2)"></div>
-    <div class="pb-12"><label class="lbl">ניהול</label>
-      <div class="flex gap-3 flex-wrap mt-4">
-        <button class="btn-secondary" id="sExport">ייצוא נתונים</button>
-        <button class="px-5 py-2.5 rounded-xl text-[12px] font-medium transition-all cursor-pointer" id="sReset" style="background:var(--expense-bg);border:1px solid rgba(201,93,79,.15);color:var(--expense)">איפוס מערכת</button>
+
+    <div class="card mb-5">
+      <div class="text-[12px] font-bold mb-1" style="color:var(--text2)">התחייבויות קבועות</div>
+      <div class="text-[10px] mb-4" style="color:var(--text5)">משכנתא, ביטוחים, מנויים — הוצאות קבועות ארוכות טווח.</div>
+      <div class="flex flex-col gap-2" id="fixedList">
+        ${(S.fixed||[]).map((f,i)=>`<div class="flex items-center gap-3 py-2.5 px-3 rounded-xl" style="background:var(--surface2);border:1px solid var(--border2)">
+          <input type="text" value="${f.name}" data-fn="${i}" class="flex-1 bg-transparent border-none text-[12px] outline-none" style="color:var(--text)" placeholder="שם">
+          <input type="number" value="${f.amount}" data-fa="${i}" class="w-[100px] bg-transparent text-[12px] outline-none text-left rounded-lg px-2 py-1" style="border:1px solid var(--border);color:var(--text2)" dir="ltr">
+          <button class="fx-del w-7 h-7 rounded-lg flex items-center justify-center text-sm cursor-pointer" style="border:1px solid var(--border);background:transparent;color:var(--text5)" data-fi="${i}">&times;</button>
+        </div>`).join('')}
+      </div>
+      <button class="w-full py-2.5 rounded-xl border border-dashed text-[10px] font-medium cursor-pointer mt-3" id="addFixed" style="border-color:var(--border);color:var(--text4);background:transparent">+ התחייבות חדשה</button>
+      <div class="flex gap-3 mt-4"><button class="btn-primary" id="sSaveFixed">שמור</button></div>
+    </div>
+
+    <div class="card mb-5">
+      <div class="text-[12px] font-bold mb-4" style="color:var(--text2)">סנכרון ענן (Google Sheets)</div>
+      <input class="ff" type="text" id="sGas" value="${GAS||''}" placeholder="https://script.google.com/macros/s/.../exec" dir="ltr">
+      <div class="text-[10px] mt-2" style="color:var(--text5)">כל העסקאות נשמרות אוטומטית לגיליון Google שלך.</div>
+      <div class="flex gap-3 mt-4"><button class="btn-secondary" id="sSaveGas">שמור וסנכרן</button></div>
+    </div>
+
+    <div class="card">
+      <div class="text-[12px] font-bold mb-4" style="color:var(--text2)">ניהול נתונים</div>
+      <div class="flex gap-3 flex-wrap">
+        <button class="btn-secondary" id="sExport">ייצוא גיבוי</button>
+        <button class="px-5 py-2 rounded-xl text-[12px] font-medium cursor-pointer" id="sReset" style="background:var(--expense-bg);border:1px solid rgba(201,93,79,.15);color:var(--expense)">איפוס מערכת</button>
       </div>
     </div>
   </div>`;
-  document.getElementById('sSaveGas').onclick=async()=>{GAS=document.getElementById('sGas').value.trim();ls('lh_gas',GAS);if(GAS){await loadCloud()}toast('התצורה עודכנה')};
-  document.getElementById('addCat').onclick=()=>{const key='cat_'+Date.now();CATS.push({key,name:'New',he:'חדש',color:'#94A3B8'});saveCats();renderSettings()};
-  document.getElementById('sSaveCats').onclick=()=>{document.querySelectorAll('.cat-row').forEach((row,i)=>{if(CATS[i]){const oldKey=CATS[i].key;CATS[i].color=row.querySelector('.cc').value;const newName=row.querySelector('.cn').value.trim();CATS[i].name=newName||CATS[i].name;CATS[i].he=row.querySelector('.ch').value.trim();const newKey=newName.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').slice(0,20)||oldKey;if(newKey!==oldKey){Object.values(S.months).forEach(m=>{if(m.expenses[oldKey]!==undefined){m.expenses[newKey]=m.expenses[oldKey];delete m.expenses[oldKey]}});CATS[i].key=newKey;save()}}});saveCats();toast('הקטגוריות עודכנו');renderSettings()};
-  document.querySelectorAll('.cat-del').forEach(btn=>btn.onclick=()=>{const i=+btn.dataset.di;if(CATS.length<=1)return toast('נדרשת לפחות קטגוריה אחת');const key=CATS[i].key;CATS.splice(i,1);Object.values(S.months).forEach(m=>delete m.expenses[key]);saveCats();save();renderSettings()});
-  document.getElementById('sExport').onclick=()=>{const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ledgerhouse-backup.json';a.click();toast('הנתונים יוצאו')};
-  document.getElementById('sReset').onclick=()=>{if(confirm('לאפס את כל הנתונים?')){S=JSON.parse(JSON.stringify(DEFAULT_DATA));CATS=JSON.parse(JSON.stringify(DEFAULT_CATS));save();saveCats();syncCloud();renderAll();toast('המערכת אופסה')}};
+
+  document.getElementById('addCat').onclick=()=>{CATS.push({key:'cat_'+newId(),he:'חדשה',color:'#94A3B8'});S.cats=CATS;save();renderSettings()};
+  document.getElementById('sSaveCats').onclick=()=>{
+    document.querySelectorAll('.cat-row').forEach((row,i)=>{
+      if(CATS[i]){CATS[i].color=row.querySelector('.cc').value;CATS[i].he=row.querySelector('.ch').value.trim()||CATS[i].he}});
+    document.querySelectorAll('.cb').forEach(inp=>{const v=+inp.value;if(v>0)S.budgets[inp.dataset.bi]=v;else delete S.budgets[inp.dataset.bi]});
+    S.cats=CATS;save();syncCloud();toast('נשמר');renderSettings()};
+  document.querySelectorAll('.cat-del').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.di;if(CATS.length<=1)return toast('נדרשת לפחות קטגוריה אחת');
+    const key=CATS[i].key;
+    const used=S.txns.some(t=>t.cat===key);
+    if(used&&!confirm('יש עסקאות בקטגוריה הזו. הן יועברו ל"שונות". להמשיך?'))return;
+    S.txns.forEach(t=>{if(t.cat===key)t.cat='other'});
+    CATS.splice(i,1);S.cats=CATS;delete S.budgets[key];save();syncCloud();renderSettings()});
+  document.getElementById('sSaveTarget').onclick=()=>{S.savingsTarget=+document.getElementById('sSavTarget').value||0;save();syncCloud();toast('נשמר')};
+  document.getElementById('addFixed').onclick=()=>{S.fixed=S.fixed||[];S.fixed.push({id:newId(),name:'',amount:0});save();renderSettings()};
+  document.getElementById('sSaveFixed').onclick=()=>{
+    document.querySelectorAll('[data-fn]').forEach(inp=>{S.fixed[+inp.dataset.fn].name=inp.value.trim()});
+    document.querySelectorAll('[data-fa]').forEach(inp=>{S.fixed[+inp.dataset.fa].amount=+inp.value||0});
+    S.fixed=S.fixed.filter(f=>f.name||f.amount);save();syncCloud();toast('נשמר');renderSettings()};
+  document.querySelectorAll('.fx-del').forEach(b=>b.onclick=()=>{S.fixed.splice(+b.dataset.fi,1);save();renderSettings()});
+  document.getElementById('sSaveGas').onclick=async()=>{GAS=document.getElementById('sGas').value.trim();ls('lh_gas',GAS);if(GAS)await syncCloud();toast('נשמר')};
+  document.getElementById('sExport').onclick=()=>{const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ledgerhouse-backup.json';a.click()};
+  document.getElementById('sReset').onclick=()=>{if(confirm('למחוק את כל הנתונים? הפעולה לא הפיכה.')){S=JSON.parse(JSON.stringify(EMPTY));CATS=S.cats;save();syncCloud();render();toast('המערכת אופסה')}};
 }
 
-window.openAddMonth=function(){
-  const modal=document.getElementById('addMonthModal'),sel=document.getElementById('amMonth');
-  const now=new Date();sel.innerHTML='';
-  for(let i=-3;i<=6;i++){const d=new Date(now.getFullYear(),now.getMonth()+i,1);const l=MO[d.getMonth()]+' '+d.getFullYear();sel.innerHTML+='<option value="'+l+'"'+(i===0?' selected':'')+'>'+heMonth(l)+'</option>'}
-  document.getElementById('amCatFields').innerHTML='<div class="grid grid-cols-2 gap-3 mb-4">'+CATS.map(c=>'<div><label class="lbl">'+c.he+'</label><input type="number" id="am_'+c.key+'" placeholder="0" class="ff" dir="ltr"></div>').join('')+'</div>';
-  fillAddMonth();modal.style.display='flex';sel.onchange=fillAddMonth;
+// ===== Transaction modal =====
+let tmType='expense',tmEditId=null;
+window.openTxnModal=function(t){
+  tmEditId=t?t.id:null;
+  document.getElementById('txnModalTitle').textContent=t?'עריכת עסקה':'עסקה חדשה';
+  const sel=document.getElementById('tmCat');
+  sel.innerHTML=CATS.map(c=>`<option value="${c.key}">${c.he}</option>`).join('');
+  if(t){
+    tmType=t.type==='income'?'income':(t.amount<0?'refund':'expense');
+    document.getElementById('tmDate').value=t.date||new Date().toISOString().slice(0,10);
+    document.getElementById('tmAmt').value=Math.abs(t.amount);
+    document.getElementById('tmBiz').value=t.biz||'';
+    sel.value=t.cat||CATS[0].key;
+  }else{
+    tmType='expense';
+    document.getElementById('tmDate').value=new Date().toISOString().slice(0,10);
+    document.getElementById('tmAmt').value='';
+    document.getElementById('tmBiz').value='';
+  }
+  updateTmTabs();
+  document.getElementById('txnModal').style.display='flex';
 };
-function fillAddMonth(){
-  const s=document.getElementById('amMonth').value;
-  if(S.months[s]){const m=S.months[s];document.getElementById('amIncome').value=m.income;CATS.forEach(c=>{const el=document.getElementById('am_'+c.key);if(el)el.value=m.expenses[c.key]||0})}
-  else{document.getElementById('amIncome').value='';CATS.forEach(c=>{const el=document.getElementById('am_'+c.key);if(el)el.value=''})}
-  const nw=S.netWorth.find(n=>n.month===document.getElementById('amMonth').value.split(' ')[0]);
-  document.getElementById('amNetWorth').value=nw?nw.value:(S.netWorth[S.netWorth.length-1]?.value||0);document.getElementById('amLiquid').value=S.liquidSavings;
+function updateTmTabs(){
+  document.querySelectorAll('.tm-type').forEach(b=>{
+    const on=b.dataset.type===tmType;
+    b.style.background=on?(tmType==='income'||tmType==='refund'?'var(--income)':'var(--expense)'):'transparent';
+    b.style.color=on?'#fff':'var(--text4)';
+  });
+  document.getElementById('tmCatWrap').style.display=tmType==='income'?'none':'block';
 }
-document.getElementById('amSave').onclick=()=>{const s=document.getElementById('amMonth').value;const expenses={};CATS.forEach(c=>{const el=document.getElementById('am_'+c.key);expenses[c.key]=+(el?.value)||0});S.months[s]={income:+document.getElementById('amIncome').value||0,expenses};const ms2=s.split(' ')[0],nwV=+document.getElementById('amNetWorth').value||0;const nwI=S.netWorth.findIndex(n=>n.month===ms2);if(nwI>=0)S.netWorth[nwI].value=nwV;else S.netWorth.push({month:ms2,value:nwV});S.liquidSavings=+document.getElementById('amLiquid').value||S.liquidSavings;sortMonths();save();syncCloud();closeModal('addMonthModal');toast('עודכן: '+heMonth(s));renderAll()};
+document.querySelectorAll('.tm-type').forEach(b=>b.onclick=()=>{tmType=b.dataset.type;updateTmTabs()});
+document.getElementById('tmSave').onclick=()=>{
+  const amt=+document.getElementById('tmAmt').value;
+  if(!amt||amt<=0)return toast('הזן סכום');
+  const date=document.getElementById('tmDate').value||new Date().toISOString().slice(0,10);
+  const biz=document.getElementById('tmBiz').value.trim();
+  const cat=document.getElementById('tmCat').value;
+  const txn={
+    id:tmEditId||newId(),date,month:moKeyFromDate(date),
+    type:tmType==='income'?'income':'expense',
+    cat:tmType==='income'?null:cat,
+    biz,amount:tmType==='refund'?-amt:amt,
+    src:'manual'
+  };
+  if(tmEditId){const i=S.txns.findIndex(t=>t.id===tmEditId);if(i>=0){txn.src=S.txns[i].src;S.txns[i]=txn}}
+  else S.txns.push(txn);
+  save();syncCloud();closeModal('txnModal');
+  toast(tmEditId?'העסקה עודכנה':'העסקה נוספה');render();
+};
 window.closeModal=function(id){document.getElementById(id).style.display='none'};
-document.getElementById('addMonthModal').onclick=e=>{if(e.target.id==='addMonthModal')closeModal('addMonthModal')};
+document.getElementById('txnModal').onclick=e=>{if(e.target.id==='txnModal')closeModal('txnModal')};
 
-function animVal(el,s,e,dur,pre,suf){if(!el)return;const range=e-s;let t0=null;
-  function step(ts){if(!t0)t0=ts;const p=Math.min((ts-t0)/dur,1),ease=1-Math.pow(1-p,3);el.textContent=(pre||'')+Math.round(s+range*ease).toLocaleString('en-IL')+(suf||'');if(p<1)requestAnimationFrame(step)}requestAnimationFrame(step)}
-function updateClock(){const el=document.getElementById('clock');if(el)el.textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}
-setInterval(updateClock,1000);
-
-document.querySelectorAll('.nav-item').forEach(item=>item.onclick=()=>switchView(item.dataset.view));
-function renderAll(){if(curView==='dashboard')renderDashboard();else if(curView==='monthly')renderMonthly();else if(curView==='annual')renderAnnual();else renderSettings()}
-document.getElementById('app').style.display='block';renderAll();
-if(_freshReset&&GAS){save();syncCloud().then(()=>renderAll())}
-else if(GAS)loadCloud().then(()=>renderAll());
-
-// --- Isracard PDF Import ---
+// ===== Isracard PDF Import =====
 if(typeof pdfjsLib!=='undefined')pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-const IC_MAP={'מכולת/סופר':'food','מעדניות':'food','מסעדות/קפה':'food','דלק':'car','רכב שירותי':'car',
-  'תקשורת':'telecom','מחשבים':'telecom',"אינט' קניה":'telecom','הלבשה':'housing','ביטוח':'housing',
-  'בניה/שיפוץ':'housing','רהיטים':'housing','ספר בתי':'housing','פנאי/ספורט':'savings','תרבות':'savings','שונות':'housing'};
+const IC_MAP={'מכולת/סופר':'food','מעדניות':'food','מסעדות/קפה':'restaurants','בתי קפה':'restaurants',
+  'דלק':'car','רכב שירותי':'car','חניה':'car','תחבורה':'car',
+  'תקשורת':'telecom','מחשבים':'telecom',"אינט' קניה":'shopping','אינטרנט':'telecom',
+  'הלבשה':'shopping','הנעלה':'shopping','רהיטים':'shopping','חשמל ואלקטרוניקה':'shopping',
+  'ביטוח':'housing','בניה/שיפוץ':'housing','עירייה':'housing',
+  'בתי מרקחת':'health','רפואה':'health','קופת חולים':'health',
+  'פנאי/ספורט':'leisure','תרבות':'leisure','בידור':'leisure','מלונות':'leisure',
+  'ספר בתי':'other','שונות':'other'};
 const IC_CATS=Object.keys(IC_MAP);
 
 window.openImportModal=function(){
@@ -693,11 +550,9 @@ window.openImportModal=function(){
 document.getElementById('importModal').onclick=e=>{if(e.target.id==='importModal')closeModal('importModal')};
 
 const dropZone=document.getElementById('importDropZone');
-if(dropZone){
-  ['dragenter','dragover'].forEach(ev=>dropZone.addEventListener(ev,e=>{e.preventDefault();dropZone.style.borderColor='var(--sage)';dropZone.style.background='var(--sage-bg)'}));
-  ['dragleave','drop'].forEach(ev=>dropZone.addEventListener(ev,e=>{e.preventDefault();dropZone.style.borderColor='var(--border)';dropZone.style.background='var(--surface2)'}));
-  dropZone.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf')processPDF(f)});
-}
+['dragenter','dragover'].forEach(ev=>dropZone.addEventListener(ev,e=>{e.preventDefault();dropZone.style.borderColor='var(--sage)'}));
+['dragleave','drop'].forEach(ev=>dropZone.addEventListener(ev,e=>{e.preventDefault();dropZone.style.borderColor='var(--border)'}));
+dropZone.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf')processPDF(f)});
 document.getElementById('pdfInput').onchange=e=>{const f=e.target.files[0];if(f)processPDF(f)};
 
 async function processPDF(file){
@@ -724,7 +579,7 @@ async function processPDF(file){
     if(!txns.length){
       document.getElementById('importLoading').style.display='none';
       document.getElementById('importArea').style.display='block';
-      return toast('לא נמצאו עסקאות');
+      return toast('לא נמצאו עסקאות בקובץ');
     }
     showImportPreview(txns);
   }catch(err){
@@ -735,99 +590,99 @@ async function processPDF(file){
   }
 }
 
+// Parse amount tokens: supports "1,234.56", "-1,234.56", "1,234.56-" (trailing minus = credit/refund)
+function parseAmounts(line){
+  const out=[];
+  const re=/(-?)([\d,]+\.\d{2})(-?)/g;let m;
+  while((m=re.exec(line))!==null){
+    let v=parseFloat(m[2].replace(/,/g,''));
+    if(m[1]==='-'||m[3]==='-')v=-v;
+    out.push(v);
+  }
+  return out;
+}
+
 function extractTxns(text){
-  const txns=[],lines=text.split('\n'),dateRe=/(\d{2})\/(\d{2})\/(\d{2})/;
+  const txns=[],lines=text.split('\n'),dateRe=/(\d{2})\/(\d{2})\/(\d{2,4})/;
   for(const line of lines){
     const dm=line.match(dateRe);
     if(!dm)continue;
-    if(line.includes('תאריך')||line.includes('מועד חיוב')||line.includes('פירוט'))continue;
-    const amounts=[];
-    let m,ar=/([\d,]+\.\d{2})/g;
-    while((m=ar.exec(line))!==null)amounts.push(parseFloat(m[1].replace(/,/g,'')));
+    if(line.includes('תאריך')||line.includes('מועד חיוב')||line.includes('פירוט')||line.includes('סה"כ')||line.includes('סה״כ'))continue;
+    const amounts=parseAmounts(line);
     if(!amounts.length)continue;
+    // Last amount on the line = billed amount. Negative = refund/credit.
     const amt=amounts[amounts.length-1];
-    if(amt<=0)continue;
-    let ic='שונות',lc='housing';
+    if(amt===0)continue;
+    let ic='שונות',lc='other';
     for(const c of IC_CATS){if(line.includes(c)){ic=c;lc=IC_MAP[c];break}}
-    let biz=line.replace(dateRe,'').replace(/([\d,]+\.\d{2})/g,'').replace(/הוצג לא|נייד\.תש|קבע\.ה/g,'');
+    let biz=line.replace(dateRe,'').replace(/(-?)([\d,]+\.\d{2})(-?)/g,'').replace(/הוצג לא|נייד\.תש|קבע\.ה|זיכוי/g,'');
     for(const c of IC_CATS)biz=biz.replace(c,'');
     biz=biz.replace(/\s+/g,' ').trim();
-    if(biz.length>35)biz=biz.substring(0,35)+'…';
-    const mo=parseInt(dm[2])-1,yr='20'+dm[3],moKey=MO[mo]+' '+yr;
-    txns.push({date:dm[0],biz,ic,lc,amt,moKey});
+    if(biz.length>40)biz=biz.substring(0,40)+'…';
+    const dd=dm[1],mo=parseInt(dm[2])-1;
+    let yr=dm[3];if(yr.length===2)yr='20'+yr;
+    const iso=yr+'-'+String(mo+1).padStart(2,'0')+'-'+dd;
+    const moKey=MO[mo]+' '+yr;
+    txns.push({date:iso,dateDisp:dd+'/'+dm[2]+'/'+yr.slice(2),biz,ic,lc,amt,moKey});
   }
   return txns;
 }
 
-function isDuplicate(t){
-  return S.manualEntries.some(e=>{
-    if(Math.abs(e.amount-Math.round(t.amt))>1)return false;
-    const n=(e.note||'').replace('ישראכרט: ','');
-    if(n&&t.biz&&(n.includes(t.biz.replace('…',''))||t.biz.replace('…','').includes(n)))return true;
-    if(e.month===t.moKey&&e.cat===t.lc&&Math.abs(e.amount-Math.round(t.amt))===0)return true;
-    return false;
-  });
-}
-
 function findSelfDuplicates(txns){
-  const dupes=new Set();
-  for(let i=0;i<txns.length;i++){
-    for(let j=i+1;j<txns.length;j++){
-      if(txns[i].date===txns[j].date&&Math.abs(txns[i].amt-txns[j].amt)<0.01&&txns[i].biz===txns[j].biz){
-        dupes.add(j);
-      }
-    }
-  }
+  const seen=new Map(),dupes=new Set();
+  txns.forEach((t,i)=>{
+    const fp=t.date+'|'+Math.round(Math.abs(t.amt)*100)+'|'+(t.biz||'').replace(/\s/g,'').slice(0,20);
+    if(seen.has(fp))dupes.add(i);else seen.set(fp,i);
+  });
   return dupes;
 }
 
 function showImportPreview(txns){
-  let total=0;
+  const fps=existingFps();
   const selfDupes=findSelfDuplicates(txns);
+  let total=0;
   txns.forEach((t,i)=>{
-    t.dup=isDuplicate(t);
+    const fp=t.date+'|'+Math.round(Math.abs(t.amt)*100)+'|'+(t.biz||'').replace(/\s/g,'').slice(0,20);
+    t.dup=fps.has(fp);
     t.selfDup=selfDupes.has(i);
     t.include=!t.dup&&!t.selfDup;
     if(t.include)total+=t.amt;
   });
   const dupCount=txns.filter(t=>t.dup||t.selfDup).length;
-  const byMonth={};txns.forEach(t=>{if(!byMonth[t.moKey])byMonth[t.moKey]=[];byMonth[t.moKey].push(t)});
+  const refundCount=txns.filter(t=>t.amt<0).length;
 
-  let h=`<div class="flex items-center gap-3 mb-4 flex-wrap">
-    <div class="text-[10px] uppercase tracking-widest font-bold flex items-center gap-2" style="color:var(--income)">
-      <span class="w-[5px] h-[5px] rounded-full" style="background:var(--income)"></span>נמצאו ${txns.length} עסקאות</div>`;
-  if(dupCount>0)h+=`<div class="text-[10px] px-3 py-1.5 rounded-lg font-bold" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.15);color:#D97706">⚠ ${dupCount} חשודות ככפילות</div>`;
+  let h=`<div class="flex items-center gap-2 mb-4 flex-wrap">
+    <div class="text-[11px] font-bold px-3 py-1.5 rounded-lg" style="background:var(--income-bg);color:var(--income)">נמצאו ${txns.length} עסקאות</div>`;
+  if(refundCount)h+=`<div class="text-[11px] font-bold px-3 py-1.5 rounded-lg" style="background:var(--income-bg);color:var(--income)">${refundCount} החזרים</div>`;
+  if(dupCount)h+=`<div class="text-[11px] font-bold px-3 py-1.5 rounded-lg" style="background:var(--warn-bg);color:var(--warn)">⚠ ${dupCount} כבר יובאו בעבר</div>`;
   h+=`</div>`;
 
-  h+='<div class="max-h-[45vh] overflow-y-auto rounded-xl" style="border:1px solid var(--border)"><table class="w-full text-[11px]">';
+  h+='<div class="max-h-[48vh] overflow-y-auto rounded-xl" style="border:1px solid var(--border)"><table class="w-full text-[11px]">';
   h+=`<thead class="sticky top-0 z-10" style="background:var(--surface)"><tr>`;
-  h+='<th class="p-3 text-center w-8"><input type="checkbox" id="icAll" checked class="cursor-pointer"></th>';
-  h+='<th class="text-right p-3 text-[9px] uppercase tracking-wider font-semibold" style="color:var(--text5)">תאריך</th>';
-  h+='<th class="text-right p-3 text-[9px] uppercase tracking-wider font-semibold" style="color:var(--text5)">בית עסק</th>';
-  h+='<th class="text-right p-3 text-[9px] uppercase tracking-wider font-semibold" style="color:var(--text5)">ענף</th>';
-  h+='<th class="text-right p-3 text-[9px] uppercase tracking-wider font-semibold" style="color:var(--text5)">קטגוריה</th>';
-  h+='<th class="text-left p-3 text-[9px] uppercase tracking-wider font-semibold" style="color:var(--text5)">סכום</th>';
-  h+='<th class="p-3 w-6"></th>';
+  h+='<th class="p-2.5 text-center w-8"><input type="checkbox" id="icAll" checked class="cursor-pointer"></th>';
+  h+='<th class="text-right p-2.5 text-[9px] font-semibold" style="color:var(--text5)">תאריך</th>';
+  h+='<th class="text-right p-2.5 text-[9px] font-semibold" style="color:var(--text5)">בית עסק</th>';
+  h+='<th class="text-right p-2.5 text-[9px] font-semibold" style="color:var(--text5)">קטגוריה</th>';
+  h+='<th class="text-left p-2.5 text-[9px] font-semibold" style="color:var(--text5)">סכום</th>';
+  h+='<th class="p-2.5 w-14"></th>';
   h+='</tr></thead><tbody>';
   txns.forEach((t,i)=>{
-    const warn=t.dup||t.selfDup;
-    const rowBg=warn?'background:rgba(245,158,11,.04)':'';
-    h+=`<tr class="ic-row transition-all" data-i="${i}" style="${rowBg};border-top:1px solid var(--border2)">
-      <td class="p-3 text-center"><input type="checkbox" class="ic-chk cursor-pointer" data-i="${i}" ${t.include?'checked':''}></td>
-      <td class="p-3 font-mono text-[10px]" style="color:var(--text4)">${t.date}</td>
-      <td class="p-3" style="color:var(--text3)">${t.biz}</td>
-      <td class="p-3 text-[10px]" style="color:var(--text5)">${t.ic}</td>
-      <td class="p-3"><select class="ic-sel rounded-lg px-2 py-1 text-[10px] outline-none cursor-pointer" data-i="${i}" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2)">
+    const warn=t.dup||t.selfDup,refund=t.amt<0;
+    h+=`<tr style="${warn?'background:var(--warn-bg);':''}border-top:1px solid var(--border2)">
+      <td class="p-2.5 text-center"><input type="checkbox" class="ic-chk cursor-pointer" data-i="${i}" ${t.include?'checked':''}></td>
+      <td class="p-2.5 text-[10px]" style="color:var(--text4)" dir="ltr">${t.dateDisp}</td>
+      <td class="p-2.5" style="color:var(--text2)">${t.biz||'—'}</td>
+      <td class="p-2.5"><select class="ic-sel rounded-lg px-2 py-1 text-[10px] outline-none cursor-pointer" data-i="${i}" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2)">
         ${CATS.map(c=>`<option value="${c.key}" ${c.key===t.lc?'selected':''}>${c.he}</option>`).join('')}
       </select></td>
-      <td class="p-3 text-left font-bold" style="color:var(--text)">${fmt(t.amt)}</td>
-      <td class="p-3 text-center">${warn?(t.dup?'<span class="text-[9px] font-bold" style="color:#D97706" title="כבר קיימת">כפול</span>':'<span class="text-[9px] font-bold" style="color:#D97706" title="זהה בדוח">כפול?</span>'):''}</td></tr>`;
+      <td class="p-2.5 text-left font-bold" style="color:${refund?'var(--income)':'var(--text)'}">${refund?'+':''}${fmt(t.amt)}</td>
+      <td class="p-2.5 text-center">
+        ${refund?'<span class="text-[9px] font-bold px-1.5 py-0.5 rounded" style="background:var(--income-bg);color:var(--income)">החזר</span>':''}
+        ${warn?'<span class="text-[9px] font-bold" style="color:var(--warn)" title="'+(t.dup?'יובאה בעבר':'כפולה בדוח')+'">כפול</span>':''}
+      </td></tr>`;
   });
-  h+=`<tr class="font-bold" style="border-top:2px solid var(--border)"><td class="p-3"></td><td colspan="4" class="p-3" style="color:var(--text3)">סה״כ לייבוא</td><td class="p-3 text-left" style="color:var(--copper)" id="impTotal">${fmt(total)}</td><td></td></tr>`;
+  h+=`<tr class="font-bold" style="border-top:2px solid var(--border)"><td class="p-2.5"></td><td colspan="3" class="p-2.5" style="color:var(--text3)">סה״כ לייבוא (נטו)</td><td class="p-2.5 text-left" style="color:var(--copper)" id="impTotal">${fmt(total)}</td><td></td></tr>`;
   h+='</tbody></table></div>';
-  h+='<div class="mt-3 flex flex-wrap gap-2">';
-  Object.keys(byMonth).forEach(mk=>{h+=`<span class="text-[10px] px-3 py-1.5 rounded-lg" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text4)">${heMonth(mk)}: ${byMonth[mk].length} עסקאות</span>`});
-  h+='</div>';
 
   document.getElementById('importPreview').innerHTML=h;
   document.getElementById('importLoading').style.display='none';
@@ -850,14 +705,16 @@ document.getElementById('confirmImport').onclick=()=>{
   const txns=(window._iTxns||[]).filter(t=>t.include);
   if(!txns.length)return toast('לא נבחרו עסקאות');
   txns.forEach(t=>{
-    if(!S.months[t.moKey]){S.months[t.moKey]={income:0,expenses:{}};CATS.forEach(c=>S.months[t.moKey].expenses[c.key]=0)}
-    S.months[t.moKey].expenses[t.lc]=(S.months[t.moKey].expenses[t.lc]||0)+Math.round(t.amt);
-    S.manualEntries.push({type:'expense',cat:t.lc,amount:Math.round(t.amt),note:'ישראכרט: '+t.biz,month:t.moKey,ts:Date.now()});
+    S.txns.push({id:newId(),date:t.date,month:t.moKey,type:'expense',cat:t.lc,biz:t.biz,amount:t.amt,src:'isracard'});
   });
-  sortMonths();save();syncCloud();closeModal('importModal');
-  toast('יובאו '+txns.length+' עסקאות');
-  renderAll();
+  save();syncCloud();closeModal('importModal');
+  toast('יובאו '+txns.length+' עסקאות');render();
 };
+
+// ===== Init =====
+document.querySelectorAll('.nav-item').forEach(item=>item.onclick=()=>switchView(item.dataset.view));
+render();
+if(GAS)loadCloud().then(()=>{CATS=S.cats;render()});
 })();
 </script>
 </body>

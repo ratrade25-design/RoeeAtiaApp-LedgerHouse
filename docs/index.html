@@ -214,7 +214,15 @@ function loadLocal(){try{return JSON.parse(ls('lh_state'))}catch(e){return null}
 function save(){ls('lh_state',JSON.stringify(S))}
 let CATS=S.cats;
 let GAS=ls('lh_gas')||'https://script.google.com/macros/s/AKfycbwMDQpxmLCiXM62_imOz6p63DwQvT6A7kyJ_59qps8SwrELidbQ4KZQDicUDn1qZlzd/exec';
-let curView='summary',sumMonth=curMoKey(),txFilter={q:'',month:'all',cat:'all',type:'all'};
+let curView='summary',sumMonth=latestDataMonth(),txFilter={q:'',month:'all',cat:'all',type:'all'};
+function latestDataMonth(){
+  if(!S.txns.length)return curMoKey();
+  // pick the month with the most transactions; break ties by most recent month
+  const cnt={};S.txns.forEach(t=>{cnt[t.month]=(cnt[t.month]||0)+1});
+  let best=null,bestC=-1,bestN=-1;
+  Object.keys(cnt).forEach(m=>{const c=cnt[m],n=moKeyToNum(m);if(c>bestC||(c===bestC&&n>bestN)){bestC=c;bestN=n;best=m}});
+  return best||curMoKey();
+}
 
 // ===== Helpers =====
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
@@ -441,9 +449,11 @@ function renderSettings(){
     </div>
 
     <div class="card">
-      <div class="text-[12px] font-bold mb-4" style="color:var(--text2)">ניהול נתונים</div>
+      <div class="text-[12px] font-bold mb-1" style="color:var(--text2)">ניהול נתונים</div>
+      <div class="text-[10px] mb-4" style="color:var(--text5)">${dupeCount()>0?'נמצאו '+dupeCount()+' עסקאות כפולות.':'אין עסקאות כפולות.'}</div>
       <div class="flex gap-3 flex-wrap">
         <button class="btn-secondary" id="sExport">ייצוא גיבוי</button>
+        ${dupeCount()>0?'<button class="btn-secondary" id="sDedup" style="color:var(--warn);border-color:var(--warn)">נקה כפילויות ('+dupeCount()+')</button>':''}
         <button class="px-5 py-2 rounded-xl text-[12px] font-medium cursor-pointer" id="sReset" style="background:var(--expense-bg);border:1px solid rgba(201,93,79,.15);color:var(--expense)">איפוס מערכת</button>
       </div>
     </div>
@@ -471,7 +481,26 @@ function renderSettings(){
   document.querySelectorAll('.fx-del').forEach(b=>b.onclick=()=>{S.fixed.splice(+b.dataset.fi,1);save();renderSettings()});
   document.getElementById('sSaveGas').onclick=async()=>{GAS=document.getElementById('sGas').value.trim();ls('lh_gas',GAS);if(GAS)await syncCloud();toast('נשמר')};
   document.getElementById('sExport').onclick=()=>{const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ledgerhouse-backup.json';a.click()};
+  const dd=document.getElementById('sDedup');if(dd)dd.onclick=()=>{
+    const n=dupeCount();
+    if(confirm('לאחד '+n+' עסקאות כפולות? נשמור עותק אחד מכל אחת.')){cleanDuplicates();save();syncCloud();toast('אוחדו '+n+' כפילויות');renderSettings()}};
   document.getElementById('sReset').onclick=()=>{if(confirm('למחוק את כל הנתונים? הפעולה לא הפיכה.')){S=JSON.parse(JSON.stringify(EMPTY));CATS=S.cats;save();syncCloud();render();toast('המערכת אופסה')}};
+}
+
+// Dedup: same month + rounded amount + normalized business. Prefer the copy that has a real date.
+function dupeKey(t){return t.month+'|'+Math.round(Math.abs(t.amount))+'|'+(t.biz||'').replace(/[\s.]/g,'').slice(0,12)+'|'+(t.amount<0?'r':'')+t.type}
+function dupeCount(){const seen=new Set();let n=0;S.txns.forEach(t=>{const k=dupeKey(t);if(seen.has(k))n++;else seen.add(k)});return n}
+function cleanDuplicates(){
+  const groups={};
+  S.txns.forEach(t=>{const k=dupeKey(t);(groups[k]=groups[k]||[]).push(t)});
+  const kept=[];
+  Object.values(groups).forEach(g=>{
+    if(g.length===1){kept.push(g[0]);return}
+    // keep the one with a real date; else the first
+    const withDate=g.find(t=>t.date);
+    kept.push(withDate||g[0]);
+  });
+  S.txns=kept;
 }
 
 // ===== Transaction modal =====

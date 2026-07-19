@@ -539,6 +539,24 @@ const IC_MAP={'מכולת/סופר':'food','מעדניות':'food','מסעדות
   'ספר בתי':'other','שונות':'other'};
 const IC_CATS=Object.keys(IC_MAP);
 
+window.showRawDebug=function(){
+  const raw=window._iRaw||'(אין טקסט — טען קובץ קודם)';
+  document.getElementById('importArea').style.display='none';
+  document.getElementById('importLoading').style.display='none';
+  document.getElementById('importActions').style.display='none';
+  const pv=document.getElementById('importPreview');
+  pv.style.display='block';
+  pv.innerHTML=`<div class="flex items-center gap-2 mb-3">
+    <div class="text-[12px] font-bold">טקסט גולמי מהדוח</div>
+    <button id="rawCopy" class="text-[11px] font-bold px-3 py-1.5 rounded-lg cursor-pointer" style="background:var(--sage);color:#fff">העתק הכל</button>
+    <button onclick="openImportModal()" class="text-[11px] font-bold px-3 py-1.5 rounded-lg cursor-pointer mr-auto" style="background:var(--surface2);color:var(--text4);border:1px solid var(--border)">חזרה</button>
+  </div>
+  <div class="text-[10px] mb-2" style="color:var(--text5)">העתק את זה ושלח לי — לפי זה אכייל את הפענוח.</div>
+  <textarea id="rawText" readonly dir="ltr" class="w-full font-mono text-[10px] p-3 rounded-xl" style="height:52vh;background:var(--surface2);border:1px solid var(--border);color:var(--text2);white-space:pre;overflow:auto"></textarea>`;
+  document.getElementById('rawText').value=raw;
+  document.getElementById('rawCopy').onclick=()=>{const t=document.getElementById('rawText');t.select();try{document.execCommand('copy')}catch(e){}if(navigator.clipboard)navigator.clipboard.writeText(raw).catch(()=>{});toast('הועתק')};
+};
+
 window.openImportModal=function(){
   document.getElementById('importModal').style.display='flex';
   document.getElementById('importArea').style.display='block';
@@ -575,11 +593,13 @@ async function processPDF(file){
         fullText+=lineMap[y].sort((a,b)=>a.x-b.x).map(i=>i.str).join(' ')+'\n';
       });
     }
+    window._iRaw=fullText;
     const txns=extractTxns(fullText);
     if(!txns.length){
       document.getElementById('importLoading').style.display='none';
       document.getElementById('importArea').style.display='block';
-      return toast('לא נמצאו עסקאות בקובץ');
+      showRawDebug();
+      return toast('לא נמצאו עסקאות — נפתח הטקסט הגולמי');
     }
     showImportPreview(txns);
   }catch(err){
@@ -655,6 +675,7 @@ function showImportPreview(txns){
     <div class="text-[11px] font-bold px-3 py-1.5 rounded-lg" style="background:var(--income-bg);color:var(--income)">נמצאו ${txns.length} עסקאות</div>`;
   if(refundCount)h+=`<div class="text-[11px] font-bold px-3 py-1.5 rounded-lg" style="background:var(--income-bg);color:var(--income)">${refundCount} החזרים</div>`;
   if(dupCount)h+=`<div class="text-[11px] font-bold px-3 py-1.5 rounded-lg" style="background:var(--warn-bg);color:var(--warn)">⚠ ${dupCount} כבר יובאו בעבר</div>`;
+  h+=`<button onclick="showRawDebug()" class="text-[11px] font-bold px-3 py-1.5 rounded-lg mr-auto cursor-pointer" style="background:var(--surface2);color:var(--text4);border:1px solid var(--border)">טקסט גולמי</button>`;
   h+=`</div>`;
 
   h+='<div class="max-h-[48vh] overflow-y-auto rounded-xl" style="border:1px solid var(--border)"><table class="w-full text-[11px]">';

@@ -158,6 +158,23 @@ select{font-family:inherit}
   </div>
 </div>
 
+<!-- Duplicate review modal -->
+<div class="fixed inset-0 z-[100] items-center justify-center p-5" id="dupModal" style="display:none;background:rgba(0,0,0,.4);backdrop-filter:blur(6px)">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:28px;width:100%;max-width:820px;box-shadow:var(--shadow-lg);max-height:88vh;display:flex;flex-direction:column;animation:modalIn .25s ease-out">
+    <div class="flex items-center justify-between mb-2">
+      <h3 class="text-lg font-bold">בדיקת כפילויות</h3>
+      <button class="w-8 h-8 rounded-lg flex items-center justify-center text-lg" style="background:var(--surface2);border:1px solid var(--border);color:var(--text4)" onclick="closeModal('dupModal')">&times;</button>
+    </div>
+    <div class="text-[11px] mb-4" style="color:var(--text4)">כל קבוצה היא עסקה שמופיעה יותר מפעם אחת. סמן ✓ את העותקים שברצונך <b>למחוק</b> (כברירת מחדל נשמר עותק אחד מכל קבוצה).</div>
+    <div id="dupBody" class="overflow-y-auto flex-1" style="min-height:200px"></div>
+    <div class="flex gap-3 mt-4 pt-4" style="border-top:1px solid var(--border2)">
+      <button class="btn-primary" id="dupApply">מחק מסומנים</button>
+      <button class="btn-secondary" onclick="closeModal('dupModal')">בטל</button>
+      <span class="text-[11px] mr-auto self-center" id="dupCounter" style="color:var(--text4)"></span>
+    </div>
+  </div>
+</div>
+
 <div class="toast fixed bottom-6 right-1/2 rounded-xl px-6 py-3 text-[13px] font-semibold z-[200]" id="toast" style="background:var(--sage);color:#fff;box-shadow:var(--shadow-lg)"></div>
 
 <script>
@@ -279,7 +296,10 @@ function renderSummary(){
         <h2 class="text-[19px] font-extrabold tracking-tight min-w-[130px] text-center">${heMonth(sumMonth)}</h2>
         <button class="w-8 h-8 rounded-lg flex items-center justify-center transition-all disabled:opacity-20" id="sNext" ${mi>=months.length-1?'disabled':''} style="background:var(--surface);border:1px solid var(--border);color:var(--text3)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
       </div>
-      <button class="btn-primary !py-2 !px-4 text-[11px]" onclick="openTxnModal()">+ עסקה חדשה</button>
+      <div class="flex gap-2">
+        <button class="btn-secondary !py-2 !px-4 text-[11px]" onclick="openTxnModal(null,{income:true,month:'${sumMonth}'})" style="color:var(--income);border-color:var(--income)">+ הכנסה / משכורת</button>
+        <button class="btn-primary !py-2 !px-4 text-[11px]" onclick="openTxnModal(null,{month:'${sumMonth}'})">+ הוצאה</button>
+      </div>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 mob-1">
@@ -348,7 +368,10 @@ function renderTxns(){
   <div class="max-w-[980px] mx-auto px-5 mob-p pb-16">
     <div class="flex items-center justify-between py-5 flex-wrap gap-3">
       <h2 class="text-[19px] font-extrabold tracking-tight">עסקאות <span class="text-[12px] font-normal" style="color:var(--text4)">${list.length} רשומות · סה״כ ${fmt(tot)}</span></h2>
-      <button class="btn-primary !py-2 !px-4 text-[11px]" onclick="openTxnModal()">+ עסקה חדשה</button>
+      <div class="flex gap-2">
+        <button class="btn-secondary !py-2 !px-4 text-[11px]" onclick="openTxnModal(null,{income:true,month:'${txFilter.month!=='all'?txFilter.month:sumMonth}'})" style="color:var(--income);border-color:var(--income)">+ הכנסה</button>
+        <button class="btn-primary !py-2 !px-4 text-[11px]" onclick="openTxnModal(null,{month:'${txFilter.month!=='all'?txFilter.month:sumMonth}'})">+ הוצאה</button>
+      </div>
     </div>
     <div class="flex gap-2 mb-4 flex-wrap">
       <input type="text" id="txQ" class="ff !w-[200px]" placeholder="חיפוש בית עסק..." value="${txFilter.q}">
@@ -481,33 +504,77 @@ function renderSettings(){
   document.querySelectorAll('.fx-del').forEach(b=>b.onclick=()=>{S.fixed.splice(+b.dataset.fi,1);save();renderSettings()});
   document.getElementById('sSaveGas').onclick=async()=>{GAS=document.getElementById('sGas').value.trim();ls('lh_gas',GAS);if(GAS)await syncCloud();toast('נשמר')};
   document.getElementById('sExport').onclick=()=>{const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ledgerhouse-backup.json';a.click()};
-  const dd=document.getElementById('sDedup');if(dd)dd.onclick=()=>{
-    const n=dupeCount();
-    if(confirm('לאחד '+n+' עסקאות כפולות? נשמור עותק אחד מכל אחת.')){cleanDuplicates();save();syncCloud();toast('אוחדו '+n+' כפילויות');renderSettings()}};
+  const dd=document.getElementById('sDedup');if(dd)dd.onclick=openDupModal;
   document.getElementById('sReset').onclick=()=>{if(confirm('למחוק את כל הנתונים? הפעולה לא הפיכה.')){S=JSON.parse(JSON.stringify(EMPTY));CATS=S.cats;save();syncCloud();render();toast('המערכת אופסה')}};
 }
 
 // Dedup: same month + rounded amount + normalized business. Prefer the copy that has a real date.
 function dupeKey(t){return t.month+'|'+Math.round(Math.abs(t.amount))+'|'+(t.biz||'').replace(/[\s.]/g,'').slice(0,12)+'|'+(t.amount<0?'r':'')+t.type}
-function dupeCount(){const seen=new Set();let n=0;S.txns.forEach(t=>{const k=dupeKey(t);if(seen.has(k))n++;else seen.add(k)});return n}
-function cleanDuplicates(){
-  const groups={};
-  S.txns.forEach(t=>{const k=dupeKey(t);(groups[k]=groups[k]||[]).push(t)});
-  const kept=[];
-  Object.values(groups).forEach(g=>{
-    if(g.length===1){kept.push(g[0]);return}
-    // keep the one with a real date; else the first
-    const withDate=g.find(t=>t.date);
-    kept.push(withDate||g[0]);
-  });
-  S.txns=kept;
+function dupeGroups(){
+  const g={};S.txns.forEach(t=>{const k=dupeKey(t);(g[k]=g[k]||[]).push(t)});
+  return Object.values(g).filter(a=>a.length>1);
 }
+function dupeCount(){return dupeGroups().reduce((a,g)=>a+g.length-1,0)}
+
+function openDupModal(){
+  const groups=dupeGroups();
+  if(!groups.length){toast('אין כפילויות');return}
+  // sort each group: dated first (kept by default), and mark the rest for removal
+  groups.forEach(g=>g.sort((a,b)=>(b.date?1:0)-(a.date?1:0)));
+  const catHe=k=>catOf(k).he;
+  let h='';
+  groups.forEach((g,gi)=>{
+    const head=g[0];
+    h+=`<div class="rounded-xl mb-2.5 overflow-hidden" style="border:1px solid var(--border)">
+      <div class="px-4 py-2 text-[11px] font-bold flex items-center gap-2" style="background:var(--surface2)">
+        <span>${head.biz||'ללא שם'}</span>
+        <span class="font-normal" style="color:var(--text4)">· ${g[0].type==='income'?'הכנסה':catHe(head.cat)} · ${heMonth(head.month)} · ${g.length} עותקים</span>
+      </div>`;
+    g.forEach((t,i)=>{
+      const removeByDefault=i>0; // keep first (dated), remove the rest
+      h+=`<label class="flex items-center gap-3 px-4 py-2.5 cursor-pointer" style="border-top:1px solid var(--border2)">
+        <input type="checkbox" class="dup-chk cursor-pointer" data-id="${t.id}" ${removeByDefault?'checked':''}>
+        <span class="text-[11px] flex-1" style="color:var(--text3)">${t.date?t.date.split('-').reverse().join('/'):'ללא תאריך'} ${t.src==='isracard'?'· ישראכרט':'· ידני'}</span>
+        <span class="text-[12px] font-bold" style="color:${t.amount<0?'var(--income)':'var(--text)'}">${t.amount<0?'+':''}${fmt(t.amount)}</span>
+        <span class="text-[9px] px-2 py-0.5 rounded ${removeByDefault?'':'font-bold'}" style="background:${removeByDefault?'var(--expense-bg)':'var(--income-bg)'};color:${removeByDefault?'var(--expense)':'var(--income)'}">${removeByDefault?'למחיקה':'נשמר'}</span>
+      </label>`;
+    });
+    h+='</div>';
+  });
+  document.getElementById('dupBody').innerHTML=h;
+  document.getElementById('dupModal').style.display='flex';
+  updateDupCounter();
+  document.querySelectorAll('.dup-chk').forEach(c=>c.onchange=()=>{
+    const badge=c.parentElement.querySelector('span:last-child');
+    if(c.checked){badge.textContent='למחיקה';badge.style.background='var(--expense-bg)';badge.style.color='var(--expense)';badge.classList.remove('font-bold')}
+    else{badge.textContent='נשמר';badge.style.background='var(--income-bg)';badge.style.color='var(--income)';badge.classList.add('font-bold')}
+    updateDupCounter();
+  });
+}
+function updateDupCounter(){
+  const n=document.querySelectorAll('.dup-chk:checked').length;
+  document.getElementById('dupCounter').textContent=n+' עסקאות יימחקו';
+}
+document.getElementById('dupApply').onclick=()=>{
+  const ids=new Set([...document.querySelectorAll('.dup-chk:checked')].map(c=>c.dataset.id));
+  if(!ids.size){closeModal('dupModal');return}
+  S.txns=S.txns.filter(t=>!ids.has(t.id));
+  save();syncCloud();closeModal('dupModal');toast('נמחקו '+ids.size+' עסקאות');renderSettings();
+};
+document.getElementById('dupModal').onclick=e=>{if(e.target.id==='dupModal')closeModal('dupModal')};
 
 // ===== Transaction modal =====
 let tmType='expense',tmEditId=null;
-window.openTxnModal=function(t){
+// default date: if opening for a specific month, use that month (day 1, or today if current month)
+function defaultDateFor(moKey){
+  const today=new Date().toISOString().slice(0,10);
+  if(!moKey||moKey===curMoKey())return today;
+  const p=moKey.split(' ');return p[1]+'-'+String(MO.indexOf(p[0])+1).padStart(2,'0')+'-01';
+}
+window.openTxnModal=function(t,opts){
+  opts=opts||{};
   tmEditId=t?t.id:null;
-  document.getElementById('txnModalTitle').textContent=t?'עריכת עסקה':'עסקה חדשה';
+  document.getElementById('txnModalTitle').textContent=t?'עריכת עסקה':(opts.income?'הכנסה חדשה':'עסקה חדשה');
   const sel=document.getElementById('tmCat');
   sel.innerHTML=CATS.map(c=>`<option value="${c.key}">${c.he}</option>`).join('');
   if(t){
@@ -517,10 +584,10 @@ window.openTxnModal=function(t){
     document.getElementById('tmBiz').value=t.biz||'';
     sel.value=t.cat||CATS[0].key;
   }else{
-    tmType='expense';
-    document.getElementById('tmDate').value=new Date().toISOString().slice(0,10);
+    tmType=opts.income?'income':'expense';
+    document.getElementById('tmDate').value=defaultDateFor(opts.month);
     document.getElementById('tmAmt').value='';
-    document.getElementById('tmBiz').value='';
+    document.getElementById('tmBiz').value=opts.income?'משכורת':'';
   }
   updateTmTabs();
   document.getElementById('txnModal').style.display='flex';

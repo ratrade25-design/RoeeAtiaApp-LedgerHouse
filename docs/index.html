@@ -3,157 +3,166 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#050510">
-<title>LedgerHouse — מרכז פיקוד פיננסי</title>
+<meta name="theme-color" content="#F5F2EB">
+<title>LedgerHouse — מרכז פיננסי</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 tailwind.config={theme:{extend:{
   fontFamily:{heebo:['Heebo','sans-serif']},
-  colors:{brand:{950:'#030308',900:'#050510',850:'#0a0a1a',800:'#0f0f24',750:'#14142e',700:'#1a1a38'},
-    gold:{DEFAULT:'#C9A84C',light:'#E5D08A',dark:'#9A7E38'},
-    neon:{purple:'#A855F7',cyan:'#22D3EE',pink:'#F472B6',blue:'#6366F1'}},
-  transitionDuration:{500:'500ms',700:'700ms'}
+  colors:{
+    sand:{50:'#FAF8F3',100:'#F5F2EB',200:'#EBE6DA',300:'#E2DED4',400:'#C4BFB2',500:'#8E9490',600:'#6B706C',700:'#4A4F4B',800:'#2C3630',900:'#1A1F1C',950:'#111513'},
+    sage:{DEFAULT:'#2E5E4E',light:'#4A8A72',dark:'#1E3F35',50:'#EEFAF4',100:'#D0F0E0',200:'#A3E0C2',400:'#4A8A72',500:'#2E5E4E',600:'#1E3F35',700:'#162E27'},
+    copper:{DEFAULT:'#C8956C',light:'#DDB892',dark:'#A67548',50:'#FDF6EF',100:'#F9E8D6'},
+    warmWhite:'#FFFFFF',
+  }
 }}}
 </script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
+:root{
+  --bg:#F5F2EB;--surface:#FFFFFF;--surface2:#FAF8F3;--border:#E2DED4;--border2:#EBE6DA;
+  --text:#2C3630;--text2:#4A4F4B;--text3:#6B706C;--text4:#8E9490;--text5:#C4BFB2;
+  --sage:#2E5E4E;--sage-light:#4A8A72;--sage-bg:rgba(46,94,78,.06);--sage-border:rgba(46,94,78,.12);
+  --copper:#C8956C;--copper-bg:rgba(200,149,108,.08);--copper-border:rgba(200,149,108,.15);
+  --income:#3B8C5C;--income-bg:rgba(59,140,92,.06);--expense:#C95D4F;--expense-bg:rgba(201,93,79,.06);
+  --shadow-sm:0 1px 3px rgba(44,54,48,.04),0 1px 2px rgba(44,54,48,.03);
+  --shadow:0 4px 16px rgba(44,54,48,.06),0 1px 3px rgba(44,54,48,.04);
+  --shadow-lg:0 12px 40px rgba(44,54,48,.08),0 4px 12px rgba(44,54,48,.04);
+  --radius:14px;--radius-sm:10px;--radius-lg:20px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#111513;--surface:#1A1F1C;--surface2:#1E2420;--border:#2A302C;--border2:#232A26;
+  --text:#E8E4DD;--text2:#C4C0B8;--text3:#8E9490;--text4:#6B706C;--text5:#4A4F4B;
+  --sage:#4A8A72;--sage-light:#6AB894;--sage-bg:rgba(74,138,114,.1);--sage-border:rgba(74,138,114,.2);
+  --copper:#DDB892;--copper-bg:rgba(221,184,146,.08);--copper-border:rgba(221,184,146,.15);
+  --income:#5CB87A;--income-bg:rgba(92,184,122,.08);--expense:#E07A5F;--expense-bg:rgba(224,122,95,.08);
+  --shadow-sm:0 1px 3px rgba(0,0,0,.2);--shadow:0 4px 16px rgba(0,0,0,.25);--shadow-lg:0 12px 40px rgba(0,0,0,.35);
+}}
+:root[data-theme="dark"]{
+  --bg:#111513;--surface:#1A1F1C;--surface2:#1E2420;--border:#2A302C;--border2:#232A26;
+  --text:#E8E4DD;--text2:#C4C0B8;--text3:#8E9490;--text4:#6B706C;--text5:#4A4F4B;
+  --sage:#4A8A72;--sage-light:#6AB894;--sage-bg:rgba(74,138,114,.1);--sage-border:rgba(74,138,114,.2);
+  --copper:#DDB892;--copper-bg:rgba(221,184,146,.08);--copper-border:rgba(221,184,146,.15);
+  --income:#5CB87A;--income-bg:rgba(92,184,122,.08);--expense:#E07A5F;--expense-bg:rgba(224,122,95,.08);
+  --shadow-sm:0 1px 3px rgba(0,0,0,.2);--shadow:0 4px 16px rgba(0,0,0,.25);--shadow-lg:0 12px 40px rgba(0,0,0,.35);
+}
+:root[data-theme="light"]{
+  --bg:#F5F2EB;--surface:#FFFFFF;--surface2:#FAF8F3;--border:#E2DED4;--border2:#EBE6DA;
+  --text:#2C3630;--text2:#4A4F4B;--text3:#6B706C;--text4:#8E9490;--text5:#C4BFB2;
+  --sage:#2E5E4E;--sage-light:#4A8A72;--sage-bg:rgba(46,94,78,.06);--sage-border:rgba(46,94,78,.12);
+  --copper:#C8956C;--copper-bg:rgba(200,149,108,.08);--copper-border:rgba(200,149,108,.15);
+  --income:#3B8C5C;--income-bg:rgba(59,140,92,.06);--expense:#C95D4F;--expense-bg:rgba(201,93,79,.06);
+  --shadow-sm:0 1px 3px rgba(44,54,48,.04),0 1px 2px rgba(44,54,48,.03);
+  --shadow:0 4px 16px rgba(44,54,48,.06),0 1px 3px rgba(44,54,48,.04);
+  --shadow-lg:0 12px 40px rgba(44,54,48,.08),0 4px 12px rgba(44,54,48,.04);
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Heebo',sans-serif;font-variant-numeric:tabular-nums;background:#050510;color:#E2E8F0;-webkit-font-smoothing:antialiased;overflow:hidden}
+body{font-family:'Heebo',sans-serif;font-variant-numeric:tabular-nums;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;overflow:hidden}
 
-.nebula{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-.neb{position:absolute;border-radius:50%;filter:blur(120px);mix-blend-mode:screen;will-change:transform}
-@keyframes nd1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(90px,70px) scale(1.25)}}
-@keyframes nd2{0%,100%{transform:translate(0,0) scale(1.1)}50%{transform:translate(-70px,-90px) scale(1.35)}}
-@keyframes nd3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,-50px) scale(1.15)}}
-@keyframes nd4{0%,100%{transform:translate(0,0) scale(1.05)}50%{transform:translate(-50px,80px) scale(1.2)}}
-
-.grid-ov{position:fixed;inset:0;z-index:1;pointer-events:none;
-  background-image:linear-gradient(rgba(99,102,241,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.02) 1px,transparent 1px);
-  background-size:60px 60px}
-
-.scan-ov{position:fixed;inset:0;z-index:2;pointer-events:none;
-  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.015) 3px,rgba(0,0,0,.015) 6px)}
-
-.main::-webkit-scrollbar{width:3px}
+.main::-webkit-scrollbar{width:4px}
 .main::-webkit-scrollbar-track{background:transparent}
-.main::-webkit-scrollbar-thumb{background:rgba(168,85,247,.12);border-radius:2px}
+.main::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.main::-webkit-scrollbar-thumb:hover{background:var(--text5)}
 
 .view{display:none;min-height:100%}.view.active{display:block}
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
-@keyframes modalIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
-@keyframes glowPulse{0%,100%{box-shadow:0 0 20px -5px var(--glow)}50%{box-shadow:0 0 35px -3px var(--glow)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes modalIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-.zone .zone-inner{opacity:1}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;
+  box-shadow:var(--shadow-sm);transition:all .3s ease}
+.card:hover{box-shadow:var(--shadow)}
+.card-lg{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;box-shadow:var(--shadow-sm)}
 
-.qc{position:relative;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);background:rgba(255,255,255,.02);
-  border:1px solid rgba(255,255,255,.04);border-radius:20px;padding:24px;overflow:hidden;
-  transition:all .6s cubic-bezier(.16,1,.3,1)}
-.qc::before{content:'';position:absolute;inset:-1px;border-radius:21px;padding:1px;
-  background:linear-gradient(135deg,rgba(168,85,247,.15),rgba(34,211,238,.08),rgba(201,168,76,.12));
-  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;transition:opacity .5s}
-.qc::after{content:'';position:absolute;bottom:-30px;left:15%;right:15%;height:50px;border-radius:50%;
-  background:radial-gradient(ellipse,var(--ambient,rgba(168,85,247,.08)),transparent 70%);filter:blur(20px);opacity:0;transition:opacity .5s;pointer-events:none}
-.qc:hover::after{opacity:1}
+.ff{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:10px 14px;color:var(--text);outline:none;font-size:13px;transition:all .25s;width:100%;font-family:inherit}
+.ff:focus{border-color:var(--sage);box-shadow:0 0 0 3px var(--sage-bg)}
+.ff::placeholder{color:var(--text5)}
+.ff-copper:focus{border-color:var(--copper);box-shadow:0 0 0 3px var(--copper-bg)}
 
-.qp{backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);background:rgba(255,255,255,.015);
-  border:1px solid rgba(255,255,255,.04);border-radius:20px;padding:28px;
-  box-shadow:0 4px 40px -8px rgba(0,0,0,.3);transition:all .6s cubic-bezier(.16,1,.3,1)}
+.btn-primary{background:var(--sage);color:#fff;font-weight:700;border:none;
+  border-radius:var(--radius-sm);padding:10px 24px;cursor:pointer;font-size:12px;
+  transition:all .25s;font-family:inherit}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px);box-shadow:var(--shadow)}
+.btn-primary:active{transform:scale(.98)}
 
-.ff{background:transparent!important;border:none!important;border-bottom:1px solid rgba(255,255,255,.08)!important;border-radius:0!important;
-  padding:10px 4px!important;color:#E2E8F0;outline:none;font-size:13px;transition:all .5s;width:100%}
-.ff:focus{border-bottom-color:rgba(168,85,247,.6)!important;box-shadow:0 2px 20px -4px rgba(168,85,247,.2)}
-.ff::placeholder{color:rgba(255,255,255,.15)}
-.ff-gold:focus{border-bottom-color:rgba(201,168,76,.6)!important;box-shadow:0 2px 20px -4px rgba(201,168,76,.2)}
+.btn-secondary{background:var(--surface2);color:var(--text2);font-weight:600;border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:10px 24px;cursor:pointer;font-size:12px;
+  transition:all .25s;font-family:inherit}
+.btn-secondary:hover{background:var(--surface);border-color:var(--sage-border);color:var(--sage);box-shadow:var(--shadow-sm)}
+.btn-secondary:active{transform:scale(.98)}
 
-.btn-neon{background:linear-gradient(135deg,rgba(168,85,247,.15),rgba(99,102,241,.1));border:1px solid rgba(168,85,247,.25);
-  color:#E2E8F0;font-weight:700;border-radius:14px;padding:10px 24px;cursor:pointer;font-size:12px;
-  transition:all .5s;position:relative;overflow:hidden}
-.btn-neon:hover{background:linear-gradient(135deg,rgba(168,85,247,.25),rgba(99,102,241,.15));
-  box-shadow:0 0 30px -5px rgba(168,85,247,.3);transform:translateY(-1px)}
-.btn-neon:active{transform:scale(.97)}
-.btn-neon::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.05),transparent);
-  transform:translateX(-100%);transition:transform .6s}
-.btn-neon:hover::before{transform:translateX(100%)}
+.btn-copper{background:var(--copper);color:#fff;font-weight:700;border:none;
+  border-radius:var(--radius-sm);padding:10px 24px;cursor:pointer;font-size:12px;transition:all .25s;font-family:inherit}
+.btn-copper:hover{opacity:.9;transform:translateY(-1px);box-shadow:var(--shadow)}
 
-.btn-gold{background:linear-gradient(135deg,#C9A84C,#9A7E38);color:#050510;font-weight:800;border:none;
-  border-radius:14px;padding:10px 24px;cursor:pointer;font-size:12px;transition:all .5s}
-.btn-gold:hover{box-shadow:0 0 30px -5px rgba(201,168,76,.35);transform:translateY(-1px)}
-.btn-gold:active{transform:scale(.97)}
+.lbl{display:block;font-size:10px;font-weight:700;letter-spacing:.12em;margin-bottom:6px;color:var(--text4);text-transform:uppercase}
 
-.lbl{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.25em;font-weight:600;margin-bottom:8px;
-  background:linear-gradient(90deg,rgba(168,85,247,.7),rgba(34,211,238,.5));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-
-.bar{transition:height 1.2s cubic-bezier(.16,1,.3,1)}
-.toast{transform:translateX(-50%) translateY(100px);transition:transform .5s cubic-bezier(.16,1,.3,1)}
+.bar{transition:height .8s cubic-bezier(.16,1,.3,1)}
+.toast{transform:translateX(-50%) translateY(100px);transition:transform .4s cubic-bezier(.16,1,.3,1)}
 .toast.show{transform:translateX(-50%) translateY(0)}
 
-.halo{position:fixed;pointer-events:none;z-index:9997;width:160px;height:160px;border-radius:50%;
-  background:radial-gradient(circle,rgba(168,85,247,.03) 0%,rgba(99,102,241,.01) 40%,transparent 70%);
-  transform:translate(-50%,-50%);transition:opacity .4s}
+.nav-item{position:relative;display:flex;align-items:center;justify-content:center;width:42px;height:42px;
+  border-radius:var(--radius-sm);color:var(--text4);cursor:pointer;transition:all .25s}
+.nav-item:hover{background:var(--sage-bg);color:var(--sage)}
+.nav-item.active{color:var(--sage);background:var(--sage-bg)}
+.nav-item.active::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);
+  width:16px;height:2px;border-radius:1px;background:var(--sage)}
 
-.sb-item.active .sb-bar{opacity:1;transform:scaleY(1)}
+.stat-badge{font-size:9px;font-weight:700;padding:3px 8px;border-radius:6px;letter-spacing:.03em}
+.stat-up{background:var(--income-bg);color:var(--income)}
+.stat-down{background:var(--expense-bg);color:var(--expense)}
+
 input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none}
 input[type="number"]{-moz-appearance:textfield}
-
-#particleOverlay{position:fixed;inset:0;z-index:999;pointer-events:none}
+select{font-family:inherit}
 
 @media(max-width:768px){
   .mob-1{grid-template-columns:1fr!important}
-  .mob-p{padding-left:14px!important;padding-right:14px!important}
-  .mob-py{padding-top:20px!important;padding-bottom:20px!important}
-  .mob-text{font-size:24px!important}
+  .mob-p{padding-left:16px!important;padding-right:16px!important}
+  .mob-text{font-size:22px!important}
   .mob-ring{flex-direction:column!important}
   .mob-ring>div:first-child{width:180px!important;height:180px!important;margin:0 auto!important}
 }
-@media(max-width:540px){.sidebar{width:46px!important}}
 </style>
 </head>
-<body class="bg-brand-900 text-slate-200 font-heebo antialiased overflow-hidden h-screen">
+<body class="font-heebo antialiased overflow-hidden h-screen">
 
-<div class="nebula">
-  <div class="neb" style="width:550px;height:550px;background:radial-gradient(circle,rgba(99,102,241,.13),transparent 70%);top:-12%;left:-8%;animation:nd1 28s infinite ease-in-out"></div>
-  <div class="neb" style="width:420px;height:420px;background:radial-gradient(circle,rgba(168,85,247,.11),transparent 70%);top:35%;right:-10%;animation:nd2 32s infinite ease-in-out"></div>
-  <div class="neb" style="width:600px;height:350px;background:radial-gradient(circle,rgba(201,168,76,.07),transparent 70%);bottom:-12%;left:25%;animation:nd3 36s infinite ease-in-out"></div>
-  <div class="neb" style="width:380px;height:380px;background:radial-gradient(circle,rgba(34,211,238,.06),transparent 70%);top:15%;left:45%;animation:nd4 30s infinite ease-in-out"></div>
-  <div class="neb" style="width:300px;height:300px;background:radial-gradient(circle,rgba(244,114,182,.05),transparent 70%);bottom:20%;right:20%;animation:nd1 34s infinite ease-in-out reverse"></div>
-</div>
-<div class="grid-ov"></div>
-<div class="scan-ov"></div>
+<div id="app" class="h-screen overflow-hidden relative">
+<div class="flex flex-col h-full">
 
-<div id="app" class="h-screen overflow-hidden relative z-10">
-<div class="flex h-full">
-
-<nav class="sidebar w-[62px] flex-shrink-0 backdrop-blur-3xl bg-brand-950/60 border-r border-white/[0.03] flex flex-col items-center py-5 gap-1.5 z-20 relative">
-  <div class="absolute inset-0 bg-gradient-to-b from-neon-purple/[0.03] to-transparent pointer-events-none"></div>
-  <div class="w-[36px] h-[36px] rounded-xl bg-gradient-to-br from-neon-purple/20 to-neon-blue/15 border border-neon-purple/20 flex items-center justify-center text-neon-purple font-black text-[11px] mb-8 shadow-[0_0_20px_-4px_rgba(168,85,247,0.15)] relative z-10 tracking-tight" style="animation:glowPulse 4s infinite;--glow:rgba(168,85,247,.12)">LH</div>
-
-  <div class="sb-item active relative w-[40px] h-[40px] rounded-xl flex items-center justify-center text-slate-600 cursor-pointer transition-all duration-500 hover:text-slate-300 hover:bg-white/[0.03]" data-view="dashboard">
-    <div class="sb-bar absolute left-0 top-3 bottom-3 w-[2px] rounded-r-full bg-neon-purple shadow-[0_0_12px_rgba(168,85,247,0.5)] opacity-0 scale-y-0 transition-all duration-500"></div>
-    <svg class="w-[17px] h-[17px] relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+<header class="flex-shrink-0 h-[56px] flex items-center px-6 mob-p border-b" style="border-color:var(--border);background:var(--surface)">
+  <div class="flex items-center gap-2.5 mr-auto">
+    <div class="w-8 h-8 rounded-lg flex items-center justify-center font-black text-[11px] text-white" style="background:var(--sage)">LH</div>
+    <span class="text-[15px] font-extrabold tracking-tight" style="color:var(--text)">LedgerHouse</span>
   </div>
-  <div class="sb-item relative w-[40px] h-[40px] rounded-xl flex items-center justify-center text-slate-600 cursor-pointer transition-all duration-500 hover:text-slate-300 hover:bg-white/[0.03]" data-view="monthly">
-    <div class="sb-bar absolute left-0 top-3 bottom-3 w-[2px] rounded-r-full bg-neon-purple shadow-[0_0_12px_rgba(168,85,247,0.5)] opacity-0 scale-y-0 transition-all duration-500"></div>
-    <svg class="w-[17px] h-[17px] relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-  </div>
-  <div class="sb-item relative w-[40px] h-[40px] rounded-xl flex items-center justify-center text-slate-600 cursor-pointer transition-all duration-500 hover:text-slate-300 hover:bg-white/[0.03]" data-view="annual">
-    <div class="sb-bar absolute left-0 top-3 bottom-3 w-[2px] rounded-r-full bg-neon-purple shadow-[0_0_12px_rgba(168,85,247,0.5)] opacity-0 scale-y-0 transition-all duration-500"></div>
-    <svg class="w-[17px] h-[17px] relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-  </div>
-  <div class="mt-auto">
-    <div class="sb-item relative w-[40px] h-[40px] rounded-xl flex items-center justify-center text-slate-600 cursor-pointer transition-all duration-500 hover:text-slate-300 hover:bg-white/[0.03]" data-view="settings">
-      <div class="sb-bar absolute left-0 top-3 bottom-3 w-[2px] rounded-r-full bg-neon-purple shadow-[0_0_12px_rgba(168,85,247,0.5)] opacity-0 scale-y-0 transition-all duration-500"></div>
-      <svg class="w-[17px] h-[17px] relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  <nav class="flex items-center gap-1 mx-auto">
+    <div class="nav-item active" data-view="dashboard" title="דשבורד">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    </div>
+    <div class="nav-item" data-view="monthly" title="חודשי">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </div>
+    <div class="nav-item" data-view="annual" title="שנתי">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    </div>
+    <div class="nav-item" data-view="settings" title="הגדרות">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </div>
+  </nav>
+  <div class="flex items-center gap-2 ml-auto">
+    <div class="flex items-center gap-1.5 text-[10px] font-mono px-2.5 py-1.5 rounded-lg" style="color:var(--text4);background:var(--surface2);border:1px solid var(--border)">
+      <span class="w-[5px] h-[5px] rounded-full" style="background:var(--sage);animation:pulse 2.5s ease-in-out infinite"></span>
+      <span id="clock">--:--</span>
     </div>
   </div>
-</nav>
+</header>
 
-<div class="main flex-1 overflow-y-auto overflow-x-hidden relative scroll-smooth" id="mainScroll">
+<div class="main flex-1 overflow-y-auto overflow-x-hidden scroll-smooth" id="mainScroll" style="background:var(--bg)">
   <div class="view active" id="v-dashboard"></div>
   <div class="view" id="v-monthly"></div>
   <div class="view" id="v-annual"></div>
@@ -162,58 +171,60 @@ input[type="number"]{-moz-appearance:textfield}
 </div>
 </div>
 
-<div class="fixed inset-0 bg-black/70 backdrop-blur-2xl z-[100] items-center justify-center p-5" id="addMonthModal" style="display:none">
-  <div class="bg-brand-800/90 backdrop-blur-3xl border border-neon-purple/10 rounded-3xl p-8 w-full max-w-lg relative shadow-[0_32px_80px_-12px_rgba(168,85,247,.15)]" style="animation:modalIn .4s cubic-bezier(.16,1,.3,1)">
-    <button class="absolute top-5 right-5 w-8 h-8 rounded-lg bg-white/[0.03] border border-white/[0.05] text-slate-500 hover:text-white hover:bg-neon-purple/10 transition-all duration-500 flex items-center justify-center text-lg" onclick="closeModal('addMonthModal')">&times;</button>
-    <h3 class="text-lg font-bold mb-7 tracking-tight bg-gradient-to-r from-neon-purple to-neon-cyan bg-clip-text text-transparent">עריכת מחזור</h3>
-    <div class="mb-5"><label class="lbl">מחזור</label><select id="amMonth" class="ff ff-gold w-full"></select></div>
-    <div class="mb-5"><label class="lbl">כניסות (₪)</label><input type="number" id="amIncome" placeholder="0" class="ff ff-gold" dir="ltr"></div>
+<div class="fixed inset-0 z-[100] items-center justify-center p-5" id="addMonthModal" style="display:none;background:rgba(0,0,0,.4);backdrop-filter:blur(8px)">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;width:100%;max-width:500px;box-shadow:var(--shadow-lg);animation:modalIn .3s ease-out">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-lg font-bold" style="color:var(--text)">עריכת מחזור</h3>
+      <button class="w-8 h-8 rounded-lg flex items-center justify-center text-lg transition-all" style="background:var(--surface2);border:1px solid var(--border);color:var(--text4)" onclick="closeModal('addMonthModal')" onmouseover="this.style.color='var(--expense)'" onmouseout="this.style.color='var(--text4)'">&times;</button>
+    </div>
+    <div class="mb-4"><label class="lbl">מחזור</label><select id="amMonth" class="ff ff-copper w-full"></select></div>
+    <div class="mb-4"><label class="lbl">כניסות (₪)</label><input type="number" id="amIncome" placeholder="0" class="ff ff-copper" dir="ltr"></div>
     <div id="amCatFields"></div>
     <div class="grid grid-cols-2 gap-4 mb-6">
-      <div><label class="lbl">שווי נטו</label><input type="number" id="amNetWorth" placeholder="0" class="ff ff-gold" dir="ltr"></div>
-      <div><label class="lbl">רזרבה נזילה</label><input type="number" id="amLiquid" placeholder="0" class="ff ff-gold" dir="ltr"></div>
+      <div><label class="lbl">שווי נטו</label><input type="number" id="amNetWorth" placeholder="0" class="ff ff-copper" dir="ltr"></div>
+      <div><label class="lbl">רזרבה נזילה</label><input type="number" id="amLiquid" placeholder="0" class="ff ff-copper" dir="ltr"></div>
     </div>
-    <div class="flex gap-3"><button class="btn-gold" id="amSave">אשר</button><button class="btn-neon" onclick="closeModal('addMonthModal')">בטל</button></div>
+    <div class="flex gap-3"><button class="btn-primary" id="amSave">אשר</button><button class="btn-secondary" onclick="closeModal('addMonthModal')">בטל</button></div>
   </div>
 </div>
 
-<div class="fixed inset-0 bg-black/70 backdrop-blur-2xl z-[100] items-center justify-center p-5" id="importModal" style="display:none">
-  <div class="bg-brand-800/90 backdrop-blur-3xl border border-neon-purple/10 rounded-3xl p-8 w-full max-w-3xl relative shadow-[0_32px_80px_-12px_rgba(168,85,247,.15)] max-h-[85vh] overflow-y-auto" style="animation:modalIn .4s cubic-bezier(.16,1,.3,1)">
-    <button class="absolute top-5 right-5 w-8 h-8 rounded-lg bg-white/[0.03] border border-white/[0.05] text-slate-500 hover:text-white hover:bg-neon-purple/10 transition-all duration-500 flex items-center justify-center text-lg" onclick="closeModal('importModal')">&times;</button>
-    <h3 class="text-lg font-bold mb-7 tracking-tight bg-gradient-to-r from-neon-purple to-neon-cyan bg-clip-text text-transparent">ייבוא דוח ישראכרט</h3>
+<div class="fixed inset-0 z-[100] items-center justify-center p-5" id="importModal" style="display:none;background:rgba(0,0,0,.4);backdrop-filter:blur(8px)">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;width:100%;max-width:780px;box-shadow:var(--shadow-lg);max-height:85vh;overflow-y:auto;animation:modalIn .3s ease-out">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-lg font-bold" style="color:var(--text)">ייבוא דוח ישראכרט</h3>
+      <button class="w-8 h-8 rounded-lg flex items-center justify-center text-lg transition-all" style="background:var(--surface2);border:1px solid var(--border);color:var(--text4)" onclick="closeModal('importModal')" onmouseover="this.style.color='var(--expense)'" onmouseout="this.style.color='var(--text4)'">&times;</button>
+    </div>
     <div id="importArea">
-      <label class="block w-full py-12 border-2 border-dashed border-white/[0.08] rounded-2xl cursor-pointer text-center transition-all duration-500 hover:border-neon-purple/30 hover:bg-neon-purple/[0.02]" id="importDropZone">
+      <label class="block w-full py-14 border-2 border-dashed rounded-2xl cursor-pointer text-center transition-all" id="importDropZone" style="border-color:var(--border);background:var(--surface2)" onmouseover="this.style.borderColor='var(--sage)';this.style.background='var(--sage-bg)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface2)'">
         <input type="file" accept=".pdf" id="pdfInput" class="hidden">
         <div class="text-3xl mb-3">📄</div>
-        <div class="text-[12px] text-slate-400 font-medium">לחץ לבחירת קובץ PDF של ישראכרט</div>
-        <div class="text-[10px] text-slate-600 mt-1">או גרור קובץ לכאן</div>
+        <div class="text-[12px] font-medium" style="color:var(--text3)">לחץ לבחירת קובץ PDF של ישראכרט</div>
+        <div class="text-[10px] mt-1" style="color:var(--text5)">או גרור קובץ לכאן</div>
       </label>
     </div>
-    <div id="importLoading" style="display:none" class="text-center py-12">
-      <div class="text-2xl mb-3" style="animation:pulse 1.5s infinite">⚡</div>
-      <div class="text-[12px] text-neon-purple/80 font-medium">מפענח את הדוח...</div>
+    <div id="importLoading" style="display:none" class="text-center py-14">
+      <div class="text-2xl mb-3" style="animation:pulse 1.5s infinite">📊</div>
+      <div class="text-[12px] font-medium" style="color:var(--sage)">מפענח את הדוח...</div>
     </div>
     <div id="importPreview" style="display:none"></div>
     <div id="importActions" style="display:none" class="flex gap-3 mt-6">
-      <button class="btn-gold" id="confirmImport">אשר ייבוא</button>
-      <button class="btn-neon" onclick="closeModal('importModal')">בטל</button>
+      <button class="btn-primary" id="confirmImport">אשר ייבוא</button>
+      <button class="btn-secondary" onclick="closeModal('importModal')">בטל</button>
     </div>
   </div>
 </div>
 
-<div class="toast fixed bottom-6 left-1/2 bg-brand-800/95 border border-neon-purple/20 rounded-2xl px-7 py-4 text-[13px] font-medium text-neon-purple z-[200] shadow-[0_0_40px_-8px_rgba(168,85,247,.2)] backdrop-blur-3xl" id="toast"></div>
-<div class="halo" id="halo"></div>
-<canvas id="particleOverlay"></canvas>
+<div class="toast fixed bottom-6 left-1/2 rounded-xl px-6 py-3.5 text-[13px] font-semibold z-[200]" id="toast" style="background:var(--sage);color:#fff;box-shadow:var(--shadow-lg)"></div>
 
 <script>
 (function(){
 const DEFAULT_CATS=[
-  {key:'food',name:'Food & Groceries',he:'מזון ומכולת',color:'#34D399'},
-  {key:'housing',name:'Housing & Utilities',he:'דיור ושירותים',color:'#818CF8'},
-  {key:'invest',name:'Investments',he:'השקעות',color:'#C9A84C'},
-  {key:'savings',name:'Savings',he:'חיסכון',color:'#22D3EE'},
-  {key:'car',name:'Car & Transport',he:'רכב ותחבורה',color:'#FB923C'},
-  {key:'telecom',name:'Telecom',he:'תקשורת',color:'#A78BFA'},
+  {key:'food',name:'Food & Groceries',he:'מזון ומכולת',color:'#3B8C5C'},
+  {key:'housing',name:'Housing & Utilities',he:'דיור ושירותים',color:'#6366F1'},
+  {key:'invest',name:'Investments',he:'השקעות',color:'#C8956C'},
+  {key:'savings',name:'Savings',he:'חיסכון',color:'#0EA5E9'},
+  {key:'car',name:'Car & Transport',he:'רכב ותחבורה',color:'#F59E0B'},
+  {key:'telecom',name:'Telecom',he:'תקשורת',color:'#8B5CF6'},
 ];
 let CATS=JSON.parse(localStorage.getItem('lh_cats')||'null')||JSON.parse(JSON.stringify(DEFAULT_CATS));
 function saveCats(){localStorage.setItem('lh_cats',JSON.stringify(CATS))}
@@ -223,18 +234,14 @@ const MO_HE_S=['ינו׳','פבר׳','מרץ','אפר׳','מאי','יוני','י
 function heMonth(k){const p=k.split(' ');return MO_HE[MO.indexOf(p[0])]+' '+p[1]}
 function heMonthS(k){return MO_HE_S[MO.indexOf(k.split(' ')[0])]}
 
-const DEFAULT_DATA={
-  months:{},
-  netWorth:[],
-  liquidSavings:0,manualEntries:[]
-};
+const DEFAULT_DATA={months:{},netWorth:[],liquidSavings:0,manualEntries:[]};
 
 const _freshReset=!ls('lh_v2');
 if(_freshReset){localStorage.removeItem('lh_state');ls('lh_v2','1')}
 let S=loadLocal()||JSON.parse(JSON.stringify(DEFAULT_DATA));
 if(!S.manualEntries)S.manualEntries=[];
 let GAS=ls('lh_gas')||'https://script.google.com/macros/s/AKfycbwMDQpxmLCiXM62_imOz6p63DwQvT6A7kyJ_59qps8SwrELidbQ4KZQDicUDn1qZlzd/exec';
-let curView='dashboard',curMonthIdx=-1,vortexRAF=null;
+let curView='dashboard',curMonthIdx=-1;
 
 function ls(k,v){if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}
 function loadLocal(){try{return JSON.parse(ls('lh_state'))}catch(e){return null}}
@@ -246,16 +253,19 @@ function totE(d){return CATS.reduce((a,c)=>a+(d.expenses[c.key]||0),0)}
 function mKeys(){return Object.keys(S.months)}
 function sortMonths(){const sorted=Object.entries(S.months).sort((a,b)=>{const[mA,yA]=a[0].split(' '),[mB,yB]=b[0].split(' ');return(+yA-+yB)||(MO.indexOf(mA)-MO.indexOf(mB))});S.months=Object.fromEntries(sorted)}
 
-async function syncCloud(){if(!GAS)return;try{await fetch(GAS+'?action=save',{method:'POST',body:JSON.stringify(S),headers:{'Content-Type':'text/plain'}});setSyncBadge('ok','מקושר')}catch(e){setSyncBadge('err','ניתוק')}}
+async function syncCloud(){if(!GAS)return;try{await fetch(GAS+'?action=save',{method:'POST',body:JSON.stringify(S),headers:{'Content-Type':'text/plain'}});setSyncBadge('ok','מסונכרן')}catch(e){setSyncBadge('err','ניתוק')}}
 async function loadCloud(){if(!GAS)return;try{const r=await fetch(GAS+'?action=get');const d=await r.json();if(d&&d.months){S=d;if(!S.manualEntries)S.manualEntries=[];save();setSyncBadge('ok','נטען')}}catch(e){setSyncBadge('err','שגיאה')}}
-function setSyncBadge(s,t){document.querySelectorAll('.sync-badge').forEach(b=>{b.className='sync-badge flex items-center gap-2 text-[10px] px-3 py-1.5 rounded-lg backdrop-blur-2xl transition-all duration-500 '+(s==='ok'?'text-emerald-400/80 bg-emerald-400/[0.04] border border-emerald-500/10':'text-red-400/80 bg-red-400/[0.04] border border-red-500/10');b.querySelector('.st').textContent=t})}
+function setSyncBadge(s,t){document.querySelectorAll('.sync-badge').forEach(b=>{
+  b.style.color=s==='ok'?'var(--income)':'var(--expense)';
+  b.style.background=s==='ok'?'var(--income-bg)':'var(--expense-bg)';
+  b.querySelector('.st').textContent=t})}
 
-function heatStyle(pct){const a=Math.abs(pct),i=Math.min(a/15,1),up=pct>0;
-  const c=up?'248,113,113':'52,211,153';return`color:rgba(${c},${.5+i*.5});text-shadow:0 0 ${4+i*18}px rgba(${c},${i*.6})`}
+function deltaStyle(pct){const up=pct>0;return up?'color:var(--expense)':'color:var(--income)'}
+function deltaBadge(pct){return`<span class="stat-badge ${+pct>=0?'stat-down':'stat-up'}">${+pct>=0?'+':''}${pct}%</span>`}
 
 function switchView(v){
-  curView=v;if(vortexRAF){cancelAnimationFrame(vortexRAF);vortexRAF=null}
-  document.querySelectorAll('.sb-item').forEach(i=>{const a=i.dataset.view===v;i.classList.toggle('active',a);i.classList.toggle('text-neon-purple',a);i.classList.toggle('bg-neon-purple/[0.06]',a);i.classList.toggle('text-slate-600',!a)});
+  curView=v;
+  document.querySelectorAll('.nav-item').forEach(i=>{i.classList.toggle('active',i.dataset.view===v)});
   document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='v-'+v));
   document.getElementById('mainScroll').scrollTop=0;
   if(v==='dashboard')renderDashboard();else if(v==='monthly')renderMonthly();else if(v==='annual')renderAnnual();else renderSettings();
@@ -265,28 +275,29 @@ function renderDashboard(){
   const mk=mKeys();
   if(mk.length<1){
     document.getElementById('v-dashboard').innerHTML=`
-    <div class="sticky top-0 z-10 px-8 mob-p py-4 flex items-center gap-4 flex-wrap bg-brand-900/50 backdrop-blur-3xl border-b border-white/[0.03]">
-      <h2 class="text-[20px] font-extrabold tracking-[-0.5px] bg-gradient-to-r from-neon-purple via-neon-cyan to-gold bg-clip-text text-transparent">מרכז פיקוד</h2>
-      <div class="ml-auto flex items-center gap-3">
-        <div class="flex items-center gap-2 text-[10px] text-neon-cyan/60 font-mono px-3 py-1.5 rounded-lg bg-neon-cyan/[0.03] border border-neon-cyan/10">
-          <span class="w-[5px] h-[5px] rounded-full bg-neon-cyan/80 shadow-[0_0_8px_rgba(34,211,238,.5)]" style="animation:pulse 2.5s ease-in-out infinite"></span>
-          <span id="clock">--:--:--</span>
+    <div class="max-w-[900px] mx-auto px-6 mob-p">
+      <div class="flex items-center justify-between py-5">
+        <div>
+          <h2 class="text-[20px] font-extrabold tracking-tight" style="color:var(--text)">דשבורד</h2>
+          <p class="text-[11px] mt-0.5" style="color:var(--text4)">סקירה כללית</p>
         </div>
-        <button onclick="openImportModal()" title="ייבוא מישראכרט" class="w-9 h-9 rounded-xl bg-gold/[0.08] border border-gold/15 text-gold flex items-center justify-center transition-all duration-500 hover:shadow-[0_0_24px_-4px_rgba(201,168,76,.2)] hover:scale-105">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        </button>
-        <button onclick="openAddMonth()" title="עריכת מחזור" class="w-9 h-9 rounded-xl bg-neon-purple/[0.08] border border-neon-purple/15 text-neon-purple flex items-center justify-center transition-all duration-500 hover:shadow-[0_0_24px_-4px_rgba(168,85,247,.2)] hover:scale-105">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="openImportModal()" title="ייבוא מישראכרט" class="w-9 h-9 rounded-lg flex items-center justify-center transition-all" style="background:var(--copper-bg);border:1px solid var(--copper-border);color:var(--copper)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </button>
+          <button onclick="openAddMonth()" title="הוסף מחזור" class="w-9 h-9 rounded-lg flex items-center justify-center transition-all" style="background:var(--sage-bg);border:1px solid var(--sage-border);color:var(--sage)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
       </div>
-    </div>
-    <div class="flex flex-col items-center justify-center py-32 px-8 text-center">
-      <div class="text-5xl mb-6">📡</div>
-      <h3 class="text-xl font-bold mb-3 bg-gradient-to-r from-neon-purple to-neon-cyan bg-clip-text text-transparent">המערכת מוכנה לקליטה</h3>
-      <p class="text-[13px] text-slate-500 mb-8 max-w-md leading-relaxed">עדיין אין נתונים במערכת. ייבא דוח ישראכרט או הוסף מחזור ידנית כדי להתחיל.</p>
-      <div class="flex gap-4">
-        <button onclick="openImportModal()" class="btn-gold px-8 py-3">ייבוא מישראכרט</button>
-        <button onclick="openAddMonth()" class="btn-neon px-8 py-3">הוסף מחזור</button>
+      <div class="flex flex-col items-center justify-center py-24 text-center">
+        <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl mb-6" style="background:var(--sage-bg);border:1px solid var(--sage-border)">📡</div>
+        <h3 class="text-xl font-bold mb-2" style="color:var(--text)">המערכת מוכנה</h3>
+        <p class="text-[13px] mb-8 max-w-sm leading-relaxed" style="color:var(--text4)">עדיין אין נתונים. ייבא דוח ישראכרט או הוסף מחזור ידנית כדי להתחיל.</p>
+        <div class="flex gap-3">
+          <button onclick="openImportModal()" class="btn-copper px-6 py-2.5">ייבוא מישראכרט</button>
+          <button onclick="openAddMonth()" class="btn-secondary px-6 py-2.5">הוסף מחזור</button>
+        </div>
       </div>
     </div>`;
     updateClock();return;
@@ -302,223 +313,194 @@ function renderDashboard(){
   const expD=pT?((cT-pT)/pT*100).toFixed(1):'0';
 
   document.getElementById('v-dashboard').innerHTML=`
-  <div class="sticky top-0 z-10 px-8 mob-p py-4 flex items-center gap-4 flex-wrap bg-brand-900/50 backdrop-blur-3xl border-b border-white/[0.03]">
-    <h2 class="text-[20px] font-extrabold tracking-[-0.5px] bg-gradient-to-r from-neon-purple via-neon-cyan to-gold bg-clip-text text-transparent">מרכז פיקוד</h2>
-    <div class="ml-auto flex items-center gap-3">
-      <div class="flex items-center gap-2 text-[10px] text-neon-cyan/60 font-mono px-3 py-1.5 rounded-lg bg-neon-cyan/[0.03] border border-neon-cyan/10">
-        <span class="w-[5px] h-[5px] rounded-full bg-neon-cyan/80 shadow-[0_0_8px_rgba(34,211,238,.5)]" style="animation:pulse 2.5s ease-in-out infinite"></span>
-        <span id="clock">--:--:--</span>
+  <div class="max-w-[1100px] mx-auto px-6 mob-p">
+    <div class="flex items-center justify-between py-5">
+      <div>
+        <h2 class="text-[20px] font-extrabold tracking-tight" style="color:var(--text)">דשבורד</h2>
+        <p class="text-[11px] mt-0.5" style="color:var(--text4)">${heMonth(curM)}</p>
       </div>
-      <div class="sync-badge flex items-center gap-2 text-[10px] px-3 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.04] text-slate-600"><span class="w-[4px] h-[4px] rounded-full bg-current"></span><span class="st">${GAS?'מערכת פעילה':'לא מקושר'}</span></div>
-      <button onclick="openImportModal()" title="ייבוא מישראכרט" class="w-9 h-9 rounded-xl bg-gold/[0.08] border border-gold/15 text-gold flex items-center justify-center transition-all duration-500 hover:shadow-[0_0_24px_-4px_rgba(201,168,76,.2)] hover:scale-105">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      </button>
-      <button onclick="openAddMonth()" title="עריכת מחזור" class="w-9 h-9 rounded-xl bg-neon-purple/[0.08] border border-neon-purple/15 text-neon-purple flex items-center justify-center transition-all duration-500 hover:shadow-[0_0_24px_-4px_rgba(168,85,247,.2)] hover:scale-105">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </button>
-    </div>
-  </div>
-
-  <div class="zone relative py-14 mob-py">
-    <div class="zone-inner max-w-[1360px] mx-auto px-8 mob-p relative z-[2]">
-      <div class="flex items-center gap-4 mb-10">
-        <div class="w-10 h-10 rounded-[14px] bg-neon-purple/[0.06] border border-neon-purple/10 flex items-center justify-center text-base shadow-[0_0_16px_-4px_rgba(168,85,247,.1)]">⚡</div>
-        <div><div class="text-[10px] uppercase tracking-[0.3em] font-bold text-neon-purple/70">סריקה קוונטית</div><div class="text-[10px] text-slate-700 mt-0.5 tracking-wide">מצב מערכת — סריקה בזמן אמת</div></div>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mob-1" id="overviewCards">
-        <div class="qc" style="--ambient:rgba(52,211,153,.1)"><div class="lbl">יחס קוונטי</div><div class="text-[32px] mob-text font-black tracking-[-1.5px] leading-none text-emerald-400" id="a-cfr">0%</div>
-          <div class="text-[11px] text-slate-600 mt-4 flex items-center gap-2">כניסות מול יציאות <span class="text-[9px] font-bold px-2 py-0.5 rounded-md ${+cfr>=100?'bg-emerald-400/8 text-emerald-400/80':'bg-red-400/8 text-red-400/80'}">${+cfr>=100?'יציב':'דורש תשומת לב'}</span></div></div>
-        <div class="qc" style="--ambient:rgba(201,168,76,.1)"><div class="lbl">שווי נטו</div><div class="text-[32px] mob-text font-black tracking-[-1.5px] leading-none text-gold" id="a-nw">₪0</div>
-          <div class="text-[11px] text-slate-600 mt-4 flex items-center gap-2"><span class="text-[9px] font-bold px-2 py-0.5 rounded-md ${+nwD>=0?'bg-emerald-400/8 text-emerald-400/80':'bg-red-400/8 text-red-400/80'}" style="${heatStyle(+nwD)}">${+nwD>=0?'+':''}${nwD}%</span> מהמחזור הקודם</div></div>
-        <div class="qc" style="--ambient:rgba(248,113,113,.08)"><div class="lbl">יציאות</div><div class="text-[32px] mob-text font-black tracking-[-1.5px] leading-none text-amber-300/90" id="a-exp">₪0</div>
-          <div class="text-[11px] text-slate-600 mt-4 flex items-center gap-2"><span class="text-[9px] font-bold px-2 py-0.5 rounded-md" style="${heatStyle(+expD)}">${expD}%</span> מ-${heMonth(prevM)}</div></div>
-        <div class="qc" style="--ambient:rgba(34,211,238,.08)"><div class="lbl">כניסות</div><div class="text-[32px] mob-text font-black tracking-[-1.5px] leading-none text-neon-cyan/90" id="a-inc">₪0</div>
-          <div class="text-[11px] text-slate-600 mt-4">דלתא: <strong class="${surplus>=0?'text-emerald-400/80':'text-red-400/80'}">${fmt(surplus)}</strong></div></div>
+      <div class="flex items-center gap-2">
+        <div class="sync-badge flex items-center gap-1.5 text-[10px] px-2.5 py-1.5 rounded-lg" style="color:var(--text4);background:var(--surface2);border:1px solid var(--border)"><span class="w-[4px] h-[4px] rounded-full" style="background:currentColor"></span><span class="st">${GAS?'פעיל':'לא מקושר'}</span></div>
+        <button onclick="openImportModal()" title="ייבוא" class="w-9 h-9 rounded-lg flex items-center justify-center transition-all" style="background:var(--copper-bg);border:1px solid var(--copper-border);color:var(--copper)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
+        <button onclick="openAddMonth()" title="הוסף מחזור" class="w-9 h-9 rounded-lg flex items-center justify-center transition-all" style="background:var(--sage-bg);border:1px solid var(--sage-border);color:var(--sage)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
       </div>
     </div>
-  </div>
 
-  <div class="zone relative py-16 mob-py">
-    <div class="zone-inner max-w-[1360px] mx-auto px-8 mob-p relative z-[2]">
-      <div class="flex items-center gap-4 mb-12">
-        <div class="w-10 h-10 rounded-[14px] bg-emerald-400/[0.05] border border-emerald-400/10 flex items-center justify-center text-base shadow-[0_0_16px_-4px_rgba(52,211,153,.08)]">🚀</div>
-        <div><div class="text-[10px] uppercase tracking-[0.3em] font-bold text-emerald-400/60">מנוע צמיחה</div><div class="text-[10px] text-slate-700 mt-0.5 tracking-wide">מערך כניסות ובניית הון</div></div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 mob-1" id="overviewCards">
+      <div class="card">
+        <div class="lbl">יחס כיסוי</div>
+        <div class="text-[28px] mob-text font-black tracking-tight leading-none" style="color:${+cfr>=100?'var(--income)':'var(--expense)'}" id="a-cfr">0%</div>
+        <div class="text-[11px] mt-3 flex items-center gap-2" style="color:var(--text4)">כניסות/יציאות <span class="stat-badge ${+cfr>=100?'stat-up':'stat-down'}">${+cfr>=100?'יציב':'לתשומת לב'}</span></div>
       </div>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="qp">
-          <div class="text-[9px] uppercase tracking-[0.2em] text-neon-cyan/50 font-semibold mb-7 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-neon-cyan/70 shadow-[0_0_6px_rgba(34,211,238,.4)]"></span>פולס תזרימי — ${last6.length} מחזורים</div>
-          <div class="flex items-end gap-4 h-[165px] pt-2" dir="ltr">
-            ${last6.map(m=>{const inc=S.months[m].income,exp=totE(S.months[m]);return`
-            <div class="flex-1 flex flex-col items-center gap-1.5">
-              <div class="flex gap-1 items-end h-[135px]">
-                <div class="bar w-[18px] rounded-t-[4px] bg-gradient-to-t from-emerald-600/40 to-emerald-400/90 relative group cursor-pointer shadow-[0_0_12px_-3px_rgba(52,211,153,.2)]" data-v="${inc}" style="height:0"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-bold text-emerald-400/80 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-500 bg-brand-900/95 px-1.5 py-0.5 rounded-md shadow-lg border border-emerald-400/10">${fmtK(inc)}</span></div>
-                <div class="bar w-[18px] rounded-t-[4px] bg-gradient-to-t from-red-600/30 to-red-400/70 relative group cursor-pointer shadow-[0_0_12px_-3px_rgba(248,113,113,.15)]" data-v="${exp}" style="height:0"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-bold text-red-400/80 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-500 bg-brand-900/95 px-1.5 py-0.5 rounded-md shadow-lg border border-red-400/10">${fmtK(exp)}</span></div>
-              </div>
-              <div class="text-[9px] text-slate-600 font-medium">${heMonthS(m)}</div>
-            </div>`}).join('')}
-          </div>
-          <div class="flex gap-5 mt-6 text-[9px] text-slate-600"><span class="flex items-center gap-1.5"><span class="w-[6px] h-[6px] rounded-[2px] bg-emerald-400/80 shadow-[0_0_4px_rgba(52,211,153,.3)]"></span>כניסות</span><span class="flex items-center gap-1.5"><span class="w-[6px] h-[6px] rounded-[2px] bg-red-400/70 shadow-[0_0_4px_rgba(248,113,113,.2)]"></span>יציאות</span></div>
-        </div>
-        <div class="qp">
-          <div class="text-[9px] uppercase tracking-[0.2em] text-gold/50 font-semibold mb-7 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-gold/70 shadow-[0_0_6px_rgba(201,168,76,.3)]"></span>מגן קוונטי</div>
-          <div class="flex items-baseline gap-1"><span class="text-[56px] font-black tracking-[-3px] leading-none ${+rw>6?'text-emerald-400/90':+rw>3?'text-gold':'text-red-400/90'}" id="a-rw" style="text-shadow:0 0 30px ${+rw>6?'rgba(52,211,153,.2)':+rw>3?'rgba(201,168,76,.2)':'rgba(248,113,113,.2)'}">0</span><span class="text-[14px] font-medium text-slate-600 mr-1.5">מחזורים</span></div>
-          <p class="text-[11px] text-slate-600 mt-5 leading-[1.8]">הרזרבות הנזילות שלך מספיקות ל-<strong class="text-slate-300">${rw} מחזורי</strong> הוצאות, גם ללא כניסות.</p>
-          <div class="h-[5px] bg-white/[0.03] rounded-full overflow-hidden mt-6 mb-2.5 shadow-inner"><div class="h-full rounded-full transition-all duration-[1.4s] ease-out" id="rwBar" style="width:0;background:linear-gradient(90deg,${+rw>6?'#34D399,rgba(52,211,153,.2)':'#C9A84C,rgba(201,168,76,.2)'});box-shadow:0 0 12px -2px ${+rw>6?'rgba(52,211,153,.4)':'rgba(201,168,76,.3)'}"></div></div>
-          <div class="flex justify-between text-[9px] text-slate-700 mb-5"><span>0</span><span class="text-gold/30">3</span><span class="text-emerald-400/30">6</span><span>12</span></div>
-          <div class="flex justify-between py-3 px-4 bg-white/[0.015] border border-white/[0.03] rounded-xl text-[11px] mb-2 transition-all duration-500 hover:bg-white/[0.025]"><span class="text-slate-600">רזרבה נזילה</span><span class="font-bold text-slate-300">${fmt(S.liquidSavings)}</span></div>
-          <div class="flex justify-between py-3 px-4 bg-white/[0.015] border border-white/[0.03] rounded-xl text-[11px] transition-all duration-500 hover:bg-white/[0.025]"><span class="text-slate-600">שריפה חודשית ממוצעת</span><span class="font-bold text-slate-300">${fmt(avgE)}</span></div>
-        </div>
+      <div class="card">
+        <div class="lbl">שווי נטו</div>
+        <div class="text-[28px] mob-text font-black tracking-tight leading-none" style="color:var(--copper)" id="a-nw">₪0</div>
+        <div class="text-[11px] mt-3 flex items-center gap-2" style="color:var(--text4)">${deltaBadge(nwD)} מהמחזור הקודם</div>
+      </div>
+      <div class="card">
+        <div class="lbl">יציאות</div>
+        <div class="text-[28px] mob-text font-black tracking-tight leading-none" style="color:var(--expense)" id="a-exp">₪0</div>
+        <div class="text-[11px] mt-3 flex items-center gap-2" style="color:var(--text4)">${deltaBadge(expD)} מ-${heMonth(prevM)}</div>
+      </div>
+      <div class="card">
+        <div class="lbl">כניסות</div>
+        <div class="text-[28px] mob-text font-black tracking-tight leading-none" style="color:var(--income)" id="a-inc">₪0</div>
+        <div class="text-[11px] mt-3" style="color:var(--text4)">דלתא: <strong style="color:${surplus>=0?'var(--income)':'var(--expense)'}">${fmt(surplus)}</strong></div>
       </div>
     </div>
-  </div>
 
-  <div class="zone relative py-16 pb-24 mob-py">
-    <div class="zone-inner max-w-[1360px] mx-auto px-8 mob-p relative z-[2]">
-      <div class="flex items-center gap-4 mb-12">
-        <div class="w-10 h-10 rounded-[14px] bg-neon-purple/[0.05] border border-neon-purple/10 flex items-center justify-center text-base shadow-[0_0_16px_-4px_rgba(168,85,247,.08)]">🌀</div>
-        <div><div class="text-[10px] uppercase tracking-[0.3em] font-bold text-neon-purple/60">מערך זרימה</div><div class="text-[10px] text-slate-700 mt-0.5 tracking-wide">מפת הזרימה הפיננסית</div></div>
-      </div>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="qp">
-          <div class="text-[9px] uppercase tracking-[0.2em] text-neon-purple/50 font-semibold mb-7 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-neon-purple/70 shadow-[0_0_6px_rgba(168,85,247,.4)]"></span>מבנה הזרם הפיננסי</div>
-          <div class="flex items-center gap-8 mob-ring">
-            <div class="relative w-[220px] h-[220px] flex-shrink-0"><canvas id="vortexCanvas" width="440" height="440" style="width:220px;height:220px"></canvas></div>
-            <div class="flex-1 min-w-0 w-full">
-              ${CATS.map(c=>{const cv=cur.expenses[c.key]||0,pv=prev.expenses[c.key]||1,d=((cv-pv)/pv*100).toFixed(1),up=+d>0;
-                return`<div class="flex items-center gap-3 py-2.5 px-2 border-b border-white/[0.025] last:border-0 rounded-lg hover:bg-white/[0.02] transition-all duration-500 text-[11px]">
-                  <span class="w-[6px] h-[6px] rounded-full flex-shrink-0 shadow-[0_0_6px_var(--c)]" style="background:${c.color};--c:${c.color}80"></span>
-                  <span class="flex-1 text-slate-500">${c.he}</span>
-                  <span class="font-bold text-slate-300">${fmt(cv)}</span>
-                  <span class="text-[10px] font-bold ml-1" style="${heatStyle(+d)}">${up?'+':''}${d}%</span>
-                </div>`}).join('')}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+      <div class="card-lg">
+        <div class="text-[10px] uppercase tracking-widest font-bold mb-6 flex items-center gap-2" style="color:var(--text4)">
+          <span class="w-[5px] h-[5px] rounded-full" style="background:var(--income)"></span>תזרים — ${last6.length} מחזורים
+        </div>
+        <div class="flex items-end gap-4 h-[155px] pt-2" dir="ltr">
+          ${last6.map(m=>{const inc=S.months[m].income,exp=totE(S.months[m]);return`
+          <div class="flex-1 flex flex-col items-center gap-1.5">
+            <div class="flex gap-1 items-end h-[130px]">
+              <div class="bar w-[16px] rounded-t-md relative group cursor-pointer" data-v="${inc}" style="height:0;background:var(--income)"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity px-1.5 py-0.5 rounded-md" style="color:var(--income);background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-sm)">${fmtK(inc)}</span></div>
+              <div class="bar w-[16px] rounded-t-md relative group cursor-pointer" data-v="${exp}" style="height:0;background:var(--expense);opacity:.7"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity px-1.5 py-0.5 rounded-md" style="color:var(--expense);background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-sm)">${fmtK(exp)}</span></div>
             </div>
+            <div class="text-[9px] font-medium" style="color:var(--text5)">${heMonthS(m)}</div>
+          </div>`}).join('')}
+        </div>
+        <div class="flex gap-5 mt-5 text-[9px]" style="color:var(--text4)"><span class="flex items-center gap-1.5"><span class="w-[6px] h-[6px] rounded-sm" style="background:var(--income)"></span>כניסות</span><span class="flex items-center gap-1.5"><span class="w-[6px] h-[6px] rounded-sm" style="background:var(--expense);opacity:.7"></span>יציאות</span></div>
+      </div>
+      <div class="card-lg">
+        <div class="text-[10px] uppercase tracking-widest font-bold mb-6 flex items-center gap-2" style="color:var(--text4)">
+          <span class="w-[5px] h-[5px] rounded-full" style="background:var(--copper)"></span>כרית ביטחון
+        </div>
+        <div class="flex items-baseline gap-1.5">
+          <span class="text-[48px] font-black tracking-tight leading-none" id="a-rw" style="color:${+rw>6?'var(--income)':+rw>3?'var(--copper)':'var(--expense)'}">0</span>
+          <span class="text-[14px] font-medium" style="color:var(--text4)">חודשים</span>
+        </div>
+        <p class="text-[11px] mt-4 leading-relaxed" style="color:var(--text4)">הרזרבות הנזילות מספיקות ל-<strong style="color:var(--text2)">${rw} חודשי</strong> הוצאות ללא כניסות.</p>
+        <div class="h-[6px] rounded-full overflow-hidden mt-5 mb-2" style="background:var(--border2)"><div class="h-full rounded-full transition-all duration-1000 ease-out" id="rwBar" style="width:0;background:${+rw>6?'var(--income)':'var(--copper)'}"></div></div>
+        <div class="flex justify-between text-[9px] mb-4" style="color:var(--text5)"><span>0</span><span>3</span><span>6</span><span>12</span></div>
+        <div class="flex justify-between py-3 px-4 rounded-xl text-[11px] mb-1.5 transition-all" style="background:var(--surface2);border:1px solid var(--border2)"><span style="color:var(--text4)">רזרבה נזילה</span><span class="font-bold" style="color:var(--text)">${fmt(S.liquidSavings)}</span></div>
+        <div class="flex justify-between py-3 px-4 rounded-xl text-[11px] transition-all" style="background:var(--surface2);border:1px solid var(--border2)"><span style="color:var(--text4)">שריפה חודשית ממוצעת</span><span class="font-bold" style="color:var(--text)">${fmt(avgE)}</span></div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-12">
+      <div class="card-lg">
+        <div class="text-[10px] uppercase tracking-widest font-bold mb-6 flex items-center gap-2" style="color:var(--text4)">
+          <span class="w-[5px] h-[5px] rounded-full" style="background:var(--sage)"></span>התפלגות הוצאות
+        </div>
+        <div class="flex items-center gap-6 mob-ring">
+          <div class="relative w-[200px] h-[200px] flex-shrink-0"><canvas id="pieCanvas" width="400" height="400" style="width:200px;height:200px"></canvas></div>
+          <div class="flex-1 min-w-0 w-full">
+            ${CATS.map(c=>{const cv=cur.expenses[c.key]||0,pv=prev.expenses[c.key]||1,d=((cv-pv)/pv*100).toFixed(1);
+              return`<div class="flex items-center gap-3 py-2 px-2 rounded-lg transition-all text-[11px]" style="border-bottom:1px solid var(--border2)">
+                <span class="w-[6px] h-[6px] rounded-full flex-shrink-0" style="background:${c.color}"></span>
+                <span class="flex-1" style="color:var(--text3)">${c.he}</span>
+                <span class="font-bold" style="color:var(--text)">${fmt(cv)}</span>
+                <span class="text-[10px] font-bold" style="${deltaStyle(+d)}">${+d>0?'+':''}${d}%</span>
+              </div>`}).join('')}
           </div>
         </div>
-        <div class="qp">
-          <div class="text-[9px] uppercase tracking-[0.2em] text-gold/50 font-semibold mb-7 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-gold/70 shadow-[0_0_6px_rgba(201,168,76,.3)]"></span>פקודת קליטה מיידית</div>
-          <div class="flex gap-1 mb-6 bg-white/[0.02] rounded-xl p-1 border border-white/[0.04]">
-            <button class="qe-tab active flex-1 py-2.5 rounded-[10px] text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-500" data-t="exp">יציאה</button>
-            <button class="qe-tab flex-1 py-2.5 rounded-[10px] text-[10px] font-bold uppercase tracking-[0.15em] text-slate-600 transition-all duration-500 hover:text-slate-400" data-t="inc">כניסה</button>
+      </div>
+      <div class="card-lg">
+        <div class="text-[10px] uppercase tracking-widest font-bold mb-5 flex items-center gap-2" style="color:var(--text4)">
+          <span class="w-[5px] h-[5px] rounded-full" style="background:var(--copper)"></span>רישום מהיר
+        </div>
+        <div class="flex gap-1 mb-5 p-1 rounded-xl" style="background:var(--surface2);border:1px solid var(--border2)">
+          <button class="qe-tab active flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all" data-t="exp" style="background:var(--sage);color:#fff">יציאה</button>
+          <button class="qe-tab flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all" data-t="inc" style="color:var(--text4)">כניסה</button>
+        </div>
+        <div class="qe-form active" id="qf-exp">
+          <div class="flex gap-3 items-end mb-3">
+            <div class="flex-1"><label class="lbl">סכום (₪)</label><input type="number" id="qeAmt" placeholder="0" class="ff" dir="ltr"></div>
+            <div class="flex-1"><label class="lbl">קטגוריה</label><select id="qeCat" class="ff">${CATS.map(c=>'<option value="'+c.key+'">'+c.he+'</option>').join('')}</select></div>
+            <button class="btn-primary whitespace-nowrap h-[40px] text-[10px] px-4" id="qeAdd">הוסף</button>
           </div>
-          <div class="qe-form active" id="qf-exp">
-            <div class="flex gap-4 items-end mb-4">
-              <div class="flex-1"><label class="lbl">ערך (₪)</label><input type="number" id="qeAmt" placeholder="0" class="ff ff-gold" dir="ltr"></div>
-              <div class="flex-1"><label class="lbl">ערוץ</label><select id="qeCat" class="ff ff-gold">${CATS.map(c=>'<option value="'+c.key+'">'+c.he+'</option>').join('')}</select></div>
-              <button class="btn-gold whitespace-nowrap h-[40px] text-[10px] px-5 tracking-wider" id="qeAdd">שגר לרשת</button>
-            </div>
-            <div><label class="lbl">תיוג</label><input type="text" id="qeNote" placeholder="לא חובה" class="ff"></div>
+          <div><label class="lbl">הערה</label><input type="text" id="qeNote" placeholder="לא חובה" class="ff"></div>
+        </div>
+        <div class="qe-form" id="qf-inc" style="display:none">
+          <div class="flex gap-3 items-end">
+            <div class="flex-1"><label class="lbl">סכום (₪)</label><input type="number" id="qiAmt" placeholder="0" class="ff" dir="ltr"></div>
+            <div class="flex-1"><label class="lbl">מקור</label><input type="text" id="qiSrc" placeholder="למשל: משכורת" class="ff"></div>
+            <button class="btn-primary whitespace-nowrap h-[40px] text-[10px] px-4" id="qiAdd">הוסף</button>
           </div>
-          <div class="qe-form" id="qf-inc" style="display:none">
-            <div class="flex gap-4 items-end">
-              <div class="flex-1"><label class="lbl">ערך (₪)</label><input type="number" id="qiAmt" placeholder="0" class="ff ff-gold" dir="ltr"></div>
-              <div class="flex-1"><label class="lbl">ערוץ מקור</label><input type="text" id="qiSrc" placeholder="למשל: משכורת" class="ff"></div>
-              <button class="btn-gold whitespace-nowrap h-[40px] text-[10px] px-5 tracking-wider" id="qiAdd">שגר לרשת</button>
-            </div>
-          </div>
-          <div class="text-[9px] uppercase tracking-[0.2em] text-slate-700 font-semibold mt-7 mb-3">פקודות אחרונות</div>
-          <div id="recentList">
-            ${(S.manualEntries||[]).slice(-5).reverse().map((e,ri)=>{const c=CATS.find(x=>x.key===e.cat);const idx=S.manualEntries.length-1-ri;
-              return`<div class="flex items-center gap-3 py-2.5 px-3 bg-white/[0.01] border border-white/[0.025] rounded-xl mb-1.5 text-[11px] transition-all duration-500 hover:bg-white/[0.025] group/row">
-                <span class="w-[5px] h-[5px] rounded-full flex-shrink-0 shadow-[0_0_4px_var(--c)]" style="background:${c?c.color:'#34D399'};--c:${c?c.color+'80':'#34D39980'}"></span>
-                <span class="flex-1 text-slate-500">${e.note||e.source||(c?c.he:'כניסה')}</span>
-                <span class="font-bold ${e.type==='income'?'text-emerald-400/80':'text-slate-300'}">${e.type==='income'?'+':'-'}${fmt(e.amount)}</span>
-                <button class="re-edit w-6 h-6 rounded-md bg-white/[0.02] border border-white/[0.04] text-slate-600 flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-all duration-500 hover:!text-neon-purple hover:!border-neon-purple/20 hover:!bg-neon-purple/[0.06]" data-idx="${idx}" title="עריכה"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-                <button class="re-del w-6 h-6 rounded-md bg-white/[0.02] border border-white/[0.04] text-slate-600 flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-all duration-500 hover:!text-red-400 hover:!border-red-400/20 hover:!bg-red-400/[0.06]" data-idx="${idx}" title="מחיקה"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-              </div>`}).join('')||'<div class="text-[11px] text-slate-700 py-2">אין פקודות עדיין</div>'}
-          </div>
+        </div>
+        <div class="text-[10px] uppercase tracking-widest font-bold mt-6 mb-3" style="color:var(--text5)">אחרונים</div>
+        <div id="recentList">
+          ${(S.manualEntries||[]).slice(-5).reverse().map((e,ri)=>{const c=CATS.find(x=>x.key===e.cat);const idx=S.manualEntries.length-1-ri;
+            return`<div class="flex items-center gap-3 py-2.5 px-3 rounded-xl mb-1.5 text-[11px] transition-all group/row" style="background:var(--surface2);border:1px solid var(--border2)">
+              <span class="w-[5px] h-[5px] rounded-full flex-shrink-0" style="background:${c?c.color:'var(--income)'}"></span>
+              <span class="flex-1" style="color:var(--text3)">${e.note||e.source||(c?c.he:'כניסה')}</span>
+              <span class="font-bold" style="color:${e.type==='income'?'var(--income)':'var(--text)'}">${e.type==='income'?'+':'-'}${fmt(e.amount)}</span>
+              <button class="re-edit w-6 h-6 rounded-md flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-all" style="background:var(--surface);border:1px solid var(--border);color:var(--text4)" data-idx="${idx}" title="עריכה"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+              <button class="re-del w-6 h-6 rounded-md flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-all" style="background:var(--surface);border:1px solid var(--border);color:var(--text4)" data-idx="${idx}" title="מחיקה"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            </div>`}).join('')||'<div class="text-[11px] py-2" style="color:var(--text5)">אין רשומות עדיין</div>'}
         </div>
       </div>
     </div>
   </div>`;
 
   setTimeout(()=>{
-    if(typeof gsap!=='undefined'){
-      gsap.fromTo('#overviewCards .qc',{y:40,opacity:0},{y:0,opacity:1,duration:.8,stagger:.1,ease:'power3.out',delay:.2});
-    }
-    animVal(document.getElementById('a-cfr'),0,+cfr,1400,'','%');
-    animVal(document.getElementById('a-nw'),0,nwC,1400,'₪','');
-    animVal(document.getElementById('a-exp'),0,cT,1400,'₪','');
-    animVal(document.getElementById('a-inc'),0,cur.income,1400,'₪','');
+    animVal(document.getElementById('a-cfr'),0,+cfr,1200,'','%');
+    animVal(document.getElementById('a-nw'),0,nwC,1200,'₪','');
+    animVal(document.getElementById('a-exp'),0,cT,1200,'₪','');
+    animVal(document.getElementById('a-inc'),0,cur.income,1200,'₪','');
     const rwEl=document.getElementById('a-rw');if(rwEl){let v=0;const tgt=+rw;const iv=setInterval(()=>{v+=.06;if(v>=tgt){v=tgt;clearInterval(iv)}rwEl.textContent=v.toFixed(1)},40)}
-    setTimeout(()=>{const rb=document.getElementById('rwBar');if(rb)rb.style.width=Math.min((+rw/12)*100,100)+'%'},500);
-    setTimeout(()=>{document.querySelectorAll('.bar[data-v]').forEach(b=>{b.style.height=Math.max((+b.dataset.v/barMax)*120,6)+'px'})},600);
-    initVortex(cur.expenses,prev.expenses,curM);
-  },250);
-  updateClock();observeZones();bindDashboardEvents();
+    setTimeout(()=>{const rb=document.getElementById('rwBar');if(rb)rb.style.width=Math.min((+rw/12)*100,100)+'%'},400);
+    setTimeout(()=>{document.querySelectorAll('.bar[data-v]').forEach(b=>{b.style.height=Math.max((+b.dataset.v/barMax)*115,4)+'px'})},500);
+    drawPie(cur.expenses,curM);
+  },200);
+  updateClock();bindDashboardEvents();
 }
 
-function initVortex(curExp,prevExp,curM){
-  const c=document.getElementById('vortexCanvas');if(!c)return;
-  const ctx=c.getContext('2d'),w=c.width,h=c.height,cx=w/2,cy=h/2;
-  const total=CATS.reduce((a,cat)=>a+(curExp[cat.key]||0),0);
-  const particles=[];
-  function makeRing(exp,radius,alpha,speed){
-    const t2=CATS.reduce((a,cat)=>a+(exp[cat.key]||0),0);if(!t2)return;
-    let ang=-Math.PI/2;
-    CATS.forEach(cat=>{
-      const val=exp[cat.key]||0,sweep=(val/t2)*Math.PI*2,cnt=Math.max(2,Math.floor((val/t2)*55));
-      for(let i=0;i<cnt;i++){
-        particles.push({angle:ang+(i/cnt)*sweep,radius:radius+(Math.random()-.5)*8,
-          color:cat.color,alpha:alpha*(.5+Math.random()*.5),speed:speed+(Math.random()-.5)*.0004,
-          size:1+Math.random()*2.5,glow:3+Math.random()*8})}
-      ang+=sweep})
-  }
-  makeRing(prevExp,190,.35,.0008);makeRing(curExp,140,.75,.0015);
-  let time=0;
-  function draw(){
-    ctx.clearRect(0,0,w,h);time+=.016;
-    ctx.fillStyle='rgba(5,5,16,.04)';ctx.fillRect(0,0,w,h);
-    particles.forEach(p=>{
-      p.angle+=p.speed;const x=cx+p.radius*Math.cos(p.angle),y=cy+p.radius*Math.sin(p.angle);
-      ctx.save();ctx.globalAlpha=p.alpha;ctx.beginPath();ctx.arc(x,y,p.size,0,Math.PI*2);
-      ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=p.glow;ctx.fill();ctx.restore()});
-    const pulse=.85+.15*Math.sin(time*1.5);
-    ctx.save();ctx.globalAlpha=pulse;ctx.font='800 '+Math.round(40*(.95+.05*Math.sin(time*1.5)))+'px Heebo';
-    ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.shadowColor='rgba(168,85,247,.4)';ctx.shadowBlur=20;
-    ctx.fillText('₪'+total.toLocaleString('en-IL'),cx,cy-8);
-    ctx.font='400 16px Heebo';ctx.fillStyle='rgba(255,255,255,.3)';ctx.shadowBlur=0;
-    ctx.fillText(heMonth(curM),cx,cy+20);ctx.restore();
-    vortexRAF=requestAnimationFrame(draw)}
-  draw()
-}
-
-function particleBurst(fromEl){
-  const cv=document.getElementById('particleOverlay'),ctx=cv.getContext('2d');
-  cv.width=window.innerWidth;cv.height=window.innerHeight;
-  const r=fromEl.getBoundingClientRect(),fx=r.left+r.width/2,fy=r.top+r.height/2;
-  const ps=[];for(let i=0;i<25;i++){ps.push({x:fx,y:fy,vx:(Math.random()-.5)*10,vy:(Math.random()-.5)*10-4,
-    life:1,color:`hsl(${260+Math.random()*60},70%,${50+Math.random()*30}%)`,size:1+Math.random()*3})}
-  function anim(){ctx.clearRect(0,0,cv.width,cv.height);let alive=false;
-    ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.12;p.life-=.025;if(p.life<=0)return;alive=true;
-      ctx.save();ctx.globalAlpha=p.life;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
-      ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=8;ctx.fill();ctx.restore()});
-    if(alive)requestAnimationFrame(anim);else ctx.clearRect(0,0,cv.width,cv.height)}
-  anim()
+function drawPie(expenses,curM){
+  const c=document.getElementById('pieCanvas');if(!c)return;
+  const ctx=c.getContext('2d'),w=c.width,h=c.height,cx=w/2,cy=h/2,r=160;
+  const total=CATS.reduce((a,cat)=>a+(expenses[cat.key]||0),0);
+  if(!total)return;
+  ctx.clearRect(0,0,w,h);
+  let ang=-Math.PI/2;
+  CATS.forEach(cat=>{
+    const val=expenses[cat.key]||0;if(!val)return;
+    const sweep=(val/total)*Math.PI*2;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,ang,ang+sweep);ctx.closePath();
+    ctx.fillStyle=cat.color;ctx.fill();
+    ang+=sweep;
+  });
+  ctx.beginPath();ctx.arc(cx,cy,r*.6,0,Math.PI*2);
+  const cs=getComputedStyle(document.documentElement);
+  ctx.fillStyle=cs.getPropertyValue('--surface').trim()||'#FFFFFF';ctx.fill();
+  ctx.font='800 36px Heebo';ctx.fillStyle=cs.getPropertyValue('--text').trim()||'#2C3630';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('₪'+total.toLocaleString('en-IL'),cx,cy-6);
+  ctx.font='400 16px Heebo';ctx.fillStyle=cs.getPropertyValue('--text4').trim()||'#8E9490';
+  ctx.fillText(heMonth(curM),cx,cy+18);
 }
 
 function bindDashboardEvents(){
   document.querySelectorAll('.qe-tab').forEach(t=>t.onclick=()=>{
-    document.querySelectorAll('.qe-tab').forEach(x=>{x.classList.remove('active','bg-neon-purple/[0.06]','text-slate-100','shadow-lg','border','border-neon-purple/15');x.classList.add('text-slate-600')});
+    document.querySelectorAll('.qe-tab').forEach(x=>{x.classList.remove('active');x.style.background='transparent';x.style.color='var(--text4)'});
     document.querySelectorAll('.qe-form').forEach(x=>x.style.display='none');
-    t.classList.add('active','bg-neon-purple/[0.06]','text-slate-100','shadow-lg','border','border-neon-purple/15');t.classList.remove('text-slate-600');
+    t.classList.add('active');t.style.background='var(--sage)';t.style.color='#fff';
     document.getElementById('qf-'+t.dataset.t).style.display='block'});
   const qeAdd=document.getElementById('qeAdd');if(qeAdd)qeAdd.onclick=()=>{
     const a=+document.getElementById('qeAmt').value;if(!a||a<=0)return;
     const cat=document.getElementById('qeCat').value,note=document.getElementById('qeNote').value,mk2=mKeys(),cm=mk2[mk2.length-1];
     S.months[cm].expenses[cat]=(S.months[cm].expenses[cat]||0)+a;
     S.manualEntries.push({type:'expense',cat,amount:a,note,month:cm,ts:Date.now()});save();syncCloud();
-    particleBurst(qeAdd);toast('יציאה הוזרמה: '+fmt(a));setTimeout(()=>renderDashboard(),400)};
+    toast('יציאה נוספה: '+fmt(a));setTimeout(()=>renderDashboard(),300)};
   const qiAdd=document.getElementById('qiAdd');if(qiAdd)qiAdd.onclick=()=>{
     const a=+document.getElementById('qiAmt').value;if(!a||a<=0)return;
     const src=document.getElementById('qiSrc').value,mk2=mKeys(),cm=mk2[mk2.length-1];
     S.months[cm].income+=a;S.manualEntries.push({type:'income',amount:a,source:src,month:cm,ts:Date.now()});save();syncCloud();
-    particleBurst(qiAdd);toast('כניסה נקלטה: +'+fmt(a));setTimeout(()=>renderDashboard(),400)};
+    toast('כניסה נוספה: +'+fmt(a));setTimeout(()=>renderDashboard(),300)};
   document.querySelectorAll('.re-del').forEach(btn=>btn.onclick=()=>{
     const i=+btn.dataset.idx,e=S.manualEntries[i];if(!e)return;
     const m=e.month||mKeys()[mKeys().length-1];
     if(S.months[m]){if(e.type==='expense'){S.months[m].expenses[e.cat]=Math.max(0,(S.months[m].expenses[e.cat]||0)-e.amount)}else{S.months[m].income=Math.max(0,S.months[m].income-e.amount)}}
-    S.manualEntries.splice(i,1);save();syncCloud();toast('הפקודה בוטלה');renderDashboard()});
+    S.manualEntries.splice(i,1);save();syncCloud();toast('הרשומה הוסרה');renderDashboard()});
   document.querySelectorAll('.re-edit').forEach(btn=>btn.onclick=()=>{
     const i=+btn.dataset.idx,e=S.manualEntries[i];if(!e)return;
     const m=e.month||mKeys()[mKeys().length-1];
@@ -526,150 +508,148 @@ function bindDashboardEvents(){
     S.manualEntries.splice(i,1);save();renderDashboard();
     setTimeout(()=>{
       if(e.type==='expense'){
-        document.querySelectorAll('.qe-tab').forEach(x=>{x.classList.remove('active','bg-neon-purple/[0.06]','text-slate-100','shadow-lg','border','border-neon-purple/15');x.classList.add('text-slate-600')});
+        document.querySelectorAll('.qe-tab').forEach(x=>{x.classList.remove('active');x.style.background='transparent';x.style.color='var(--text4)'});
         document.querySelectorAll('.qe-form').forEach(x=>x.style.display='none');
-        const expTab=document.querySelector('.qe-tab[data-t="exp"]');expTab.classList.add('active','bg-neon-purple/[0.06]','text-slate-100','shadow-lg','border','border-neon-purple/15');expTab.classList.remove('text-slate-600');
+        const expTab=document.querySelector('.qe-tab[data-t="exp"]');expTab.classList.add('active');expTab.style.background='var(--sage)';expTab.style.color='#fff';
         document.getElementById('qf-exp').style.display='block';
         document.getElementById('qeAmt').value=e.amount;document.getElementById('qeCat').value=e.cat;document.getElementById('qeNote').value=e.note||'';
       }else{
-        document.querySelectorAll('.qe-tab').forEach(x=>{x.classList.remove('active','bg-neon-purple/[0.06]','text-slate-100','shadow-lg','border','border-neon-purple/15');x.classList.add('text-slate-600')});
+        document.querySelectorAll('.qe-tab').forEach(x=>{x.classList.remove('active');x.style.background='transparent';x.style.color='var(--text4)'});
         document.querySelectorAll('.qe-form').forEach(x=>x.style.display='none');
-        const incTab=document.querySelector('.qe-tab[data-t="inc"]');incTab.classList.add('active','bg-neon-purple/[0.06]','text-slate-100','shadow-lg','border','border-neon-purple/15');incTab.classList.remove('text-slate-600');
+        const incTab=document.querySelector('.qe-tab[data-t="inc"]');incTab.classList.add('active');incTab.style.background='var(--sage)';incTab.style.color='#fff';
         document.getElementById('qf-inc').style.display='block';
         document.getElementById('qiAmt').value=e.amount;document.getElementById('qiSrc').value=e.source||'';
       }
-      toast('ערוך ושגר מחדש');
-      const zone=document.querySelector('.zone:last-child');if(zone)zone.scrollIntoView({behavior:'smooth',block:'center'});
+      toast('ערוך ושלח מחדש');
     },100)});
-  if(typeof gsap!=='undefined'){
-    document.querySelectorAll('.qc').forEach(card=>{
-      card.addEventListener('mouseenter',()=>gsap.to(card,{y:-6,duration:.4,ease:'power2.out'}));
-      card.addEventListener('mouseleave',()=>gsap.to(card,{y:0,duration:.5,ease:'power2.out'}))})
-  }
 }
 
 function renderMonthly(){
   const mk=mKeys();
-  if(!mk.length){document.getElementById('v-monthly').innerHTML='<div class="flex flex-col items-center justify-center py-32 text-center"><div class="text-4xl mb-4">📊</div><p class="text-slate-500 text-[13px]">אין מחזורים עדיין. ייבא דוח או הוסף מחזור ידנית.</p><div class="flex gap-4 mt-6"><button onclick="openImportModal()" class="btn-gold px-6 py-2.5">ייבוא מישראכרט</button><button onclick="openAddMonth()" class="btn-neon px-6 py-2.5">הוסף מחזור</button></div></div>';return}
+  if(!mk.length){document.getElementById('v-monthly').innerHTML='<div class="flex flex-col items-center justify-center py-32 text-center"><div class="text-4xl mb-4">📊</div><p class="text-[13px]" style="color:var(--text4)">אין מחזורים עדיין.</p><div class="flex gap-3 mt-6"><button onclick="openImportModal()" class="btn-copper px-6 py-2.5">ייבוא מישראכרט</button><button onclick="openAddMonth()" class="btn-secondary px-6 py-2.5">הוסף מחזור</button></div></div>';return}
   if(curMonthIdx<0)curMonthIdx=mk.length-1;
   curMonthIdx=Math.max(0,Math.min(mk.length-1,curMonthIdx));
   const key=mk[curMonthIdx],d=S.months[key],tot=totE(d),surp=d.income-tot,savRate=d.income?((surp/d.income)*100).toFixed(1):'0';
   document.getElementById('v-monthly').innerHTML=`
-  <div class="sticky top-0 z-10 px-8 mob-p py-4 bg-brand-900/50 backdrop-blur-3xl border-b border-white/[0.03]"><h2 class="text-[20px] font-extrabold tracking-[-0.5px] bg-gradient-to-r from-neon-purple to-neon-cyan bg-clip-text text-transparent">ניתוח מחזורי</h2></div>
-  <div class="flex items-center gap-5 mx-8 mob-p mt-8 mb-10">
-    <button class="w-10 h-10 rounded-xl bg-white/[0.02] border border-white/[0.04] text-slate-500 flex items-center justify-center cursor-pointer transition-all duration-500 hover:bg-neon-purple/[0.06] hover:text-neon-purple hover:border-neon-purple/15 disabled:opacity-15" id="mPrev" ${curMonthIdx<=0?'disabled':''}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
-    <h2 class="text-2xl font-extrabold tracking-[-0.5px] min-w-[180px] text-center">${heMonth(key)}</h2>
-    <button class="w-10 h-10 rounded-xl bg-white/[0.02] border border-white/[0.04] text-slate-500 flex items-center justify-center cursor-pointer transition-all duration-500 hover:bg-neon-purple/[0.06] hover:text-neon-purple hover:border-neon-purple/15 disabled:opacity-15" id="mNext" ${curMonthIdx>=mk.length-1?'disabled':''}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
-  </div>
-  <div class="px-8 mob-p pb-16">
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10 mob-1">
-      <div class="qc" style="--ambient:rgba(34,211,238,.08)"><div class="lbl">כניסות</div><div class="text-[26px] mob-text font-black tracking-[-1px] text-neon-cyan/90">${fmt(d.income)}</div></div>
-      <div class="qc" style="--ambient:rgba(248,113,113,.06)"><div class="lbl">יציאות</div><div class="text-[26px] mob-text font-black tracking-[-1px] text-amber-300/90">${fmt(tot)}</div></div>
-      <div class="qc" style="--ambient:rgba(${surp>=0?'52,211,153':'248,113,113'},.08)"><div class="lbl">דלתא פיננסית</div><div class="text-[26px] mob-text font-black tracking-[-1px] ${surp>=0?'text-emerald-400/90':'text-red-400/90'}">${fmt(surp)}</div><div class="text-[10px] text-slate-600 mt-2">יחס חיסכון: <span class="text-[9px] font-bold px-2 py-0.5 rounded-md" style="${heatStyle(+savRate)}">${savRate}%</span></div></div>
+  <div class="max-w-[1000px] mx-auto px-6 mob-p">
+    <div class="py-5"><h2 class="text-[20px] font-extrabold tracking-tight" style="color:var(--text)">ניתוח חודשי</h2></div>
+    <div class="flex items-center gap-4 mb-8">
+      <button class="w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer transition-all disabled:opacity-20" id="mPrev" ${curMonthIdx<=0?'disabled':''} style="background:var(--surface);border:1px solid var(--border);color:var(--text3)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <h2 class="text-xl font-extrabold tracking-tight min-w-[160px] text-center" style="color:var(--text)">${heMonth(key)}</h2>
+      <button class="w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer transition-all disabled:opacity-20" id="mNext" ${curMonthIdx>=mk.length-1?'disabled':''} style="background:var(--surface);border:1px solid var(--border);color:var(--text3)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
     </div>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="qp"><div class="text-[9px] uppercase tracking-[0.2em] text-neon-cyan/50 font-semibold mb-6 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-neon-cyan/70 shadow-[0_0_6px_rgba(34,211,238,.3)]"></span>כניסות</div>
-        <table class="w-full"><tr><th class="text-left text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">ערוץ</th><th class="text-right text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">ערך</th></tr>
-        <tr><td class="py-4 text-[12px] text-slate-400">סה״כ כניסות</td><td class="py-4 text-right"><input class="ff ff-gold !w-[130px] text-right" type="number" value="${d.income}" data-field="income" dir="ltr"></td></tr></table>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 mob-1">
+      <div class="card"><div class="lbl">כניסות</div><div class="text-[24px] mob-text font-black tracking-tight" style="color:var(--income)">${fmt(d.income)}</div></div>
+      <div class="card"><div class="lbl">יציאות</div><div class="text-[24px] mob-text font-black tracking-tight" style="color:var(--expense)">${fmt(tot)}</div></div>
+      <div class="card"><div class="lbl">דלתא</div><div class="text-[24px] mob-text font-black tracking-tight" style="color:${surp>=0?'var(--income)':'var(--expense)'}">${fmt(surp)}</div><div class="text-[10px] mt-2" style="color:var(--text4)">חיסכון: <span class="stat-badge ${+savRate>=0?'stat-up':'stat-down'}">${savRate}%</span></div></div>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-12">
+      <div class="card-lg">
+        <div class="text-[10px] uppercase tracking-widest font-bold mb-5 flex items-center gap-2" style="color:var(--text4)"><span class="w-[5px] h-[5px] rounded-full" style="background:var(--income)"></span>כניסות</div>
+        <table class="w-full"><tr><th class="text-right text-[9px] uppercase tracking-wider font-semibold pb-3" style="color:var(--text5);border-bottom:1px solid var(--border2)">סוג</th><th class="text-left text-[9px] uppercase tracking-wider font-semibold pb-3" style="color:var(--text5);border-bottom:1px solid var(--border2)">סכום</th></tr>
+        <tr><td class="py-4 text-[12px]" style="color:var(--text3)">סה״כ כניסות</td><td class="py-4 text-left"><input class="ff !w-[130px] text-left" type="number" value="${d.income}" data-field="income" dir="ltr"></td></tr></table>
       </div>
-      <div class="qp"><div class="text-[9px] uppercase tracking-[0.2em] text-neon-purple/50 font-semibold mb-6 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-neon-purple/70 shadow-[0_0_6px_rgba(168,85,247,.3)]"></span>מפת יציאות</div>
+      <div class="card-lg">
+        <div class="text-[10px] uppercase tracking-widest font-bold mb-5 flex items-center gap-2" style="color:var(--text4)"><span class="w-[5px] h-[5px] rounded-full" style="background:var(--expense)"></span>הוצאות</div>
         <table class="w-full">
-          <tr><th class="text-left text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">ערוץ</th><th class="text-right text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">ערך</th></tr>
-          ${CATS.map(c=>`<tr class="group hover:bg-white/[0.015] transition-all duration-500"><td class="py-3 text-[12px] text-slate-400 border-b border-white/[0.02]"><span class="inline-block w-[6px] h-[6px] rounded-full mr-3 shadow-[0_0_4px_var(--c)]" style="background:${c.color};--c:${c.color}80"></span>${c.he}</td><td class="py-3 text-right border-b border-white/[0.02]"><input class="ff ff-gold !w-[130px] text-right" type="number" value="${d.expenses[c.key]||0}" data-cat="${c.key}" dir="ltr"></td></tr>`).join('')}
-          <tr class="font-bold border-t-2 border-neon-purple/10"><td class="py-4 text-[12px]">סה״כ</td><td class="py-4 text-right text-[14px]">${fmt(tot)}</td></tr>
+          <tr><th class="text-right text-[9px] uppercase tracking-wider font-semibold pb-3" style="color:var(--text5);border-bottom:1px solid var(--border2)">קטגוריה</th><th class="text-left text-[9px] uppercase tracking-wider font-semibold pb-3" style="color:var(--text5);border-bottom:1px solid var(--border2)">סכום</th></tr>
+          ${CATS.map(c=>`<tr class="transition-all"><td class="py-3 text-[12px]" style="color:var(--text3);border-bottom:1px solid var(--border2)"><span class="inline-block w-[6px] h-[6px] rounded-full mr-3" style="background:${c.color}"></span>${c.he}</td><td class="py-3 text-left" style="border-bottom:1px solid var(--border2)"><input class="ff !w-[130px] text-left" type="number" value="${d.expenses[c.key]||0}" data-cat="${c.key}" dir="ltr"></td></tr>`).join('')}
+          <tr class="font-bold" style="border-top:2px solid var(--border)"><td class="py-4 text-[12px]">סה״כ</td><td class="py-4 text-left text-[14px]">${fmt(tot)}</td></tr>
         </table>
       </div>
     </div>
-    <div class="flex gap-3 mt-8"><button class="btn-neon" id="mSave">עדכן מטריצה</button></div>
+    <div class="flex gap-3 mb-8"><button class="btn-primary" id="mSave">עדכן</button></div>
   </div>`;
   document.getElementById('mPrev').onclick=()=>{curMonthIdx--;renderMonthly()};
   document.getElementById('mNext').onclick=()=>{curMonthIdx++;renderMonthly()};
-  document.getElementById('mSave').onclick=()=>{const key2=mKeys()[curMonthIdx];S.months[key2].income=+(document.querySelector('[data-field="income"]').value)||0;document.querySelectorAll('[data-cat]').forEach(inp=>{S.months[key2].expenses[inp.dataset.cat]=+inp.value||0});save();syncCloud();toast('המטריצה עודכנה: '+heMonth(key2));renderMonthly()};
-  document.querySelectorAll('#v-monthly .qc, #v-monthly .qp').forEach((el,i)=>{el.style.animation=`fadeUp .7s ${i*.08}s cubic-bezier(.16,1,.3,1) both`});
+  document.getElementById('mSave').onclick=()=>{const key2=mKeys()[curMonthIdx];S.months[key2].income=+(document.querySelector('[data-field="income"]').value)||0;document.querySelectorAll('[data-cat]').forEach(inp=>{S.months[key2].expenses[inp.dataset.cat]=+inp.value||0});save();syncCloud();toast('עודכן: '+heMonth(key2));renderMonthly()};
+  document.querySelectorAll('#v-monthly .card, #v-monthly .card-lg').forEach((el,i)=>{el.style.animation=`fadeUp .5s ${i*.06}s ease-out both`});
 }
 
 function renderAnnual(){
   const mk=mKeys();
-  if(!mk.length){document.getElementById('v-annual').innerHTML='<div class="flex flex-col items-center justify-center py-32 text-center"><div class="text-4xl mb-4">📈</div><p class="text-slate-500 text-[13px]">אין נתונים שנתיים עדיין.</p><div class="flex gap-4 mt-6"><button onclick="openImportModal()" class="btn-gold px-6 py-2.5">ייבוא מישראכרט</button><button onclick="openAddMonth()" class="btn-neon px-6 py-2.5">הוסף מחזור</button></div></div>';return}
+  if(!mk.length){document.getElementById('v-annual').innerHTML='<div class="flex flex-col items-center justify-center py-32 text-center"><div class="text-4xl mb-4">📈</div><p class="text-[13px]" style="color:var(--text4)">אין נתונים שנתיים עדיין.</p><div class="flex gap-3 mt-6"><button onclick="openImportModal()" class="btn-copper px-6 py-2.5">ייבוא מישראכרט</button><button onclick="openAddMonth()" class="btn-secondary px-6 py-2.5">הוסף מחזור</button></div></div>';return}
   const year=new Date().getFullYear();const ym=mk.filter(k=>k.endsWith(' '+year));
   let tI=0,tE=0,tInv=0,tSav=0;ym.forEach(k=>{const d=S.months[k];tI+=d.income;tE+=totE(d);tInv+=(d.expenses.invest||0);tSav+=(d.expenses.savings||0)});
   const net=tI-tE,bMax=Math.max(...ym.map(k=>Math.max(S.months[k].income,totE(S.months[k]))),1);
   document.getElementById('v-annual').innerHTML=`
-  <div class="sticky top-0 z-10 px-8 mob-p py-4 bg-brand-900/50 backdrop-blur-3xl border-b border-white/[0.03]"><h2 class="text-[20px] font-extrabold tracking-[-0.5px] bg-gradient-to-r from-neon-purple to-neon-cyan bg-clip-text text-transparent">דו״ח ציר זמן — ${year}</h2></div>
-  <div class="px-8 mob-p pt-10 pb-16">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10 mob-1">
-      <div class="qc" style="--ambient:rgba(34,211,238,.08)"><div class="lbl">סה״כ כניסות</div><div class="text-[26px] mob-text font-black tracking-[-1px] text-neon-cyan/90">${fmt(tI)}</div><div class="text-[10px] text-slate-600 mt-2">${ym.length} מחזורים</div></div>
-      <div class="qc" style="--ambient:rgba(248,113,113,.06)"><div class="lbl">סה״כ יציאות</div><div class="text-[26px] mob-text font-black tracking-[-1px] text-amber-300/90">${fmt(tE)}</div></div>
-      <div class="qc" style="--ambient:rgba(201,168,76,.08)"><div class="lbl">הוזרם להשקעה</div><div class="text-[26px] mob-text font-black tracking-[-1px] text-gold">${fmt(tInv)}</div><div class="text-[10px] text-slate-600 mt-2"><span class="text-[9px] font-bold px-2 py-0.5 rounded-md bg-gold/8 text-gold/80">${((tInv/tI)*100).toFixed(1)}%</span> מהכניסות</div></div>
-      <div class="qc" style="--ambient:rgba(52,211,153,.08)"><div class="lbl">נצבר ברזרבה</div><div class="text-[26px] mob-text font-black tracking-[-1px] text-emerald-400/90">${fmt(tSav)}</div><div class="text-[10px] text-slate-600 mt-2"><span class="text-[9px] font-bold px-2 py-0.5 rounded-md bg-emerald-400/8 text-emerald-400/80">${((tSav/tI)*100).toFixed(1)}%</span> מהכניסות</div></div>
+  <div class="max-w-[1100px] mx-auto px-6 mob-p">
+    <div class="py-5"><h2 class="text-[20px] font-extrabold tracking-tight" style="color:var(--text)">סיכום שנתי — ${year}</h2></div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 mob-1">
+      <div class="card"><div class="lbl">סה״כ כניסות</div><div class="text-[24px] mob-text font-black tracking-tight" style="color:var(--income)">${fmt(tI)}</div><div class="text-[10px] mt-2" style="color:var(--text4)">${ym.length} חודשים</div></div>
+      <div class="card"><div class="lbl">סה״כ יציאות</div><div class="text-[24px] mob-text font-black tracking-tight" style="color:var(--expense)">${fmt(tE)}</div></div>
+      <div class="card"><div class="lbl">השקעות</div><div class="text-[24px] mob-text font-black tracking-tight" style="color:var(--copper)">${fmt(tInv)}</div><div class="text-[10px] mt-2" style="color:var(--text4)"><span class="stat-badge stat-up">${tI?((tInv/tI)*100).toFixed(1):'0'}%</span> מהכניסות</div></div>
+      <div class="card"><div class="lbl">חיסכון</div><div class="text-[24px] mob-text font-black tracking-tight" style="color:var(--income)">${fmt(tSav)}</div><div class="text-[10px] mt-2" style="color:var(--text4)"><span class="stat-badge stat-up">${tI?((tSav/tI)*100).toFixed(1):'0'}%</span> מהכניסות</div></div>
     </div>
-    <div class="max-w-[340px] mb-10"><div class="qc" style="--ambient:rgba(${net>=0?'52,211,153':'248,113,113'},.08)"><div class="lbl">דלתא מצרפית</div><div class="text-[26px] font-black tracking-[-1px] ${net>=0?'text-emerald-400/90':'text-red-400/90'}">${net>=0?'+':''}${fmt(net)}</div><div class="text-[10px] text-slate-600 mt-2">סה״כ כניסות בניכוי כלל היציאות</div></div></div>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="qp"><div class="text-[9px] uppercase tracking-[0.2em] text-neon-cyan/50 font-semibold mb-7 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-neon-cyan/70 shadow-[0_0_6px_rgba(34,211,238,.3)]"></span>מפת מחזורים</div>
-        <div class="flex items-end gap-4 h-[180px]" dir="ltr">${ym.map(m=>{const inc=S.months[m].income,exp=totE(S.months[m]);return`<div class="flex-1 flex flex-col items-center gap-1.5"><div class="flex gap-1 items-end h-[150px]"><div class="bar w-[18px] rounded-t-[4px] bg-gradient-to-t from-emerald-600/40 to-emerald-400/90 relative group cursor-pointer shadow-[0_0_10px_-3px_rgba(52,211,153,.15)]" style="height:${Math.max((inc/bMax)*140,4)}px"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-bold text-emerald-400/80 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-500 bg-brand-900/95 px-1.5 py-0.5 rounded-md border border-emerald-400/10">${fmtK(inc)}</span></div><div class="bar w-[18px] rounded-t-[4px] bg-gradient-to-t from-red-600/30 to-red-400/70 relative group cursor-pointer shadow-[0_0_10px_-3px_rgba(248,113,113,.1)]" style="height:${Math.max((exp/bMax)*140,4)}px"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-bold text-red-400/80 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-500 bg-brand-900/95 px-1.5 py-0.5 rounded-md border border-red-400/10">${fmtK(exp)}</span></div></div><div class="text-[9px] text-slate-600 font-medium">${heMonthS(m)}</div></div>`}).join('')}</div>
+    <div class="max-w-[320px] mb-6"><div class="card"><div class="lbl">דלתא מצרפית</div><div class="text-[24px] font-black tracking-tight" style="color:${net>=0?'var(--income)':'var(--expense)'}">${net>=0?'+':''}${fmt(net)}</div><div class="text-[10px] mt-2" style="color:var(--text4)">כניסות פחות כלל היציאות</div></div></div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-12">
+      <div class="card-lg">
+        <div class="text-[10px] uppercase tracking-widest font-bold mb-6 flex items-center gap-2" style="color:var(--text4)"><span class="w-[5px] h-[5px] rounded-full" style="background:var(--income)"></span>תזרים חודשי</div>
+        <div class="flex items-end gap-4 h-[170px]" dir="ltr">${ym.map(m=>{const inc=S.months[m].income,exp=totE(S.months[m]);return`<div class="flex-1 flex flex-col items-center gap-1.5"><div class="flex gap-1 items-end h-[145px]"><div class="bar w-[16px] rounded-t-md relative group cursor-pointer" style="height:${Math.max((inc/bMax)*130,4)}px;background:var(--income)"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity px-1.5 py-0.5 rounded-md" style="color:var(--income);background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-sm)">${fmtK(inc)}</span></div><div class="bar w-[16px] rounded-t-md relative group cursor-pointer" style="height:${Math.max((exp/bMax)*130,4)}px;background:var(--expense);opacity:.7"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity px-1.5 py-0.5 rounded-md" style="color:var(--expense);background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-sm)">${fmtK(exp)}</span></div></div><div class="text-[9px] font-medium" style="color:var(--text5)">${heMonthS(m)}</div></div>`}).join('')}</div>
       </div>
-      <div class="qp"><div class="text-[9px] uppercase tracking-[0.2em] text-neon-purple/50 font-semibold mb-6 flex items-center gap-3"><span class="w-[5px] h-[5px] rounded-full bg-neon-purple/70 shadow-[0_0_6px_rgba(168,85,247,.3)]"></span>מפת ערוצים</div>
-        <table class="w-full"><tr><th class="text-left text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">ערוץ</th><th class="text-right text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">סה״כ</th><th class="text-right text-[9px] uppercase tracking-[0.15em] text-slate-600 font-semibold pb-3 border-b border-white/[0.03]">%</th></tr>
-          ${CATS.map(c=>{let ct=0;ym.forEach(k=>ct+=(S.months[k].expenses[c.key]||0));return`<tr class="hover:bg-white/[0.015] transition-all duration-500"><td class="py-3 text-[11px] text-slate-400 border-b border-white/[0.02]"><span class="inline-block w-[6px] h-[6px] rounded-full mr-3 shadow-[0_0_4px_var(--c)]" style="background:${c.color};--c:${c.color}80"></span>${c.he}</td><td class="py-3 text-right text-[11px] text-slate-300 border-b border-white/[0.02]">${fmt(ct)}</td><td class="py-3 text-right text-[11px] text-slate-600 border-b border-white/[0.02]">${((ct/tE)*100).toFixed(1)}%</td></tr>`}).join('')}
-          <tr class="font-bold border-t-2 border-neon-purple/10"><td class="py-4 text-[11px]">סה״כ</td><td class="py-4 text-right text-[12px]">${fmt(tE)}</td><td class="py-4 text-right text-[11px]">100%</td></tr></table>
+      <div class="card-lg">
+        <div class="text-[10px] uppercase tracking-widest font-bold mb-5 flex items-center gap-2" style="color:var(--text4)"><span class="w-[5px] h-[5px] rounded-full" style="background:var(--sage)"></span>לפי קטגוריה</div>
+        <table class="w-full"><tr><th class="text-right text-[9px] uppercase tracking-wider font-semibold pb-3" style="color:var(--text5);border-bottom:1px solid var(--border2)">קטגוריה</th><th class="text-left text-[9px] uppercase tracking-wider font-semibold pb-3" style="color:var(--text5);border-bottom:1px solid var(--border2)">סה״כ</th><th class="text-left text-[9px] uppercase tracking-wider font-semibold pb-3" style="color:var(--text5);border-bottom:1px solid var(--border2)">%</th></tr>
+          ${CATS.map(c=>{let ct=0;ym.forEach(k=>ct+=(S.months[k].expenses[c.key]||0));return`<tr class="transition-all"><td class="py-3 text-[11px]" style="color:var(--text3);border-bottom:1px solid var(--border2)"><span class="inline-block w-[6px] h-[6px] rounded-full mr-3" style="background:${c.color}"></span>${c.he}</td><td class="py-3 text-left text-[11px]" style="color:var(--text);border-bottom:1px solid var(--border2)">${fmt(ct)}</td><td class="py-3 text-left text-[11px]" style="color:var(--text4);border-bottom:1px solid var(--border2)">${tE?((ct/tE)*100).toFixed(1):'0'}%</td></tr>`}).join('')}
+          <tr class="font-bold" style="border-top:2px solid var(--border)"><td class="py-4 text-[11px]">סה״כ</td><td class="py-4 text-left text-[12px]">${fmt(tE)}</td><td class="py-4 text-left text-[11px]">100%</td></tr></table>
       </div>
     </div>
   </div>`;
-  document.querySelectorAll('#v-annual .qc, #v-annual .qp').forEach((el,i)=>{el.style.animation=`fadeUp .7s ${i*.08}s cubic-bezier(.16,1,.3,1) both`});
+  document.querySelectorAll('#v-annual .card, #v-annual .card-lg').forEach((el,i)=>{el.style.animation=`fadeUp .5s ${i*.06}s ease-out both`});
 }
 
 function renderSettings(){
   document.getElementById('v-settings').innerHTML=`
-  <div class="sticky top-0 z-10 px-8 mob-p py-4 bg-brand-900/50 backdrop-blur-3xl border-b border-white/[0.03]"><h2 class="text-[20px] font-extrabold tracking-[-0.5px] bg-gradient-to-r from-neon-purple to-neon-cyan bg-clip-text text-transparent">תצורת מערכת</h2></div>
-  <div class="px-8 mob-p pt-10 pb-16 max-w-[640px]">
-    <div class="mb-12">
-      <label class="lbl">Google Apps Script URL</label>
-      <input class="ff ff-gold" type="text" id="sGas" value="${GAS||''}" placeholder="https://script.google.com/macros/s/.../exec" dir="ltr">
-      <div class="text-[10px] text-slate-700 mt-2.5 leading-[1.8]">הנתונים מסתנכרנים אוטומטית לגיליון Google שלך.</div>
-      <div class="flex gap-3 mt-5"><button class="btn-neon" id="sSaveGas">סנכרן לענן</button></div>
-    </div>
-    <div class="h-px bg-gradient-to-r from-neon-purple/10 via-neon-cyan/10 to-neon-purple/10 my-10"></div>
+  <div class="max-w-[600px] mx-auto px-6 mob-p">
+    <div class="py-5"><h2 class="text-[20px] font-extrabold tracking-tight" style="color:var(--text)">הגדרות</h2></div>
     <div class="mb-10">
-      <label class="lbl">ערוצי זרימה</label>
-      <div class="text-[10px] text-slate-600 mb-6 leading-[1.8]">התאם אישית את ערוצי הזרימה. השינויים יחולו על כל התצוגות.</div>
-      <div class="flex flex-col gap-2.5" id="catList">
-        ${CATS.map((c,i)=>`<div class="cat-row flex items-center gap-3 py-3 px-4 bg-white/[0.015] border border-white/[0.03] rounded-xl transition-all duration-500 hover:bg-white/[0.03] hover:border-neon-purple/10" data-i="${i}">
+      <label class="lbl">Google Apps Script URL</label>
+      <input class="ff" type="text" id="sGas" value="${GAS||''}" placeholder="https://script.google.com/macros/s/.../exec" dir="ltr">
+      <div class="text-[10px] mt-2 leading-relaxed" style="color:var(--text5)">סנכרון אוטומטי לגיליון Google.</div>
+      <div class="flex gap-3 mt-4"><button class="btn-secondary" id="sSaveGas">סנכרן לענן</button></div>
+    </div>
+    <div class="h-px my-8" style="background:var(--border2)"></div>
+    <div class="mb-10">
+      <label class="lbl">קטגוריות</label>
+      <div class="text-[10px] mb-5 leading-relaxed" style="color:var(--text5)">התאם קטגוריות לפי הצרכים שלך.</div>
+      <div class="flex flex-col gap-2" id="catList">
+        ${CATS.map((c,i)=>`<div class="cat-row flex items-center gap-3 py-3 px-4 rounded-xl transition-all" data-i="${i}" style="background:var(--surface);border:1px solid var(--border)">
           <input type="color" value="${c.color}" data-ci="${i}" class="cc w-7 h-7 rounded-lg cursor-pointer border-none bg-transparent p-0">
-          <input type="text" value="${c.name}" data-ni="${i}" class="cn flex-1 bg-transparent border-none text-[12px] text-slate-300 outline-none placeholder-slate-700" placeholder="שם ערוץ">
-          <input type="text" value="${c.he||''}" data-hi="${i}" class="ch w-[90px] bg-transparent border-none text-[11px] text-slate-500 outline-none text-center placeholder-slate-700" placeholder="עברית">
-          <button class="cat-del w-7 h-7 rounded-lg border border-red-400/10 bg-transparent text-red-400/50 cursor-pointer flex items-center justify-center text-sm transition-all duration-500 hover:bg-red-500 hover:text-white hover:border-red-500 hover:shadow-[0_0_16px_-4px_rgba(248,113,113,.3)]" data-di="${i}">&times;</button>
+          <input type="text" value="${c.name}" data-ni="${i}" class="cn flex-1 bg-transparent border-none text-[12px] outline-none" style="color:var(--text)" placeholder="שם">
+          <input type="text" value="${c.he||''}" data-hi="${i}" class="ch w-[90px] bg-transparent border-none text-[11px] outline-none text-center" style="color:var(--text3)" placeholder="עברית">
+          <button class="cat-del w-7 h-7 rounded-lg flex items-center justify-center text-sm cursor-pointer transition-all" style="border:1px solid var(--border);background:transparent;color:var(--text5)" data-di="${i}">&times;</button>
         </div>`).join('')}
       </div>
-      <button class="w-full py-3 rounded-xl border border-dashed border-white/[0.05] bg-transparent text-slate-600 text-[10px] font-medium cursor-pointer transition-all duration-500 hover:border-neon-purple/20 hover:text-neon-purple/80 hover:bg-neon-purple/[0.02] mt-3" id="addCat">+ ערוץ חדש</button>
-      <div class="flex gap-3 mt-6"><button class="btn-neon" id="sSaveCats">עדכן ערוצים</button></div>
+      <button class="w-full py-3 rounded-xl border border-dashed text-[10px] font-medium cursor-pointer transition-all mt-3" id="addCat" style="border-color:var(--border);color:var(--text4);background:transparent">+ קטגוריה חדשה</button>
+      <div class="flex gap-3 mt-5"><button class="btn-secondary" id="sSaveCats">שמור קטגוריות</button></div>
     </div>
-    <div class="h-px bg-gradient-to-r from-neon-purple/10 via-neon-cyan/10 to-neon-purple/10 my-10"></div>
+    <div class="h-px my-8" style="background:var(--border2)"></div>
     <div class="mb-10">
       <label class="lbl">ייבוא נתונים</label>
-      <div class="text-[10px] text-slate-600 mb-4 leading-[1.8]">ייבוא עסקאות מדוח PDF של ישראכרט ישירות למערכת.</div>
-      <button class="btn-gold" onclick="openImportModal()">ייבוא מישראכרט</button>
+      <div class="text-[10px] mb-4 leading-relaxed" style="color:var(--text5)">ייבוא עסקאות מדוח PDF של ישראכרט.</div>
+      <button class="btn-copper" onclick="openImportModal()">ייבוא מישראכרט</button>
     </div>
-    <div class="h-px bg-gradient-to-r from-neon-purple/10 via-neon-cyan/10 to-neon-purple/10 my-10"></div>
-    <div><label class="lbl">ניהול מטריצה</label>
+    <div class="h-px my-8" style="background:var(--border2)"></div>
+    <div class="pb-12"><label class="lbl">ניהול</label>
       <div class="flex gap-3 flex-wrap mt-4">
-        <button class="btn-neon" id="sExport">ייצוא מטריצה</button>
-        <button class="bg-red-500/[0.06] border border-red-400/10 text-red-400/70 text-sm font-medium rounded-xl px-6 py-3 transition-all duration-500 hover:bg-red-500 hover:text-white hover:border-red-500 hover:shadow-[0_0_20px_-4px_rgba(248,113,113,.3)]" id="sReset">איפוס קוונטי</button>
+        <button class="btn-secondary" id="sExport">ייצוא נתונים</button>
+        <button class="px-5 py-2.5 rounded-xl text-[12px] font-medium transition-all cursor-pointer" id="sReset" style="background:var(--expense-bg);border:1px solid rgba(201,93,79,.15);color:var(--expense)">איפוס מערכת</button>
       </div>
     </div>
   </div>`;
   document.getElementById('sSaveGas').onclick=async()=>{GAS=document.getElementById('sGas').value.trim();ls('lh_gas',GAS);if(GAS){await loadCloud()}toast('התצורה עודכנה')};
-  document.getElementById('addCat').onclick=()=>{const key='cat_'+Date.now();CATS.push({key,name:'New Channel',he:'ערוץ חדש',color:'#94A3B8'});saveCats();renderSettings()};
-  document.getElementById('sSaveCats').onclick=()=>{document.querySelectorAll('.cat-row').forEach((row,i)=>{if(CATS[i]){const oldKey=CATS[i].key;CATS[i].color=row.querySelector('.cc').value;const newName=row.querySelector('.cn').value.trim();CATS[i].name=newName||CATS[i].name;CATS[i].he=row.querySelector('.ch').value.trim();const newKey=newName.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').slice(0,20)||oldKey;if(newKey!==oldKey){Object.values(S.months).forEach(m=>{if(m.expenses[oldKey]!==undefined){m.expenses[newKey]=m.expenses[oldKey];delete m.expenses[oldKey]}});CATS[i].key=newKey;save()}}});saveCats();toast('הערוצים עודכנו');renderSettings()};
-  document.querySelectorAll('.cat-del').forEach(btn=>btn.onclick=()=>{const i=+btn.dataset.di;if(CATS.length<=1)return toast('נדרש לפחות ערוץ אחד');const key=CATS[i].key;CATS.splice(i,1);Object.values(S.months).forEach(m=>delete m.expenses[key]);saveCats();save();renderSettings()});
-  document.getElementById('sExport').onclick=()=>{const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ledgerhouse-backup.json';a.click();toast('המטריצה יוצאה')};
-  document.getElementById('sReset').onclick=()=>{if(confirm('לאפס את כל המטריצה לברירת מחדל?')){S=JSON.parse(JSON.stringify(DEFAULT_DATA));CATS=JSON.parse(JSON.stringify(DEFAULT_CATS));save();saveCats();syncCloud();renderAll();toast('המערכת אופסה')}};
+  document.getElementById('addCat').onclick=()=>{const key='cat_'+Date.now();CATS.push({key,name:'New',he:'חדש',color:'#94A3B8'});saveCats();renderSettings()};
+  document.getElementById('sSaveCats').onclick=()=>{document.querySelectorAll('.cat-row').forEach((row,i)=>{if(CATS[i]){const oldKey=CATS[i].key;CATS[i].color=row.querySelector('.cc').value;const newName=row.querySelector('.cn').value.trim();CATS[i].name=newName||CATS[i].name;CATS[i].he=row.querySelector('.ch').value.trim();const newKey=newName.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').slice(0,20)||oldKey;if(newKey!==oldKey){Object.values(S.months).forEach(m=>{if(m.expenses[oldKey]!==undefined){m.expenses[newKey]=m.expenses[oldKey];delete m.expenses[oldKey]}});CATS[i].key=newKey;save()}}});saveCats();toast('הקטגוריות עודכנו');renderSettings()};
+  document.querySelectorAll('.cat-del').forEach(btn=>btn.onclick=()=>{const i=+btn.dataset.di;if(CATS.length<=1)return toast('נדרשת לפחות קטגוריה אחת');const key=CATS[i].key;CATS.splice(i,1);Object.values(S.months).forEach(m=>delete m.expenses[key]);saveCats();save();renderSettings()});
+  document.getElementById('sExport').onclick=()=>{const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ledgerhouse-backup.json';a.click();toast('הנתונים יוצאו')};
+  document.getElementById('sReset').onclick=()=>{if(confirm('לאפס את כל הנתונים?')){S=JSON.parse(JSON.stringify(DEFAULT_DATA));CATS=JSON.parse(JSON.stringify(DEFAULT_CATS));save();saveCats();syncCloud();renderAll();toast('המערכת אופסה')}};
 }
 
 window.openAddMonth=function(){
   const modal=document.getElementById('addMonthModal'),sel=document.getElementById('amMonth');
   const now=new Date();sel.innerHTML='';
   for(let i=-3;i<=6;i++){const d=new Date(now.getFullYear(),now.getMonth()+i,1);const l=MO[d.getMonth()]+' '+d.getFullYear();sel.innerHTML+='<option value="'+l+'"'+(i===0?' selected':'')+'>'+heMonth(l)+'</option>'}
-  document.getElementById('amCatFields').innerHTML='<div class="grid grid-cols-2 gap-4 mb-5">'+CATS.map(c=>'<div><label class="lbl">'+c.he+'</label><input type="number" id="am_'+c.key+'" placeholder="0" class="ff ff-gold" dir="ltr"></div>').join('')+'</div>';
+  document.getElementById('amCatFields').innerHTML='<div class="grid grid-cols-2 gap-3 mb-4">'+CATS.map(c=>'<div><label class="lbl">'+c.he+'</label><input type="number" id="am_'+c.key+'" placeholder="0" class="ff" dir="ltr"></div>').join('')+'</div>';
   fillAddMonth();modal.style.display='flex';sel.onchange=fillAddMonth;
 };
 function fillAddMonth(){
@@ -679,22 +659,16 @@ function fillAddMonth(){
   const nw=S.netWorth.find(n=>n.month===document.getElementById('amMonth').value.split(' ')[0]);
   document.getElementById('amNetWorth').value=nw?nw.value:(S.netWorth[S.netWorth.length-1]?.value||0);document.getElementById('amLiquid').value=S.liquidSavings;
 }
-document.getElementById('amSave').onclick=()=>{const s=document.getElementById('amMonth').value;const expenses={};CATS.forEach(c=>{const el=document.getElementById('am_'+c.key);expenses[c.key]=+(el?.value)||0});S.months[s]={income:+document.getElementById('amIncome').value||0,expenses};const ms2=s.split(' ')[0],nwV=+document.getElementById('amNetWorth').value||0;const nwI=S.netWorth.findIndex(n=>n.month===ms2);if(nwI>=0)S.netWorth[nwI].value=nwV;else S.netWorth.push({month:ms2,value:nwV});S.liquidSavings=+document.getElementById('amLiquid').value||S.liquidSavings;sortMonths();save();syncCloud();closeModal('addMonthModal');toast('המטריצה עודכנה: '+heMonth(s));renderAll()};
+document.getElementById('amSave').onclick=()=>{const s=document.getElementById('amMonth').value;const expenses={};CATS.forEach(c=>{const el=document.getElementById('am_'+c.key);expenses[c.key]=+(el?.value)||0});S.months[s]={income:+document.getElementById('amIncome').value||0,expenses};const ms2=s.split(' ')[0],nwV=+document.getElementById('amNetWorth').value||0;const nwI=S.netWorth.findIndex(n=>n.month===ms2);if(nwI>=0)S.netWorth[nwI].value=nwV;else S.netWorth.push({month:ms2,value:nwV});S.liquidSavings=+document.getElementById('amLiquid').value||S.liquidSavings;sortMonths();save();syncCloud();closeModal('addMonthModal');toast('עודכן: '+heMonth(s));renderAll()};
 window.closeModal=function(id){document.getElementById(id).style.display='none'};
 document.getElementById('addMonthModal').onclick=e=>{if(e.target.id==='addMonthModal')closeModal('addMonthModal')};
 
 function animVal(el,s,e,dur,pre,suf){if(!el)return;const range=e-s;let t0=null;
   function step(ts){if(!t0)t0=ts;const p=Math.min((ts-t0)/dur,1),ease=1-Math.pow(1-p,3);el.textContent=(pre||'')+Math.round(s+range*ease).toLocaleString('en-IL')+(suf||'');if(p<1)requestAnimationFrame(step)}requestAnimationFrame(step)}
-function updateClock(){const el=document.getElementById('clock');if(el)el.textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+function updateClock(){const el=document.getElementById('clock');if(el)el.textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}
 setInterval(updateClock,1000);
 
-function observeZones(){const root=document.getElementById('mainScroll');function check(){document.querySelectorAll('.zone:not(.visible)').forEach(z=>{const r=z.getBoundingClientRect();if(r.top<window.innerHeight+100)z.classList.add('visible')})}setTimeout(()=>{document.querySelector('.zone')?.classList.add('visible');check()},120);root.addEventListener('scroll',check,{passive:true})}
-
-const halo=document.getElementById('halo');let hx=-100,hy=-100,cx2=-100,cy2=-100;
-document.addEventListener('mousemove',e=>{hx=e.clientX;hy=e.clientY});
-function animHalo(){cx2+=(hx-cx2)*.06;cy2+=(hy-cy2)*.06;halo.style.left=cx2+'px';halo.style.top=cy2+'px';requestAnimationFrame(animHalo)}
-animHalo();document.addEventListener('mouseleave',()=>halo.style.opacity='0');document.addEventListener('mouseenter',()=>halo.style.opacity='1');
-document.querySelectorAll('.sb-item').forEach(item=>item.onclick=()=>switchView(item.dataset.view));
+document.querySelectorAll('.nav-item').forEach(item=>item.onclick=()=>switchView(item.dataset.view));
 function renderAll(){if(curView==='dashboard')renderDashboard();else if(curView==='monthly')renderMonthly();else if(curView==='annual')renderAnnual();else renderSettings()}
 document.getElementById('app').style.display='block';renderAll();
 if(_freshReset&&GAS){save();syncCloud().then(()=>renderAll())}
@@ -720,8 +694,8 @@ document.getElementById('importModal').onclick=e=>{if(e.target.id==='importModal
 
 const dropZone=document.getElementById('importDropZone');
 if(dropZone){
-  ['dragenter','dragover'].forEach(ev=>dropZone.addEventListener(ev,e=>{e.preventDefault();dropZone.style.borderColor='rgba(168,85,247,.4)';dropZone.style.background='rgba(168,85,247,.04)'}));
-  ['dragleave','drop'].forEach(ev=>dropZone.addEventListener(ev,e=>{e.preventDefault();dropZone.style.borderColor='';dropZone.style.background=''}));
+  ['dragenter','dragover'].forEach(ev=>dropZone.addEventListener(ev,e=>{e.preventDefault();dropZone.style.borderColor='var(--sage)';dropZone.style.background='var(--sage-bg)'}));
+  ['dragleave','drop'].forEach(ev=>dropZone.addEventListener(ev,e=>{e.preventDefault();dropZone.style.borderColor='var(--border)';dropZone.style.background='var(--surface2)'}));
   dropZone.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf')processPDF(f)});
 }
 document.getElementById('pdfInput').onchange=e=>{const f=e.target.files[0];if(f)processPDF(f)};
@@ -750,7 +724,7 @@ async function processPDF(file){
     if(!txns.length){
       document.getElementById('importLoading').style.display='none';
       document.getElementById('importArea').style.display='block';
-      return toast('לא נמצאו עסקאות בקובץ');
+      return toast('לא נמצאו עסקאות');
     }
     showImportPreview(txns);
   }catch(err){
@@ -819,40 +793,40 @@ function showImportPreview(txns){
   const dupCount=txns.filter(t=>t.dup||t.selfDup).length;
   const byMonth={};txns.forEach(t=>{if(!byMonth[t.moKey])byMonth[t.moKey]=[];byMonth[t.moKey].push(t)});
 
-  let h=`<div class="flex items-center gap-4 mb-4 flex-wrap">
-    <div class="text-[10px] uppercase tracking-[0.2em] text-emerald-400/60 font-semibold flex items-center gap-3">
-      <span class="w-[5px] h-[5px] rounded-full bg-emerald-400/70 shadow-[0_0_6px_rgba(52,211,153,.4)]"></span>נמצאו ${txns.length} עסקאות</div>`;
-  if(dupCount>0)h+=`<div class="text-[10px] px-3 py-1.5 rounded-lg bg-amber-400/[0.06] border border-amber-400/15 text-amber-400/80 font-bold">⚠ ${dupCount} חשודות ככפילות</div>`;
+  let h=`<div class="flex items-center gap-3 mb-4 flex-wrap">
+    <div class="text-[10px] uppercase tracking-widest font-bold flex items-center gap-2" style="color:var(--income)">
+      <span class="w-[5px] h-[5px] rounded-full" style="background:var(--income)"></span>נמצאו ${txns.length} עסקאות</div>`;
+  if(dupCount>0)h+=`<div class="text-[10px] px-3 py-1.5 rounded-lg font-bold" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.15);color:#D97706">⚠ ${dupCount} חשודות ככפילות</div>`;
   h+=`</div>`;
 
-  h+='<div class="max-h-[45vh] overflow-y-auto rounded-xl border border-white/[0.04]"><table class="w-full text-[11px]">';
-  h+='<thead class="sticky top-0 bg-brand-800/95 backdrop-blur-xl z-10"><tr>';
-  h+='<th class="p-3 text-center w-8"><input type="checkbox" id="icAll" checked class="cursor-pointer accent-neon-purple"></th>';
-  h+='<th class="text-right p-3 text-[9px] uppercase tracking-wider text-slate-600 font-semibold">תאריך</th>';
-  h+='<th class="text-right p-3 text-[9px] uppercase tracking-wider text-slate-600 font-semibold">בית עסק</th>';
-  h+='<th class="text-right p-3 text-[9px] uppercase tracking-wider text-slate-600 font-semibold">ענף</th>';
-  h+='<th class="text-right p-3 text-[9px] uppercase tracking-wider text-slate-600 font-semibold">ערוץ</th>';
-  h+='<th class="text-left p-3 text-[9px] uppercase tracking-wider text-slate-600 font-semibold">סכום</th>';
+  h+='<div class="max-h-[45vh] overflow-y-auto rounded-xl" style="border:1px solid var(--border)"><table class="w-full text-[11px]">';
+  h+=`<thead class="sticky top-0 z-10" style="background:var(--surface)"><tr>`;
+  h+='<th class="p-3 text-center w-8"><input type="checkbox" id="icAll" checked class="cursor-pointer"></th>';
+  h+='<th class="text-right p-3 text-[9px] uppercase tracking-wider font-semibold" style="color:var(--text5)">תאריך</th>';
+  h+='<th class="text-right p-3 text-[9px] uppercase tracking-wider font-semibold" style="color:var(--text5)">בית עסק</th>';
+  h+='<th class="text-right p-3 text-[9px] uppercase tracking-wider font-semibold" style="color:var(--text5)">ענף</th>';
+  h+='<th class="text-right p-3 text-[9px] uppercase tracking-wider font-semibold" style="color:var(--text5)">קטגוריה</th>';
+  h+='<th class="text-left p-3 text-[9px] uppercase tracking-wider font-semibold" style="color:var(--text5)">סכום</th>';
   h+='<th class="p-3 w-6"></th>';
   h+='</tr></thead><tbody>';
   txns.forEach((t,i)=>{
     const warn=t.dup||t.selfDup;
-    const rowCls=warn?'border-t border-amber-400/10 bg-amber-400/[0.02]':'border-t border-white/[0.03] hover:bg-white/[0.015]';
-    h+=`<tr class="${rowCls} transition-all ic-row" data-i="${i}">
-      <td class="p-3 text-center"><input type="checkbox" class="ic-chk cursor-pointer accent-neon-purple" data-i="${i}" ${t.include?'checked':''}></td>
-      <td class="p-3 text-slate-500 font-mono text-[10px]">${t.date}</td>
-      <td class="p-3 text-slate-400">${t.biz}</td>
-      <td class="p-3 text-slate-600 text-[10px]">${t.ic}</td>
-      <td class="p-3"><select class="ic-sel bg-transparent border border-white/[0.06] rounded-lg px-2 py-1 text-[10px] text-slate-300 outline-none cursor-pointer" data-i="${i}">
+    const rowBg=warn?'background:rgba(245,158,11,.04)':'';
+    h+=`<tr class="ic-row transition-all" data-i="${i}" style="${rowBg};border-top:1px solid var(--border2)">
+      <td class="p-3 text-center"><input type="checkbox" class="ic-chk cursor-pointer" data-i="${i}" ${t.include?'checked':''}></td>
+      <td class="p-3 font-mono text-[10px]" style="color:var(--text4)">${t.date}</td>
+      <td class="p-3" style="color:var(--text3)">${t.biz}</td>
+      <td class="p-3 text-[10px]" style="color:var(--text5)">${t.ic}</td>
+      <td class="p-3"><select class="ic-sel rounded-lg px-2 py-1 text-[10px] outline-none cursor-pointer" data-i="${i}" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2)">
         ${CATS.map(c=>`<option value="${c.key}" ${c.key===t.lc?'selected':''}>${c.he}</option>`).join('')}
       </select></td>
-      <td class="p-3 text-left font-bold text-slate-300">${fmt(t.amt)}</td>
-      <td class="p-3 text-center">${warn?(t.dup?'<span class="text-amber-400 text-[9px] font-bold" title="כבר קיימת במערכת">כפול</span>':'<span class="text-amber-400 text-[9px] font-bold" title="עסקה זהה בדוח">כפול?</span>'):''}</td></tr>`;
+      <td class="p-3 text-left font-bold" style="color:var(--text)">${fmt(t.amt)}</td>
+      <td class="p-3 text-center">${warn?(t.dup?'<span class="text-[9px] font-bold" style="color:#D97706" title="כבר קיימת">כפול</span>':'<span class="text-[9px] font-bold" style="color:#D97706" title="זהה בדוח">כפול?</span>'):''}</td></tr>`;
   });
-  h+=`<tr class="border-t-2 border-neon-purple/15 font-bold"><td class="p-3"></td><td colspan="4" class="p-3 text-slate-400">סה״כ לייבוא</td><td class="p-3 text-left text-gold" id="impTotal">${fmt(total)}</td><td></td></tr>`;
+  h+=`<tr class="font-bold" style="border-top:2px solid var(--border)"><td class="p-3"></td><td colspan="4" class="p-3" style="color:var(--text3)">סה״כ לייבוא</td><td class="p-3 text-left" style="color:var(--copper)" id="impTotal">${fmt(total)}</td><td></td></tr>`;
   h+='</tbody></table></div>';
-  h+='<div class="mt-4 flex flex-wrap gap-2">';
-  Object.keys(byMonth).forEach(mk=>{h+=`<span class="text-[10px] px-3 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.04] text-slate-500">${heMonth(mk)}: ${byMonth[mk].length} עסקאות</span>`});
+  h+='<div class="mt-3 flex flex-wrap gap-2">';
+  Object.keys(byMonth).forEach(mk=>{h+=`<span class="text-[10px] px-3 py-1.5 rounded-lg" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text4)">${heMonth(mk)}: ${byMonth[mk].length} עסקאות</span>`});
   h+='</div>';
 
   document.getElementById('importPreview').innerHTML=h;
@@ -874,14 +848,14 @@ function showImportPreview(txns){
 
 document.getElementById('confirmImport').onclick=()=>{
   const txns=(window._iTxns||[]).filter(t=>t.include);
-  if(!txns.length)return toast('לא נבחרו עסקאות לייבוא');
+  if(!txns.length)return toast('לא נבחרו עסקאות');
   txns.forEach(t=>{
     if(!S.months[t.moKey]){S.months[t.moKey]={income:0,expenses:{}};CATS.forEach(c=>S.months[t.moKey].expenses[c.key]=0)}
     S.months[t.moKey].expenses[t.lc]=(S.months[t.moKey].expenses[t.lc]||0)+Math.round(t.amt);
     S.manualEntries.push({type:'expense',cat:t.lc,amount:Math.round(t.amt),note:'ישראכרט: '+t.biz,month:t.moKey,ts:Date.now()});
   });
   sortMonths();save();syncCloud();closeModal('importModal');
-  toast('יובאו '+txns.length+' עסקאות מישראכרט');
+  toast('יובאו '+txns.length+' עסקאות');
   renderAll();
 };
 })();

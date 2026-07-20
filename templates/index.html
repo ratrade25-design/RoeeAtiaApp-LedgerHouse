@@ -405,7 +405,7 @@ function renderSummary(){
 }
 
 async function runAiReview(force){
-  if(!AI_KEY){toast('הוסף מפתח Anthropic בהגדרות');switchView('settings');return}
+  if(!AI_KEY){toast('הוסף מפתח Google AI Studio בהגדרות');switchView('settings');return}
   const btn=document.getElementById('aiRun'),regen=document.getElementById('aiRegen'),out=document.getElementById('aiOut');
   const original=btn.textContent;btn.textContent='חושב...';btn.disabled=true;if(regen)regen.disabled=true;
   try{
@@ -452,17 +452,23 @@ ${catBreakdown||'(אין הוצאות)'}
 
 חשוב: אל תמציא נתונים. תתייחס רק למספרים שקיבלת. אם משהו לא ברור מהנתונים, אל תפרש אותו.`;
 
-    const r=await fetch('https://api.anthropic.com/v1/messages',{
+    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+encodeURIComponent(AI_KEY),{
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':AI_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:1500,messages:[{role:'user',content:prompt}]})
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        contents:[{parts:[{text:prompt}]}],
+        generationConfig:{maxOutputTokens:2000,temperature:0.7}
+      })
     });
     const d=await r.json();
     if(!r.ok)throw new Error(d.error?.message||('HTTP '+r.status));
-    const text=d.content.filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
+    const cand=d.candidates&&d.candidates[0];
+    if(!cand)throw new Error('לא התקבלה תשובה'+(d.promptFeedback?.blockReason?' ('+d.promptFeedback.blockReason+')':''));
+    if(cand.finishReason&&cand.finishReason!=='STOP'&&cand.finishReason!=='MAX_TOKENS'){throw new Error('הבקשה נחסמה: '+cand.finishReason)}
+    const text=(cand.content?.parts||[]).map(p=>p.text||'').join('\n').trim();
     if(!text)throw new Error('תגובה ריקה');
     S.reviews=S.reviews||{};
-    S.reviews[sumMonth]={text,generatedAt:Date.now(),usage:d.usage};
+    S.reviews[sumMonth]={text,generatedAt:Date.now(),usage:d.usageMetadata,model:'gemini-2.5-flash'};
     save();syncCloud();
     renderSummary();
     toast('הסקירה מוכנה');
@@ -694,9 +700,9 @@ function renderSettings(){
     </div>
 
     <div class="card mb-5">
-      <div class="text-[12px] font-bold mb-1" style="color:var(--text2)">סקירת AI חודשית</div>
-      <div class="text-[10px] mb-4" style="color:var(--text5)">מפתח Anthropic API — נשמר במכשיר שלך בלבד ולא נשלח לענן. סקירה חודשית עולה פחות מסנט.</div>
-      <input class="ff" type="password" id="sAiKey" value="${AI_KEY||''}" placeholder="sk-ant-..." dir="ltr" autocomplete="off">
+      <div class="text-[12px] font-bold mb-1" style="color:var(--text2)">סקירת AI חודשית (Google Gemini)</div>
+      <div class="text-[10px] mb-4 leading-[1.7]" style="color:var(--text5)">מפתח Google AI Studio — נשמר במכשיר שלך בלבד ולא נשלח לענן. השירות חינמי (עד 1500 סקירות ביום). קבל מפתח בחינם באתר <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:var(--sage);text-decoration:underline">aistudio.google.com/apikey</a>.</div>
+      <input class="ff" type="password" id="sAiKey" value="${AI_KEY||''}" placeholder="AIzaSy..." dir="ltr" autocomplete="off">
       <div class="flex gap-3 mt-4"><button class="btn-secondary" id="sSaveAi">שמור מפתח</button>${AI_KEY?'<button class="btn-secondary" id="sTestAi">בדיקה</button>':''}</div>
     </div>
 
@@ -736,7 +742,7 @@ function renderSettings(){
   document.querySelectorAll('.fx-del').forEach(b=>b.onclick=()=>{S.fixed.splice(+b.dataset.fi,1);save();renderSettings()});
   document.getElementById('sSaveGas').onclick=async()=>{GAS=document.getElementById('sGas').value.trim();ls('lh_gas',GAS);if(GAS)await syncCloud();toast('נשמר')};
   document.getElementById('sSaveAi').onclick=()=>{AI_KEY=document.getElementById('sAiKey').value.trim();ls('lh_ai_key',AI_KEY);toast(AI_KEY?'המפתח נשמר':'המפתח הוסר');renderSettings()};
-  const tstBtn=document.getElementById('sTestAi');if(tstBtn)tstBtn.onclick=async()=>{tstBtn.disabled=true;tstBtn.textContent='בודק...';try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':AI_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:20,messages:[{role:'user',content:'שלום'}]})});const d=await r.json();if(r.ok)toast('המפתח תקין ✓');else toast('שגיאה: '+(d.error?.message||r.status))}catch(e){toast('שגיאה: '+e.message)}tstBtn.disabled=false;tstBtn.textContent='בדיקה'};
+  const tstBtn=document.getElementById('sTestAi');if(tstBtn)tstBtn.onclick=async()=>{tstBtn.disabled=true;tstBtn.textContent='בודק...';try{const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+encodeURIComponent(AI_KEY),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:'ענה במילה אחת: שלום'}]}],generationConfig:{maxOutputTokens:20}})});const d=await r.json();if(r.ok)toast('המפתח תקין ✓');else toast('שגיאה: '+(d.error?.message||r.status))}catch(e){toast('שגיאה: '+e.message)}tstBtn.disabled=false;tstBtn.textContent='בדיקה'};
   document.getElementById('sExport').onclick=()=>{const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ledgerhouse-backup.json';a.click()};
   document.getElementById('sImportBk').onclick=()=>document.getElementById('bkFile').click();
   document.getElementById('bkFile').onchange=e=>{

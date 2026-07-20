@@ -243,6 +243,7 @@ function loadLocal(){try{return JSON.parse(ls('lh_state'))}catch(e){return null}
 function save(){ls('lh_state',JSON.stringify(S))}
 let CATS=S.cats;
 let GAS=ls('lh_gas')||'https://script.google.com/macros/s/AKfycbwMDQpxmLCiXM62_imOz6p63DwQvT6A7kyJ_59qps8SwrELidbQ4KZQDicUDn1qZlzd/exec';
+let AI_KEY=ls('lh_ai_key')||'';
 let curView='summary',sumMonth=latestDataMonth(),curYear=+sumMonth.split(' ')[1]||new Date().getFullYear(),txFilter={q:'',month:'all',cat:'all',type:'all'};
 function latestDataMonth(){
   if(!S.txns.length)return curMoKey();
@@ -364,6 +365,26 @@ function renderSummary(){
         </div>`}).join('')||'<div class="card text-center text-[12px] col-span-full" style="color:var(--text4)">אין הוצאות החודש עדיין</div>'}
     </div>
 
+    ${(function(){
+      const rev=(S.reviews||{})[sumMonth];
+      return`<div class="card mb-6" style="padding:0;overflow:hidden">
+        <div class="flex items-center justify-between px-5 pt-5 pb-3">
+          <div class="text-[12px] font-bold flex items-center gap-2" style="color:var(--text2)">
+            <span style="background:linear-gradient(135deg,#8B5CF6,#EC4899);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">✨</span>
+            סקירת AI חודשית
+          </div>
+          <div class="flex gap-2">
+            ${rev?`<button class="text-[10px] font-semibold px-3 py-1.5 rounded-lg cursor-pointer" id="aiRegen" style="background:var(--surface2);color:var(--text4);border:1px solid var(--border)">רענן</button>`:''}
+            <button class="text-[10px] font-semibold px-3 py-1.5 rounded-lg cursor-pointer" id="aiRun" style="background:var(--sage);color:#fff;border:none">${rev?'הצג סקירה':'צור סקירה'}</button>
+          </div>
+        </div>
+        <div class="px-5 pb-5" id="aiOut" style="display:${rev?'block':'none'}">
+          ${rev?`<div class="text-[11px] leading-[1.8] whitespace-pre-wrap" style="color:var(--text2)">${rev.text.replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</div>
+          <div class="text-[9px] mt-3 pt-3" style="color:var(--text5);border-top:1px solid var(--border2)">נוצר ${new Date(rev.generatedAt).toLocaleString('he-IL')}</div>`:''}
+        </div>
+      </div>`;
+    })()}
+
     ${(S.fixed||[]).length?`
     <div class="card" style="padding:0;overflow:hidden">
       <div class="flex items-center justify-between px-5 pt-5 pb-3">
@@ -379,6 +400,77 @@ function renderSummary(){
   </div>`;
   const p=document.getElementById('sPrev');if(p)p.onclick=()=>{sumMonth=months[mi-1];renderSummary()};
   const n=document.getElementById('sNext');if(n)n.onclick=()=>{sumMonth=months[mi+1];renderSummary()};
+  const aiRun=document.getElementById('aiRun');if(aiRun)aiRun.onclick=()=>{const rev=(S.reviews||{})[sumMonth];if(rev){document.getElementById('aiOut').style.display=document.getElementById('aiOut').style.display==='none'?'block':'none'}else runAiReview(false)};
+  const aiRegen=document.getElementById('aiRegen');if(aiRegen)aiRegen.onclick=()=>runAiReview(true);
+}
+
+async function runAiReview(force){
+  if(!AI_KEY){toast('הוסף מפתח Anthropic בהגדרות');switchView('settings');return}
+  const btn=document.getElementById('aiRun'),regen=document.getElementById('aiRegen'),out=document.getElementById('aiOut');
+  const original=btn.textContent;btn.textContent='חושב...';btn.disabled=true;if(regen)regen.disabled=true;
+  try{
+    // Build compact structured data for the model
+    const mk=txMonths(),i=mk.indexOf(sumMonth),prevMo=i>0?mk[i-1]:null;
+    const monthTxns=S.txns.filter(t=>t.month===sumMonth);
+    const inc=monthTxns.filter(t=>t.type==='income').reduce((a,t)=>a+t.amount,0);
+    const expT=monthTxns.filter(t=>t.type==='expense');
+    const exp=expT.reduce((a,t)=>a+t.amount,0);
+    const catBreakdown=CATS.map(c=>{
+      const rows=expT.filter(t=>t.cat===c.key);
+      if(!rows.length)return null;
+      const total=rows.reduce((a,t)=>a+t.amount,0);
+      const bud=+S.budgets[c.key]||0;
+      const top=rows.slice().sort((a,b)=>Math.abs(b.amount)-Math.abs(a.amount)).slice(0,5)
+        .map(t=>`  - ${t.biz||'ללא שם'}: ${Math.round(t.amount)}₪${t.amount<0?' (החזר)':''}`).join('\n');
+      return`${c.he}: ${Math.round(total)}₪ (${rows.length} עסקאות)${bud?' | תקציב: '+bud+'₪ ('+(total>bud?'חריגה':'בגבולות')+')':''}\n${top}`;
+    }).filter(Boolean).join('\n\n');
+    let prevBlock='';
+    if(prevMo){
+      const prevExp=S.txns.filter(t=>t.month===prevMo&&t.type==='expense').reduce((a,t)=>a+t.amount,0);
+      const prevInc=S.txns.filter(t=>t.month===prevMo&&t.type==='income').reduce((a,t)=>a+t.amount,0);
+      prevBlock=`\nלהשוואה, ${heMonth(prevMo)}: הכנסות ${Math.round(prevInc)}₪, הוצאות ${Math.round(prevExp)}₪.`;
+    }
+    const fxTot=fixedIncTotal();
+    const fixedBlock=fxTot>0?`\nהתחייבויות קבועות נספרות: ${Math.round(fxTot)}₪/חודש.`:'';
+    const savBlock=S.savingsTarget?`\nיעד חיסכון חודשי: ${S.savingsTarget}₪.`:'';
+
+    const prompt=`הכן סקירה חודשית קצרה וחברותית של ההוצאות שלי בחודש ${heMonth(sumMonth)}. כתוב בעברית, בטון ידידותי וישיר, כמו חבר שמסתכל על הנתונים איתי.
+
+הנתונים:
+- הכנסות: ${Math.round(inc)}₪
+- הוצאות: ${Math.round(exp)}₪
+- נשאר: ${Math.round(inc-exp-fxTot)}₪${prevBlock}${fixedBlock}${savBlock}
+
+פירוט לפי קטגוריה (עם 5 העסקאות הגדולות בכל אחת):
+${catBreakdown||'(אין הוצאות)'}
+
+מבנה הסקירה (4 חלקים קצרים, כל אחד 2-3 משפטים):
+1. **תמונת מצב** — כמה הוצאתי, איך זה ביחס להכנסות
+2. **מה בלט** — קטגוריות/עסקאות חריגות, שינויים משמעותיים מהחודש הקודם
+3. **חריגות מתקציב או הוצאות שכדאי לשים לב אליהן** (רק אם יש)
+4. **המלצה מעשית אחת קונקרטית** להחודש הבא
+
+חשוב: אל תמציא נתונים. תתייחס רק למספרים שקיבלת. אם משהו לא ברור מהנתונים, אל תפרש אותו.`;
+
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':AI_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:1500,messages:[{role:'user',content:prompt}]})
+    });
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error?.message||('HTTP '+r.status));
+    const text=d.content.filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
+    if(!text)throw new Error('תגובה ריקה');
+    S.reviews=S.reviews||{};
+    S.reviews[sumMonth]={text,generatedAt:Date.now(),usage:d.usage};
+    save();syncCloud();
+    renderSummary();
+    toast('הסקירה מוכנה');
+  }catch(e){
+    console.error('AI review failed:',e);
+    toast('שגיאה: '+e.message);
+    btn.textContent=original;btn.disabled=false;if(regen)regen.disabled=false;
+  }
 }
 window.gotoCat=function(ck){txFilter={q:'',month:sumMonth,cat:ck,type:'all'};switchView('txns',true)};
 window.editTxn=function(id){const t=S.txns.find(x=>x.id===id);if(t)openTxnModal(t)};
@@ -601,6 +693,13 @@ function renderSettings(){
       <div class="flex gap-3 mt-4"><button class="btn-secondary" id="sSaveGas">שמור וסנכרן</button></div>
     </div>
 
+    <div class="card mb-5">
+      <div class="text-[12px] font-bold mb-1" style="color:var(--text2)">סקירת AI חודשית</div>
+      <div class="text-[10px] mb-4" style="color:var(--text5)">מפתח Anthropic API — נשמר במכשיר שלך בלבד ולא נשלח לענן. סקירה חודשית עולה פחות מסנט.</div>
+      <input class="ff" type="password" id="sAiKey" value="${AI_KEY||''}" placeholder="sk-ant-..." dir="ltr" autocomplete="off">
+      <div class="flex gap-3 mt-4"><button class="btn-secondary" id="sSaveAi">שמור מפתח</button>${AI_KEY?'<button class="btn-secondary" id="sTestAi">בדיקה</button>':''}</div>
+    </div>
+
     <div class="card">
       <div class="text-[12px] font-bold mb-1" style="color:var(--text2)">ניהול נתונים</div>
       <div class="text-[10px] mb-4" style="color:var(--text5)">${dupeCount()>0?'נמצאו '+dupeCount()+' עסקאות כפולות.':'אין עסקאות כפולות.'}</div>
@@ -636,6 +735,8 @@ function renderSettings(){
     S.fixed=S.fixed.filter(f=>f.name||f.amount);save();syncCloud();toast('נשמר');renderSettings()};
   document.querySelectorAll('.fx-del').forEach(b=>b.onclick=()=>{S.fixed.splice(+b.dataset.fi,1);save();renderSettings()});
   document.getElementById('sSaveGas').onclick=async()=>{GAS=document.getElementById('sGas').value.trim();ls('lh_gas',GAS);if(GAS)await syncCloud();toast('נשמר')};
+  document.getElementById('sSaveAi').onclick=()=>{AI_KEY=document.getElementById('sAiKey').value.trim();ls('lh_ai_key',AI_KEY);toast(AI_KEY?'המפתח נשמר':'המפתח הוסר');renderSettings()};
+  const tstBtn=document.getElementById('sTestAi');if(tstBtn)tstBtn.onclick=async()=>{tstBtn.disabled=true;tstBtn.textContent='בודק...';try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':AI_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:20,messages:[{role:'user',content:'שלום'}]})});const d=await r.json();if(r.ok)toast('המפתח תקין ✓');else toast('שגיאה: '+(d.error?.message||r.status))}catch(e){toast('שגיאה: '+e.message)}tstBtn.disabled=false;tstBtn.textContent='בדיקה'};
   document.getElementById('sExport').onclick=()=>{const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ledgerhouse-backup.json';a.click()};
   document.getElementById('sImportBk').onclick=()=>document.getElementById('bkFile').click();
   document.getElementById('bkFile').onchange=e=>{

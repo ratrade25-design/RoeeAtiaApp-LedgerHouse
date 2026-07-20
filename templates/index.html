@@ -15,6 +15,7 @@
 tailwind.config={theme:{extend:{fontFamily:{heebo:['Heebo','sans-serif']}}}}
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -244,6 +245,9 @@ function save(){ls('lh_state',JSON.stringify(S))}
 let CATS=S.cats;
 let GAS=ls('lh_gas')||'https://script.google.com/macros/s/AKfycbwMDQpxmLCiXM62_imOz6p63DwQvT6A7kyJ_59qps8SwrELidbQ4KZQDicUDn1qZlzd/exec';
 let AI_KEY=ls('lh_ai_key')||'';
+const GOOGLE_CLIENT_ID='738568158638-t4fs7lohmjhg840ifrd8k3na22qi6185.apps.googleusercontent.com';
+const DRIVE_FILE_NAME='ledgerhouse-state.json';
+let GG={signedIn:false,email:null,accessToken:null,fileId:null,tokenClient:null,expiresAt:0};
 let curView='summary',sumMonth=latestDataMonth(),curYear=+sumMonth.split(' ')[1]||new Date().getFullYear(),txFilter={q:'',month:'all',cat:'all',type:'all'};
 function latestDataMonth(){
   if(!S.txns.length)return curMoKey();
@@ -272,14 +276,98 @@ function fpOf(t){return(t.date||'')+'|'+Math.round(Math.abs(t.amount)*100)+'|'+(
 function existingFps(){return new Set(S.txns.filter(t=>t.src==='isracard').map(fpOf))}
 
 // ===== Cloud sync =====
-async function syncCloud(){if(!GAS)return;try{await fetch(GAS+'?action=save',{method:'POST',body:JSON.stringify(S),headers:{'Content-Type':'text/plain'}});setSync('ok','מסונכרן')}catch(e){setSync('err','ניתוק')}}
-async function loadCloud(){if(!GAS)return;try{const r=await fetch(GAS+'?action=get');const d=await r.json();
+async function syncCloud(){if(GG.signedIn)return driveSave();return gasSave()}
+async function loadCloud(){if(GG.signedIn)return driveLoad();return gasLoad()}
+async function gasSave(){if(!GAS)return;try{await fetch(GAS+'?action=save',{method:'POST',body:JSON.stringify(S),headers:{'Content-Type':'text/plain'}});setSync('ok','מסונכרן')}catch(e){setSync('err','ניתוק')}}
+async function gasLoad(){if(!GAS)return;try{const r=await fetch(GAS+'?action=get');const d=await r.json();
   if(d&&(d.v===3||d.months)){const m=normalize(migrate(d));
     if(m&&m.txns.length>=S.txns.length){S=m;CATS=S.cats;save()}
-    else if(S.txns.length>m.txns.length){syncCloud()}
+    else if(S.txns.length>m.txns.length){gasSave()}
     setSync('ok','מסונכרן')}}catch(e){setSync('err','שגיאה')}}
 function setSync(s,t){document.querySelectorAll('.sync-badge').forEach(b=>{
   b.style.color=s==='ok'?'var(--income)':'var(--expense)';b.querySelector('.st').textContent=t})}
+
+// ===== Google Sign-In + Drive storage =====
+async function ensureGoogleToken(){
+  if(!GG.tokenClient)return false;
+  if(GG.accessToken&&Date.now()<GG.expiresAt-30000)return true;
+  return new Promise(res=>{
+    GG.tokenClient.callback=(resp)=>{if(resp.access_token){GG.accessToken=resp.access_token;GG.expiresAt=Date.now()+(resp.expires_in||3600)*1000;res(true)}else res(false)};
+    GG.tokenClient.requestAccessToken({prompt:''});
+  });
+}
+async function driveApi(path,init){
+  init=init||{};init.headers=Object.assign({},init.headers||{},{Authorization:'Bearer '+GG.accessToken});
+  const r=await fetch('https://www.googleapis.com/'+path,init);
+  if(r.status===401){await ensureGoogleToken();init.headers.Authorization='Bearer '+GG.accessToken;return fetch('https://www.googleapis.com/'+path,init)}
+  return r;
+}
+async function driveFindFile(){
+  const q=encodeURIComponent(`name='${DRIVE_FILE_NAME}' and trashed=false`);
+  const r=await driveApi('drive/v3/files?q='+q+'&spaces=drive&fields=files(id,name,modifiedTime)');
+  const d=await r.json();return(d.files&&d.files[0])||null;
+}
+async function driveCreateFile(){
+  const boundary='lh_'+Date.now();
+  const body='--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify({name:DRIVE_FILE_NAME,mimeType:'application/json'})+'\r\n--'+boundary+'\r\nContent-Type: application/json\r\n\r\n'+JSON.stringify(S)+'\r\n--'+boundary+'--';
+  const r=await driveApi('upload/drive/v3/files?uploadType=multipart&fields=id',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+boundary},body});
+  const d=await r.json();return d.id;
+}
+async function driveSave(){
+  if(!await ensureGoogleToken()){setSync('err','לא מחובר');return}
+  try{
+    if(!GG.fileId){const f=await driveFindFile();GG.fileId=f?f.id:await driveCreateFile();ls('lh_gg_file',GG.fileId);setSync('ok','מסונכרן ל-Drive');return}
+    await driveApi('upload/drive/v3/files/'+GG.fileId+'?uploadType=media',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(S)});
+    setSync('ok','מסונכרן ל-Drive');
+  }catch(e){console.error(e);setSync('err','שגיאה')}
+}
+async function driveLoad(){
+  if(!await ensureGoogleToken()){setSync('err','לא מחובר');return}
+  try{
+    if(!GG.fileId){const f=await driveFindFile();if(!f){setSync('ok','חדש ב-Drive');return}GG.fileId=f.id;ls('lh_gg_file',GG.fileId)}
+    const r=await driveApi('drive/v3/files/'+GG.fileId+'?alt=media');
+    const d=await r.json();
+    if(d&&(d.v===3||d.months)){const m=normalize(migrate(d));
+      if(m&&m.txns.length>=S.txns.length){S=m;CATS=S.cats;save()}
+      else if(S.txns.length>m.txns.length){driveSave()}
+      setSync('ok','מסונכרן ל-Drive');
+    }
+  }catch(e){console.error(e);setSync('err','שגיאה')}
+}
+function initGoogleAuth(){
+  if(typeof google==='undefined'||!google.accounts||!google.accounts.oauth2){setTimeout(initGoogleAuth,300);return}
+  GG.tokenClient=google.accounts.oauth2.initTokenClient({
+    client_id:GOOGLE_CLIENT_ID,
+    scope:'openid email profile https://www.googleapis.com/auth/drive.file',
+    callback:()=>{}, // set per-request
+  });
+  if(ls('lh_gg_signed')==='1'){signInGoogle(true)}
+}
+async function signInGoogle(silent){
+  if(!GG.tokenClient){toast('Google עדיין נטען, נסה שוב בעוד שנייה');return}
+  const ok=await new Promise(res=>{
+    GG.tokenClient.callback=(resp)=>{if(resp.access_token){GG.accessToken=resp.access_token;GG.expiresAt=Date.now()+(resp.expires_in||3600)*1000;res(true)}else res(false)};
+    try{GG.tokenClient.requestAccessToken({prompt:silent?'':'consent'})}catch(e){res(false)}
+  });
+  if(!ok){if(!silent)toast('ההתחברות בוטלה');return}
+  try{
+    const ur=await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+GG.accessToken}});
+    const u=await ur.json();GG.email=u.email||null;
+  }catch(e){}
+  GG.signedIn=true;ls('lh_gg_signed','1');
+  const cached=ls('lh_gg_file');if(cached)GG.fileId=cached;
+  await driveLoad();
+  if(curView==='settings')renderSettings();else render();
+  toast('מחובר: '+(GG.email||'חשבון Google'));
+}
+function signOutGoogle(){
+  if(GG.accessToken&&window.google&&google.accounts&&google.accounts.oauth2)google.accounts.oauth2.revoke(GG.accessToken,()=>{});
+  GG={signedIn:false,email:null,accessToken:null,fileId:null,tokenClient:GG.tokenClient,expiresAt:0};
+  localStorage.removeItem('lh_gg_signed');localStorage.removeItem('lh_gg_file');
+  if(curView==='settings')renderSettings();else render();
+  toast('התנתקת מ-Google');
+}
+window.signInGoogle=signInGoogle;window.signOutGoogle=signOutGoogle;
 
 // ===== Views =====
 function switchView(v,keepFilter){
@@ -693,9 +781,31 @@ function renderSettings(){
     </div>
 
     <div class="card mb-5">
-      <div class="text-[12px] font-bold mb-4" style="color:var(--text2)">סנכרון ענן (Google Sheets)</div>
+      <div class="text-[12px] font-bold mb-1" style="color:var(--text2)">התחברות עם Google (Drive)</div>
+      <div class="text-[10px] mb-4 leading-[1.7]" style="color:var(--text5)">${GG.signedIn?'הנתונים שלך נשמרים בקובץ יחיד ב-Google Drive האישי שלך. אף אחד אחר לא רואה אותו — כולל אני.':'התחבר עם Google כדי לשמור את הנתונים בדרייב האישי שלך במקום בגיליון המשותף. כל משתמש מקבל שטח פרטי משלו.'}</div>
+      ${GG.signedIn?`
+        <div class="flex items-center gap-3 mb-3 p-3 rounded-lg" style="background:var(--sage-bg);border:1px solid var(--sage-border)">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white" style="background:var(--sage)">${(GG.email||'?').slice(0,1).toUpperCase()}</div>
+          <div class="flex-1 min-w-0">
+            <div class="text-[12px] font-bold truncate" style="color:var(--text)">${GG.email||'מחובר'}</div>
+            <div class="text-[10px]" style="color:var(--text4)">${GG.fileId?'קובץ ב-Drive: '+DRIVE_FILE_NAME:'טרם נוצר קובץ'}</div>
+          </div>
+        </div>
+        <div class="flex gap-3"><button class="btn-secondary" onclick="signOutGoogle()" style="color:var(--expense);border-color:var(--expense-bg)">התנתק</button></div>
+      `:`
+        <button class="btn-primary" onclick="signInGoogle()">
+          <span style="display:inline-flex;align-items:center;gap:8px">
+            <svg width="14" height="14" viewBox="0 0 48 48"><path fill="#fff" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/><path fill="#fff" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/><path fill="#fff" d="M11.69 28.18c-.44-1.32-.69-2.73-.69-4.18s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24s.85 6.91 2.34 9.88l7.35-5.7z"/><path fill="#fff" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/></svg>
+            התחבר עם Google
+          </span>
+        </button>
+      `}
+    </div>
+
+    <div class="card mb-5">
+      <div class="text-[12px] font-bold mb-4" style="color:var(--text2)">סנכרון ענן — גיליון משותף (ישן)</div>
       <input class="ff" type="text" id="sGas" value="${GAS||''}" placeholder="https://script.google.com/macros/s/.../exec" dir="ltr">
-      <div class="text-[10px] mt-2" style="color:var(--text5)">כל העסקאות נשמרות אוטומטית לגיליון Google שלך.</div>
+      <div class="text-[10px] mt-2" style="color:var(--text5)">${GG.signedIn?'לא בשימוש כרגע — אתה מחובר ל-Drive. הגדרה זו שמורה למקרה שתתנתק.':'משמש כרגע לסנכרון (אם לא התחברת עם Google).'}</div>
       <div class="flex gap-3 mt-4"><button class="btn-secondary" id="sSaveGas">שמור וסנכרן</button></div>
     </div>
 
@@ -1113,7 +1223,8 @@ gS.addEventListener('input',()=>{
 });
 gS.addEventListener('keydown',e=>{if(e.key==='Escape'){gS.value='';txFilter.q='';renderTxns()}});
 render();
-if(GAS)loadCloud().then(()=>{CATS=S.cats;render()});
+if(GAS&&!GG.signedIn)loadCloud().then(()=>{CATS=S.cats;render()});
+initGoogleAuth();
 if('serviceWorker'in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 })();
 </script>
